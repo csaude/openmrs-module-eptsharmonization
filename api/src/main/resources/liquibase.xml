@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+	<!-- See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
+		documentation on this file. See http://www.liquibase.org/manual/home#available_database_refactorings 
+		for a list of supported elements and attributes -->
+
+	<!-- Uncomment this and edit the values below to use this file <changeSet 
+		id="mymoduleid-2010-05-25-15:50" author="bwolfe"> <preConditions onFail="MARK_RAN"> 
+		<not><tableExists tableName="mymoduleid_myobject"/></not> </preConditions> 
+		<comment> Creating the mymoduleid_myobject table </comment> <createTable 
+		tableName="mymoduleid_myobject"> <column name="mymoduleid_myobject_id" type="int"> 
+		<constraints primaryKey="true" nullable="false"/> </column> <column name="firstname" 
+		type="varchar(255)"/> <column name="lastname" type="varchar(255)"/> <column 
+		name="username" type="varchar(255)"> <constraints unique="true" nullable="false"/> 
+		</column> <column name="testid" type="int" /> </createTable> </changeSet> -->
+
+	<changeSet author="Guimino" id="20200402-1806">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_encounter_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _encounter_type table
+		</comment>
+		<createTable tableName="_encounter_type">
+			<column autoIncrement="true" name="encounter_type_id"
+				type="int">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="name" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueBoolean="false" name="retired"
+				type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="retired_by" type="int" />
+			<column name="date_retired" type="DATETIME" />
+			<column name="retire_reason" type="varchar(255)" />
+			<column name="uuid" type="char(38)" />
+			<column name="edit_privilege" type="varchar(255)">
+				<constraints nullable="true" />
+			</column>
+			<column name="view_privilege" type="varchar(255)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
+
+</databaseChangeLog>
