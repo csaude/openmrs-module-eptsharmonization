@@ -9,7 +9,7 @@
 
 	<artifactId>eptsharmonization-api</artifactId>
 	<packaging>jar</packaging>
-	<name>BEpts Harmonization Module API</name>
+	<name>Epts Harmonization Module API</name>
 	<description>API project for Epts Harmonization Module</description>
 	
 	<dependencies>

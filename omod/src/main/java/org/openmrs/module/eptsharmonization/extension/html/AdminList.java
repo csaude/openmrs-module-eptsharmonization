@@ -35,12 +35,10 @@ public class AdminList extends AdministrationSectionExt {
 
   /** @see org.openmrs.module.web.extension.AdministrationSectionExt#getLinks() */
   public Map<String, String> getLinks() {
-
     Map<String, String> map = new HashMap<String, String>();
-
     map.put(
-        "module/eptsharmonization/eptsharmonizationLink.form",
-        "eptsharmonization.replace.this.link.name");
+        "module/eptsharmonization/harmonizeEncounterTypeList.form",
+        "eptsharmonization.harmonize.encountertype");
 
     return map;
   }
