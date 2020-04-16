@@ -3,9 +3,9 @@ package org.openmrs.module.eptsharmonization.web.controller;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.EncounterType;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationService;
+import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,9 +25,9 @@ public class HarmonizeEncounterTypeController {
 
     HarmonizationService service = HarmonizationUtils.getService();
 
-    List<EncounterType> onlyMetadataEncounterTypes =
+    List<EncounterTypeDTO> onlyMetadataEncounterTypes =
         service.findAllMetadataEncounterNotContainedInProductionServer();
-    List<EncounterType> OnlyProductionEncounterTypes =
+    List<EncounterTypeDTO> OnlyProductionEncounterTypes =
         service.findAllProductionEncountersNotContainedInMetadataServer();
 
     modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);

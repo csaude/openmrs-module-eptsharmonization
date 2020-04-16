@@ -12,16 +12,16 @@
 package org.openmrs.module.eptsharmonization.api.db;
 
 import java.util.List;
-import org.openmrs.EncounterType;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.eptsharmonization.api.HarmonizationService;
+import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 
 /** Database methods for {@link HarmonizationService}. */
 public interface HarmonizationServiceDAO {
 
-  public List<EncounterType> findAllMetadataEncounterNotContainedInProductionServer()
+  public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
       throws DAOException;
 
-  public List<EncounterType> findAllProductionEncountersNotContainedInMetadataServer()
+  public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws DAOException;
 }

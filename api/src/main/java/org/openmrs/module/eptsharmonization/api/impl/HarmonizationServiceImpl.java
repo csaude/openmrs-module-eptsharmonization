@@ -14,11 +14,11 @@ package org.openmrs.module.eptsharmonization.api.impl;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.EncounterType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 
 /** It is a default implementation of {@link HarmonizationService}. */
 public class HarmonizationServiceImpl extends BaseOpenmrsService implements HarmonizationService {
@@ -38,13 +38,13 @@ public class HarmonizationServiceImpl extends BaseOpenmrsService implements Harm
   }
 
   @Override
-  public List<EncounterType> findAllMetadataEncounterNotContainedInProductionServer()
+  public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
       throws APIException {
     return dao.findAllMetadataEncounterNotContainedInProductionServer();
   }
 
   @Override
-  public List<EncounterType> findAllProductionEncountersNotContainedInMetadataServer()
+  public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException {
     return dao.findAllProductionEncountersNotContainedInMetadataServer();
   }

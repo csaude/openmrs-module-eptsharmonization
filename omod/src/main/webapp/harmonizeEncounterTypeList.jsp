@@ -23,12 +23,12 @@
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
 			</tr>
-			<c:forEach var="encounterType" items="${onlyMetadataEncounterTypes}">
+			<c:forEach var="item" items="${onlyMetadataEncounterTypes}">
 				<tr>
-					<td valign="top">${encounterType.id}</td>
-					<td valign="top">${encounterType.name}</td>
-					<td valign="top">${encounterType.description}</td>
-					<td valign="top">${encounterType.uuid}</td>
+					<td valign="top">${item.encounterType.id}</td>
+					<td valign="top">${item.encounterType.name}</td>
+					<td valign="top">${item.encounterType.description}</td>
+					<td valign="top">${item.encounterType.uuid}</td>
 				</tr>
 			</c:forEach>
 		</table>
@@ -47,13 +47,13 @@
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
 			</tr>
-			<c:forEach var="encounterType"
+			<c:forEach var="item"
 				items="${OnlyProductionEncounterTypes}">
 				<tr>
-					<td valign="top">${encounterType.id}</td>
-					<td valign="top">${encounterType.name}</td>
-					<td valign="top">${encounterType.description}</td>
-					<td valign="top">${encounterType.uuid}</td>
+					<td valign="top">${item.encounterType.id}</td>
+					<td valign="top">${item.encounterType.name}</td>
+					<td valign="top">${item.encounterType.description}</td>
+					<td valign="top">${item.encounterType.uuid}</td>
 				</tr>
 			</c:forEach>
 		</table>

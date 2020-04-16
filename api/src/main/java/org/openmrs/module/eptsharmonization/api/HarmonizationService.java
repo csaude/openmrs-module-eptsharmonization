@@ -12,10 +12,10 @@
 package org.openmrs.module.eptsharmonization.api;
 
 import java.util.List;
-import org.openmrs.EncounterType;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,11 +35,11 @@ public interface HarmonizationService extends OpenmrsService {
   // @Authorized({ "Manage Encountery Types" })
   @Transactional(readOnly = true)
   @Authorized({"View Encountery Types"})
-  public List<EncounterType> findAllMetadataEncounterNotContainedInProductionServer()
+  public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
       throws APIException;
 
   @Transactional(readOnly = true)
   @Authorized({"View Encountery Types"})
-  public List<EncounterType> findAllProductionEncountersNotContainedInMetadataServer()
+  public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException;
 }
