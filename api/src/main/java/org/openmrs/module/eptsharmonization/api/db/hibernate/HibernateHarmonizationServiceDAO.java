@@ -19,9 +19,7 @@ import org.hibernate.SessionFactory;
 import org.openmrs.EncounterType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
-import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 
 /** It is a default implementation of {@link HarmonizationServiceDAO}. */
 public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO {
@@ -40,20 +38,13 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
   }
 
   @Override
-  public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
-      throws DAOException {
-    List<EncounterType> mdsEncounterTypes = this.findMDSEncounterTypes();
-    List<EncounterType> psEncounterTypes = Context.getEncounterService().getAllEncounterTypes();
-    mdsEncounterTypes.removeAll(psEncounterTypes);
-    return DTOUtils.fromEncounterTypes(mdsEncounterTypes);
+  public List<EncounterType> findAllMetadataServerEncounterTypes() throws DAOException {
+    return this.findMDSEncounterTypes();
   }
 
   @Override
-  public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
-      throws DAOException {
-    List<EncounterType> psEncounterTypes = Context.getEncounterService().getAllEncounterTypes();
-    psEncounterTypes.removeAll(this.findMDSEncounterTypes());
-    return DTOUtils.fromEncounterTypes(psEncounterTypes);
+  public List<EncounterType> findAllProductionServerEncounterTypes() throws DAOException {
+    return Context.getEncounterService().getAllEncounterTypes();
   }
 
   @SuppressWarnings("unchecked")

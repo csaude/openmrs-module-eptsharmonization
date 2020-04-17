@@ -42,4 +42,15 @@ public interface HarmonizationService extends OpenmrsService {
   @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException;
+
+  // @Authorized({ "Manage Encountery Types" })
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public List<EncounterTypeDTO> findAllMetadataEncounterPartialEqualsToProductionServer()
+      throws APIException;
+
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public List<EncounterTypeDTO> findAllProductionEncountersPartialEqualsToMetadataServer()
+      throws APIException;
 }

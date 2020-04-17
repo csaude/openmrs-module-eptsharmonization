@@ -23,15 +23,21 @@ public class HarmonizeEncounterTypeController {
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
 
-    HarmonizationService service = HarmonizationUtils.getService();
+    HarmonizationService harmonizationService = HarmonizationUtils.getService();
 
     List<EncounterTypeDTO> onlyMetadataEncounterTypes =
-        service.findAllMetadataEncounterNotContainedInProductionServer();
+        harmonizationService.findAllMetadataEncounterNotContainedInProductionServer();
     List<EncounterTypeDTO> OnlyProductionEncounterTypes =
-        service.findAllProductionEncountersNotContainedInMetadataServer();
+        harmonizationService.findAllProductionEncountersNotContainedInMetadataServer();
+    List<EncounterTypeDTO> mdsEncountersPartialEqual =
+        harmonizationService.findAllMetadataEncounterPartialEqualsToProductionServer();
+    List<EncounterTypeDTO> pdsEncountersPartialEqual =
+        harmonizationService.findAllProductionEncountersPartialEqualsToMetadataServer();
 
     modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
     modelAndView.addObject("OnlyProductionEncounterTypes", OnlyProductionEncounterTypes);
+    modelAndView.addObject("mdsEncountersPartialEqual", mdsEncountersPartialEqual);
+    modelAndView.addObject("pdsEncountersPartialEqual", pdsEncountersPartialEqual);
 
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 

@@ -11,11 +11,14 @@
  */
 package org.openmrs.module.eptsharmonization.api.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.EncounterType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
@@ -40,12 +43,58 @@ public class HarmonizationServiceImpl extends BaseOpenmrsService implements Harm
   @Override
   public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
       throws APIException {
-    return dao.findAllMetadataEncounterNotContainedInProductionServer();
+    List<EncounterType> mdsEncounterTypes = dao.findAllMetadataServerEncounterTypes();
+    List<EncounterType> pdsEncounterTypes = dao.findAllProductionServerEncounterTypes();
+    mdsEncounterTypes.removeAll(pdsEncounterTypes);
+    return DTOUtils.fromEncounterTypes(mdsEncounterTypes);
   }
 
   @Override
   public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException {
-    return dao.findAllProductionEncountersNotContainedInMetadataServer();
+    List<EncounterType> pdsEncounterTypes = dao.findAllProductionServerEncounterTypes();
+    List<EncounterType> mdsEncounterTypes = dao.findAllMetadataServerEncounterTypes();
+    pdsEncounterTypes.removeAll(mdsEncounterTypes);
+    return DTOUtils.fromEncounterTypes(pdsEncounterTypes);
+  }
+
+  @Override
+  public List<EncounterTypeDTO> findAllMetadataEncounterPartialEqualsToProductionServer()
+      throws APIException {
+    List<EncounterType> mdsEncounterTypes =
+        this.removeElementsWithDifferentIDsAndUUIDs(
+            dao.findAllMetadataServerEncounterTypes(), dao.findAllProductionServerEncounterTypes());
+    List<EncounterType> allMDS = dao.findAllMetadataServerEncounterTypes();
+    List<EncounterType> allPDS = dao.findAllProductionServerEncounterTypes();
+    allMDS.removeAll(allPDS);
+    mdsEncounterTypes.removeAll(allMDS);
+    return DTOUtils.fromEncounterTypes(mdsEncounterTypes);
+  }
+
+  @Override
+  public List<EncounterTypeDTO> findAllProductionEncountersPartialEqualsToMetadataServer()
+      throws APIException {
+    List<EncounterType> pdsEncounterTypes =
+        this.removeElementsWithDifferentIDsAndUUIDs(
+            dao.findAllProductionServerEncounterTypes(), dao.findAllMetadataServerEncounterTypes());
+    List<EncounterType> allPDS = dao.findAllProductionServerEncounterTypes();
+    List<EncounterType> allMDS = dao.findAllMetadataServerEncounterTypes();
+    allPDS.removeAll(allMDS);
+    pdsEncounterTypes.removeAll(allPDS);
+    return DTOUtils.fromEncounterTypes(pdsEncounterTypes);
+  }
+
+  private List<EncounterType> removeElementsWithDifferentIDsAndUUIDs(
+      List<EncounterType> mdsEncounterTypes, List<EncounterType> pdsEncounterTypes) {
+    List<EncounterType> auxMDS = new ArrayList<>();
+    for (EncounterType mdsEncounterType : mdsEncounterTypes) {
+      for (EncounterType pdsEncounterType : pdsEncounterTypes) {
+        if (mdsEncounterType.getId().compareTo(pdsEncounterType.getId()) != 0
+            && mdsEncounterType.getUuid().contentEquals(pdsEncounterType.getUuid())) {
+          auxMDS.add(mdsEncounterType);
+        }
+      }
+    }
+    return auxMDS;
   }
 }
