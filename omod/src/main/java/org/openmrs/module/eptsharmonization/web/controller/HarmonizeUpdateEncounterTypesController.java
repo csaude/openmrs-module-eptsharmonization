@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class HarmonizeEncounterTypeController {
+public class HarmonizeUpdateEncounterTypesController {
 
   protected final Log log = LogFactory.getLog(getClass());
 
   @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeEncounterTypeList"},
+      value = {"/module/eptsharmonization/harmonizeUpdateEncounterTypes"},
       method = {org.springframework.web.bind.annotation.RequestMethod.GET})
   public ModelAndView getAffinityTypeList(
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
@@ -26,10 +26,6 @@ public class HarmonizeEncounterTypeController {
 
     HarmonizationService harmonizationService = HarmonizationUtils.getService();
 
-    List<EncounterTypeDTO> onlyMetadataEncounterTypes =
-        harmonizationService.findAllMetadataEncounterNotContainedInProductionServer();
-    List<EncounterTypeDTO> OnlyProductionEncounterTypes =
-        harmonizationService.findAllProductionEncountersNotContainedInMetadataServer();
     List<EncounterTypeDTO> mdsEncountersPartialEqual =
         harmonizationService.findAllMetadataEncounterPartialEqualsToProductionServer();
     List<EncounterTypeDTO> pdsEncountersPartialEqual =
@@ -38,8 +34,6 @@ public class HarmonizeEncounterTypeController {
     Collections.sort(mdsEncountersPartialEqual);
     Collections.sort(pdsEncountersPartialEqual);
 
-    modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
-    modelAndView.addObject("OnlyProductionEncounterTypes", OnlyProductionEncounterTypes);
     modelAndView.addObject("mdsEncountersPartialEqual", mdsEncountersPartialEqual);
     modelAndView.addObject("pdsEncountersPartialEqual", pdsEncountersPartialEqual);
 
@@ -49,18 +43,14 @@ public class HarmonizeEncounterTypeController {
   }
 
   @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeEncounterTypeList"},
+      value = {"/module/eptsharmonization/harmonizeUpdateEncounterTypes"},
       method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-  public ModelAndView processForm(
+  public ModelAndView processHarmonization(
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
 
     HarmonizationService harmonizationService = HarmonizationUtils.getService();
 
-    List<EncounterTypeDTO> onlyMetadataEncounterTypes =
-        harmonizationService.findAllMetadataEncounterNotContainedInProductionServer();
-    List<EncounterTypeDTO> OnlyProductionEncounterTypes =
-        harmonizationService.findAllProductionEncountersNotContainedInMetadataServer();
     List<EncounterTypeDTO> mdsEncountersPartialEqual =
         harmonizationService.findAllMetadataEncounterPartialEqualsToProductionServer();
     List<EncounterTypeDTO> pdsEncountersPartialEqual =
@@ -69,8 +59,6 @@ public class HarmonizeEncounterTypeController {
     Collections.sort(mdsEncountersPartialEqual);
     Collections.sort(pdsEncountersPartialEqual);
 
-    modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
-    modelAndView.addObject("OnlyProductionEncounterTypes", OnlyProductionEncounterTypes);
     modelAndView.addObject("mdsEncountersPartialEqual", mdsEncountersPartialEqual);
     modelAndView.addObject("pdsEncountersPartialEqual", pdsEncountersPartialEqual);
 
