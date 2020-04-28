@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.openmrs.EncounterType;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
@@ -54,6 +55,27 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
             .getCurrentSession()
             .createSQLQuery("select e.* from _encounter_type e")
             .addEntity(EncounterType.class);
+    return query.list();
+  }
+
+  @Override
+  public List<PersonAttributeType> findAllMetadataServerPersonAttributeTypes() throws DAOException {
+    return this.findMDSPersonAttributeType();
+  }
+
+  @Override
+  public List<PersonAttributeType> findAllProductionServerPersonAttributeTypes()
+      throws DAOException {
+    return Context.getPersonService().getAllPersonAttributeTypes();
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<PersonAttributeType> findMDSPersonAttributeType() {
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select p.* from _person_attribute_type p")
+            .addEntity(PersonAttributeType.class);
     return query.list();
   }
 }

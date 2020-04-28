@@ -1,9 +1,10 @@
 package org.openmrs.module.eptsharmonization.api.model;
 
 import java.io.Serializable;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 
 @SuppressWarnings("serial")
-public abstract class BaseDTO implements Serializable {
+public abstract class BaseDTO implements Serializable, Comparable<BaseDTO> {
 
   private Integer id;
   private String uuid;
@@ -51,5 +52,13 @@ public abstract class BaseDTO implements Serializable {
       if (other.uuid != null) return false;
     } else if (!uuid.equals(other.uuid)) return false;
     return true;
+  }
+
+  @Override
+  public int compareTo(BaseDTO obj) {
+    return new CompareToBuilder()
+        .append(this.uuid, obj.uuid)
+        .append(this.id, obj.id)
+        .toComparison();
   }
 }

@@ -8,6 +8,11 @@
 		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeEncounterTypeList.form"><spring:message
 				code="eptsharmonization.harmonize.encountertype" /></a>
 	</li>
+	<li>
+		<a
+		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizePersonAttributeTypesList.form"><spring:message
+				code="eptsharmonization.harmonize.personattributetypes" /></a>
+	</li>
 		
 	<!-- Add further links here -->
 </ul>

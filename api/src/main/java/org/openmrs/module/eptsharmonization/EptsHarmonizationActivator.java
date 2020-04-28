@@ -55,6 +55,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     log.info("Importing _encounter_type Metadata");
     dataImporter.importData("encounter-types.xml");
     log.info(" _encounter_type Metadata imported");
+
+    log.info("Importing _person_attribute_type Metadata");
+    dataImporter.importData("person-attribute-types.xml");
+    log.info(" _person_attribute_type Metadata imported");
   }
 
   @Override
@@ -69,7 +73,15 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder();
-    sb.append("delete from liquibasechangelog where ID ='20200402-1806'");
+    sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200423-0840';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 }

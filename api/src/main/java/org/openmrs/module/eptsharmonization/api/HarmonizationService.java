@@ -16,6 +16,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -53,4 +54,24 @@ public interface HarmonizationService extends OpenmrsService {
   @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllProductionEncountersPartialEqualsToMetadataServer()
       throws APIException;
+
+  @Transactional(readOnly = true)
+  @Authorized({"View Person Attribute Types"})
+  public List<PersonAttributeTypeDTO> findAllMetadataPersonAttributeTypesNotInProductionServer()
+      throws APIException;
+
+  @Transactional(readOnly = true)
+  @Authorized({"View Person Attribute Types"})
+  public List<PersonAttributeTypeDTO> findAllProductionPersonAttibuteTypesNotInMetadataServer()
+      throws APIException;
+
+  @Transactional(readOnly = true)
+  @Authorized({"View Person Attribute Types"})
+  public List<PersonAttributeTypeDTO>
+      findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer() throws APIException;
+
+  @Transactional(readOnly = true)
+  @Authorized({"View Person Attribute Types"})
+  public List<PersonAttributeTypeDTO>
+      findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer() throws APIException;
 }

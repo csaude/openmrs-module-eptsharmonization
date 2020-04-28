@@ -13,6 +13,7 @@ package org.openmrs.module.eptsharmonization.api.db;
 
 import java.util.List;
 import org.openmrs.EncounterType;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 
@@ -22,4 +23,9 @@ public interface HarmonizationServiceDAO {
   public List<EncounterType> findAllMetadataServerEncounterTypes() throws DAOException;
 
   public List<EncounterType> findAllProductionServerEncounterTypes() throws DAOException;
+
+  public List<PersonAttributeType> findAllMetadataServerPersonAttributeTypes() throws DAOException;
+
+  public List<PersonAttributeType> findAllProductionServerPersonAttributeTypes()
+      throws DAOException;
 }

@@ -3,7 +3,9 @@ package org.openmrs.module.eptsharmonization.api;
 import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.EncounterType;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 
 public class DTOUtils {
 
@@ -18,5 +20,22 @@ public class DTOUtils {
 
   public static EncounterTypeDTO fromEncounterType(EncounterType encounterType) {
     return new EncounterTypeDTO(encounterType);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static List<PersonAttributeTypeDTO> fromPersonAttributeTypes(
+      List<PersonAttributeType> personAttributeTypes) {
+    List<PersonAttributeTypeDTO> result = new ArrayList();
+
+    for (PersonAttributeType personAttributeType : personAttributeTypes) {
+      result.add(new PersonAttributeTypeDTO(personAttributeType));
+    }
+
+    return result;
+  }
+
+  public static PersonAttributeTypeDTO fromPersonAttributeType(
+      PersonAttributeType personAttributeType) {
+    return new PersonAttributeTypeDTO(personAttributeType);
   }
 }

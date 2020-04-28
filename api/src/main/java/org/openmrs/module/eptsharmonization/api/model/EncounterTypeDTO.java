@@ -2,7 +2,7 @@ package org.openmrs.module.eptsharmonization.api.model;
 
 import org.openmrs.EncounterType;
 
-public class EncounterTypeDTO extends BaseDTO implements Comparable<EncounterTypeDTO> {
+public class EncounterTypeDTO extends BaseDTO {
   /** */
   private static final long serialVersionUID = -5555871173077269215L;
 
@@ -19,11 +19,5 @@ public class EncounterTypeDTO extends BaseDTO implements Comparable<EncounterTyp
 
   public void setEncounterType(EncounterType encounterType) {
     this.encounterType = encounterType;
-  }
-
-  @Override
-  public int compareTo(EncounterTypeDTO o) {
-
-    return this.encounterType.getUuid().compareTo(o.getEncounterType().getUuid());
   }
 }
