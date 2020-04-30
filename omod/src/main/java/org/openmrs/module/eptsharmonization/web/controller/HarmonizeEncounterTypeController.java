@@ -2,6 +2,7 @@ package org.openmrs.module.eptsharmonization.web.controller;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
@@ -34,6 +35,8 @@ public class HarmonizeEncounterTypeController {
         harmonizationService.findAllMetadataEncounterPartialEqualsToProductionServer();
     List<EncounterTypeDTO> pdsEncountersPartialEqual =
         harmonizationService.findAllProductionEncountersPartialEqualsToMetadataServer();
+    Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentNames =
+        harmonizationService.findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
 
     Collections.sort(mdsEncountersPartialEqual);
     Collections.sort(pdsEncountersPartialEqual);
@@ -42,6 +45,7 @@ public class HarmonizeEncounterTypeController {
     modelAndView.addObject("OnlyProductionEncounterTypes", OnlyProductionEncounterTypes);
     modelAndView.addObject("mdsEncountersPartialEqual", mdsEncountersPartialEqual);
     modelAndView.addObject("pdsEncountersPartialEqual", pdsEncountersPartialEqual);
+    modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
 
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 
@@ -65,6 +69,8 @@ public class HarmonizeEncounterTypeController {
         harmonizationService.findAllMetadataEncounterPartialEqualsToProductionServer();
     List<EncounterTypeDTO> pdsEncountersPartialEqual =
         harmonizationService.findAllProductionEncountersPartialEqualsToMetadataServer();
+    Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentNames =
+        harmonizationService.findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
 
     Collections.sort(mdsEncountersPartialEqual);
     Collections.sort(pdsEncountersPartialEqual);
@@ -73,6 +79,7 @@ public class HarmonizeEncounterTypeController {
     modelAndView.addObject("OnlyProductionEncounterTypes", OnlyProductionEncounterTypes);
     modelAndView.addObject("mdsEncountersPartialEqual", mdsEncountersPartialEqual);
     modelAndView.addObject("pdsEncountersPartialEqual", pdsEncountersPartialEqual);
+    modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
 
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 

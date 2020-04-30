@@ -13,7 +13,7 @@
 <br />
 <br />
 <b class="boxHeader"><spring:message code="eptsharmonization.personattributetype.harmonize.onlyOnMDServer" /></b>
-<form method="post" class="box" action="harmonizeAddNewEncounterTypes.form">
+<form method="post" class="box" action="harmonizeAddNewPersonAttributeTypes.form">
 	<fieldset>
 		<table>
 			<tr>

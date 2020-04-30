@@ -40,11 +40,17 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @Override
   public List<EncounterType> findAllMetadataServerEncounterTypes() throws DAOException {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
     return this.findMDSEncounterTypes();
   }
 
   @Override
   public List<EncounterType> findAllProductionServerEncounterTypes() throws DAOException {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
     return Context.getEncounterService().getAllEncounterTypes();
   }
 

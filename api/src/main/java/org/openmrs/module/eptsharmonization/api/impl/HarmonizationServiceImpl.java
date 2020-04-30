@@ -12,7 +12,11 @@
 package org.openmrs.module.eptsharmonization.api.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.EncounterType;
@@ -84,18 +88,15 @@ public class HarmonizationServiceImpl extends BaseOpenmrsService implements Harm
     return DTOUtils.fromEncounterTypes(pdsEncounterTypes);
   }
 
-  private List<EncounterType> removeElementsWithDifferentIDsAndUUIDs(
-      List<EncounterType> mdsEncounterTypes, List<EncounterType> pdsEncounterTypes) {
-    List<EncounterType> auxMDS = new ArrayList<>();
-    for (EncounterType mdsEncounterType : mdsEncounterTypes) {
-      for (EncounterType pdsEncounterType : pdsEncounterTypes) {
-        if (mdsEncounterType.getId().compareTo(pdsEncounterType.getId()) != 0
-            && mdsEncounterType.getUuid().contentEquals(pdsEncounterType.getUuid())) {
-          auxMDS.add(mdsEncounterType);
-        }
-      }
+  @Override
+  public Map<String, List<EncounterTypeDTO>>
+      findAllEncounterTypesWithDifferentNameAndSameUUIDAndID() throws APIException {
+    Map<String, List<EncounterTypeDTO>> result = new HashMap<>();
+    Map<String, List<EncounterType>> map = findByWithDifferentNameAndSameUUIDAndID();
+    for (String key : map.keySet()) {
+      result.put(key, DTOUtils.fromEncounterTypes(map.get(key)));
     }
-    return auxMDS;
+    return result;
   }
 
   @Override
@@ -142,6 +143,37 @@ public class HarmonizationServiceImpl extends BaseOpenmrsService implements Harm
     allPDS.removeAll(allMDS);
     pdsPersonAttributeTypes.removeAll(allPDS);
     return DTOUtils.fromPersonAttributeTypes(pdsPersonAttributeTypes);
+  }
+
+  private List<EncounterType> removeElementsWithDifferentIDsAndUUIDs(
+      List<EncounterType> mdsEncounterTypes, List<EncounterType> pdsEncounterTypes) {
+    List<EncounterType> auxMDS = new ArrayList<>();
+    for (EncounterType mdsEncounterType : mdsEncounterTypes) {
+      for (EncounterType pdsEncounterType : pdsEncounterTypes) {
+        if (mdsEncounterType.getId().compareTo(pdsEncounterType.getId()) != 0
+            && mdsEncounterType.getUuid().contentEquals(pdsEncounterType.getUuid())) {
+          auxMDS.add(mdsEncounterType);
+        }
+      }
+    }
+    return auxMDS;
+  }
+
+  private Map<String, List<EncounterType>> findByWithDifferentNameAndSameUUIDAndID() {
+    List<EncounterType> allMDS = dao.findAllMetadataServerEncounterTypes();
+    List<EncounterType> allPDS = dao.findAllProductionServerEncounterTypes();
+
+    Map<String, List<EncounterType>> map = new TreeMap<>();
+    for (EncounterType mdsItem : allMDS) {
+      for (EncounterType pdsItem : allPDS) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid())
+            && mdsItem.getId() == pdsItem.getId()
+            && !mdsItem.getName().equals(pdsItem.getName())) {
+          map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
+        }
+      }
+    }
+    return map;
   }
 
   private List<PersonAttributeType> removePATWithDifferentIDsAndUUIDs(
