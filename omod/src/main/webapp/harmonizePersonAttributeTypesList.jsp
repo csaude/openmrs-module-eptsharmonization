@@ -144,7 +144,7 @@ td {
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.personattributetype.harmonize.differentID.andEqualUUID" /></b>
 	<form method="post" class="box"
-		action="harmonizeUpdateEncounterTypes.form">
+		action="harmonizeUpdatePersonAttributeTypes.form">
 		<fieldset>
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>

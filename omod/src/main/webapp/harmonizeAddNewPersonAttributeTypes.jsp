@@ -77,6 +77,7 @@ td {
 				<th><spring:message code="general.name" /></th>
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
+				<th><spring:message code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 			</tr>
 			<c:forEach var="item" items="${onlyMetadataPersonAttributeTypes}">
 				<tr>
@@ -84,6 +85,7 @@ td {
 					<td valign="top">${item.personAttributeType.name}</td>
 					<td valign="top">${item.personAttributeType.description}</td>
 					<td valign="top">${item.personAttributeType.uuid}</td>
+					<td valign="top" align="center">0</td>
 				</tr>
 			</c:forEach>
 			<tr>

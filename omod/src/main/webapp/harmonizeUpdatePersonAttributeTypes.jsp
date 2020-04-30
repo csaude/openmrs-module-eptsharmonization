@@ -2,7 +2,7 @@
 
 <openmrs:require privilege="Manage Encountery Types"
 	otherwise="/login.htm"
-	redirect="/module/eptsharmonization/harmonizeEncounterTypeList.form" />
+	redirect="/module/eptsharmonization/harmonizePersonAttributeTypesList.form" />
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <%@ include file="template/localHeader.jsp"%>
@@ -62,48 +62,44 @@ td {
 </style>
 
 <h2>
-	<spring:message code="eptsharmonization.encountertype.harmonize" />
+	<spring:message code="eptsharmonization.personattributetype.harmonize" />
 </h2>
 <br />
 <br />
 <b class="boxHeader"><spring:message
-		code="eptsharmonization.encountertype.harmonize.differentID.andEqualUUID" /></b>
-<form method="post" class="box" action="harmonizeEncounterTypeList.form">
+		code="eptsharmonization.personattributetype.harmonize.differentID.andEqualUUID" /></b>
+<form method="post" class="box" action="harmonizePersonAttributeTypesList.form">
 	<fieldset>
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
 				<td><b class="boxHeader"><spring:message
-							code="eptsharmonization.encountertype.harmonize.mdserver" /></b>
+							code="eptsharmonization.personattributetype.harmonize.mdserver" /></b>
 					<table cellspacing="0" border="0" style="width: 100%">
 						<tr>
 							<th><spring:message code="general.id" /></th>
 							<th><spring:message code="general.name" /></th>
 						</tr>
-						<c:forEach var="item" items="${mdsEncountersPartialEqual}">
+						<c:forEach var="item" items="${mdsPersonAttributeTypesPartialEqual}">
 							<tr>
-								<td valign="top" align="center">${item.encounterType.id}</td>
-								<td valign="top">${item.encounterType.name}</td>
+								<td valign="top" align="center">${item.personAttributeType.id}</td>
+								<td valign="top">${item.personAttributeType.name}</td>
 							</tr>
 						</c:forEach>
 					</table></td>
 				<td><b class="boxHeader"><spring:message
-							code="eptsharmonization.encountertype.harmonize.pdserver" /></b>
+							code="eptsharmonization.personattributetype.harmonize.pdserver" /></b>
 					<table cellspacing="0" border="0" style="width: 100%">
 						<tr>
 							<th><spring:message code="general.id" /></th>
 							<th><spring:message code="general.name" /></th>
 							<th><spring:message code="general.uuid" /></th>
-							<th><spring:message
-									code="eptsharmonization.encountertype.harmonize.encounters" /></th>
-							<th><spring:message
-									code="eptsharmonization.encountertype.harmonize.forms" /></th>
+							<th><spring:message code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 						</tr>
-						<c:forEach var="item" items="${pdsEncountersPartialEqual}">
+						<c:forEach var="item" items="${pdsPersonAttributeTypesPartialEqual}">
 							<tr>
-								<td valign="top" align="center">${item.encounterType.id}</td>
-								<td valign="top">${item.encounterType.name}</td>
-								<td valign="top">${item.encounterType.uuid}</td>
-								<td valign="top" align="center">0</td>
+								<td valign="top" align="center">${item.personAttributeType.id}</td>
+								<td valign="top">${item.personAttributeType.name}</td>
+								<td valign="top">${item.personAttributeType.uuid}</td>
 								<td valign="top" align="center">0</td>
 							</tr>
 						</c:forEach>
