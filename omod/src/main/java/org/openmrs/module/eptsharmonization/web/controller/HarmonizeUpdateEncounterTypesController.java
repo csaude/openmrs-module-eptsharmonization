@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
-import org.openmrs.module.eptsharmonization.api.HarmonizationService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,12 +24,13 @@ public class HarmonizeUpdateEncounterTypesController {
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
 
-    HarmonizationService harmonizationService = HarmonizationUtils.getService();
+    HarmonizationEncounterTypeService encounterTypeService =
+        HarmonizationUtils.getHarmonizationEncounterTypeService();
 
     List<EncounterTypeDTO> mdsEncountersPartialEqual =
-        harmonizationService.findAllMetadataEncounterPartialEqualsToProductionServer();
+        encounterTypeService.findAllMetadataEncounterPartialEqualsToProductionServer();
     List<EncounterTypeDTO> pdsEncountersPartialEqual =
-        harmonizationService.findAllProductionEncountersPartialEqualsToMetadataServer();
+        encounterTypeService.findAllProductionEncountersPartialEqualsToMetadataServer();
 
     Collections.sort(mdsEncountersPartialEqual);
     Collections.sort(pdsEncountersPartialEqual);
@@ -49,12 +50,13 @@ public class HarmonizeUpdateEncounterTypesController {
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
 
-    HarmonizationService harmonizationService = HarmonizationUtils.getService();
+    HarmonizationEncounterTypeService encounterTypeService =
+        HarmonizationUtils.getHarmonizationEncounterTypeService();
 
     List<EncounterTypeDTO> mdsEncountersPartialEqual =
-        harmonizationService.findAllMetadataEncounterPartialEqualsToProductionServer();
+        encounterTypeService.findAllMetadataEncounterPartialEqualsToProductionServer();
     List<EncounterTypeDTO> pdsEncountersPartialEqual =
-        harmonizationService.findAllProductionEncountersPartialEqualsToMetadataServer();
+        encounterTypeService.findAllProductionEncountersPartialEqualsToMetadataServer();
 
     Collections.sort(mdsEncountersPartialEqual);
     Collections.sort(pdsEncountersPartialEqual);

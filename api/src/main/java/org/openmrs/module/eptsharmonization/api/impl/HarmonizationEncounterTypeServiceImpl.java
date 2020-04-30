@@ -20,17 +20,16 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.EncounterType;
-import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
-import org.openmrs.module.eptsharmonization.api.HarmonizationService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
-import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 
-/** It is a default implementation of {@link HarmonizationService}. */
-public class HarmonizationServiceImpl extends BaseOpenmrsService implements HarmonizationService {
+/** It is a default implementation of {@link HarmonizationEncounterTypeService}. */
+public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
+    implements HarmonizationEncounterTypeService {
 
   protected final Log log = LogFactory.getLog(this.getClass());
 
@@ -99,52 +98,6 @@ public class HarmonizationServiceImpl extends BaseOpenmrsService implements Harm
     return result;
   }
 
-  @Override
-  public List<PersonAttributeTypeDTO> findAllMetadataPersonAttributeTypesNotInProductionServer()
-      throws APIException {
-    List<PersonAttributeType> mdsPersonAttributeTypes =
-        dao.findAllMetadataServerPersonAttributeTypes();
-    List<PersonAttributeType> pdsPersonAttributeTypes =
-        dao.findAllProductionServerPersonAttributeTypes();
-    mdsPersonAttributeTypes.removeAll(pdsPersonAttributeTypes);
-    return DTOUtils.fromPersonAttributeTypes(mdsPersonAttributeTypes);
-  }
-
-  @Override
-  public List<PersonAttributeTypeDTO> findAllProductionPersonAttibuteTypesNotInMetadataServer()
-      throws APIException {
-    List<PersonAttributeType> mdsPersonAttributeTypes =
-        dao.findAllMetadataServerPersonAttributeTypes();
-    List<PersonAttributeType> pdsPersonAttributeTypes =
-        dao.findAllProductionServerPersonAttributeTypes();
-    pdsPersonAttributeTypes.removeAll(mdsPersonAttributeTypes);
-    return DTOUtils.fromPersonAttributeTypes(pdsPersonAttributeTypes);
-  }
-
-  @Override
-  public List<PersonAttributeTypeDTO>
-      findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer() throws APIException {
-    List<PersonAttributeType> allMDS = dao.findAllMetadataServerPersonAttributeTypes();
-    List<PersonAttributeType> allPDS = dao.findAllProductionServerPersonAttributeTypes();
-    List<PersonAttributeType> mdsPersonAttributeTypes =
-        this.removePATWithDifferentIDsAndUUIDs(allMDS, allPDS);
-    allMDS.removeAll(allPDS);
-    mdsPersonAttributeTypes.removeAll(allMDS);
-    return DTOUtils.fromPersonAttributeTypes(mdsPersonAttributeTypes);
-  }
-
-  @Override
-  public List<PersonAttributeTypeDTO>
-      findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer() throws APIException {
-    List<PersonAttributeType> allMDS = dao.findAllMetadataServerPersonAttributeTypes();
-    List<PersonAttributeType> allPDS = dao.findAllProductionServerPersonAttributeTypes();
-    List<PersonAttributeType> pdsPersonAttributeTypes =
-        this.removePATWithDifferentIDsAndUUIDs(allPDS, allMDS);
-    allPDS.removeAll(allMDS);
-    pdsPersonAttributeTypes.removeAll(allPDS);
-    return DTOUtils.fromPersonAttributeTypes(pdsPersonAttributeTypes);
-  }
-
   private List<EncounterType> removeElementsWithDifferentIDsAndUUIDs(
       List<EncounterType> mdsEncounterTypes, List<EncounterType> pdsEncounterTypes) {
     List<EncounterType> auxMDS = new ArrayList<>();
@@ -174,20 +127,5 @@ public class HarmonizationServiceImpl extends BaseOpenmrsService implements Harm
       }
     }
     return map;
-  }
-
-  private List<PersonAttributeType> removePATWithDifferentIDsAndUUIDs(
-      List<PersonAttributeType> mdsPersonAttributeTypes,
-      List<PersonAttributeType> pdsPersonAttributeTypes) {
-    List<PersonAttributeType> auxMDS = new ArrayList<>();
-    for (PersonAttributeType mdsEncounterType : mdsPersonAttributeTypes) {
-      for (PersonAttributeType pdsEncounterType : pdsPersonAttributeTypes) {
-        if (mdsEncounterType.getId().compareTo(pdsEncounterType.getId()) != 0
-            && mdsEncounterType.getUuid().contentEquals(pdsEncounterType.getUuid())) {
-          auxMDS.add(mdsEncounterType);
-        }
-      }
-    }
-    return auxMDS;
   }
 }

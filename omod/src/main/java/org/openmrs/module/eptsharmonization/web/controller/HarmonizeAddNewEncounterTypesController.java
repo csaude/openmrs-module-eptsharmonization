@@ -4,7 +4,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
-import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +22,9 @@ public class HarmonizeAddNewEncounterTypesController {
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
 
-    HarmonizationService harmonizationService = HarmonizationUtils.getService();
-
     List<EncounterTypeDTO> onlyMetadataEncounterTypes =
-        harmonizationService.findAllMetadataEncounterNotContainedInProductionServer();
+        HarmonizationUtils.getHarmonizationEncounterTypeService()
+            .findAllMetadataEncounterNotContainedInProductionServer();
 
     modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
 
@@ -42,10 +40,9 @@ public class HarmonizeAddNewEncounterTypesController {
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
 
-    HarmonizationService harmonizationService = HarmonizationUtils.getService();
-
     List<EncounterTypeDTO> onlyMetadataEncounterTypes =
-        harmonizationService.findAllMetadataEncounterNotContainedInProductionServer();
+        HarmonizationUtils.getHarmonizationEncounterTypeService()
+            .findAllMetadataEncounterNotContainedInProductionServer();
 
     modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
 

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
+import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +23,12 @@ public class HarmonizeUpdateEncounterTypeNamesController {
   public ModelAndView getAffinityTypeList(
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
+
+    HarmonizationEncounterTypeService encounterTypeService =
+        HarmonizationUtils.getHarmonizationEncounterTypeService();
+
     Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentNames =
-        HarmonizationUtils.getService().findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
+        encounterTypeService.findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
     modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
     return modelAndView;
   }

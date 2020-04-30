@@ -12,11 +12,9 @@
 package org.openmrs.module.eptsharmonization.api;
 
 import java.util.List;
-import java.util.Map;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,33 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.openmrs.api.context.Context
  */
 @Transactional
-public interface HarmonizationService extends OpenmrsService {
-
-  // @Authorized({ "Manage Encountery Types" })
-  @Transactional(readOnly = true)
-  @Authorized({"View Encountery Types"})
-  public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
-      throws APIException;
-
-  @Transactional(readOnly = true)
-  @Authorized({"View Encountery Types"})
-  public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
-      throws APIException;
-
-  // @Authorized({ "Manage Encountery Types" })
-  @Transactional(readOnly = true)
-  @Authorized({"View Encountery Types"})
-  public List<EncounterTypeDTO> findAllMetadataEncounterPartialEqualsToProductionServer()
-      throws APIException;
-
-  @Transactional(readOnly = true)
-  @Authorized({"View Encountery Types"})
-  public List<EncounterTypeDTO> findAllProductionEncountersPartialEqualsToMetadataServer()
-      throws APIException;
-
-  @Authorized({"View Encountery Types"})
-  public Map<String, List<EncounterTypeDTO>>
-      findAllEncounterTypesWithDifferentNameAndSameUUIDAndID() throws APIException;
+public interface HarmonizationPersonAttributeTypeService extends OpenmrsService {
 
   @Transactional(readOnly = true)
   @Authorized({"View Person Attribute Types"})

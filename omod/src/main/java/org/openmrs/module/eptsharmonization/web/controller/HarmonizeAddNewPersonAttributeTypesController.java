@@ -23,7 +23,8 @@ public class HarmonizeAddNewPersonAttributeTypesController {
     ModelAndView modelAndView = new ModelAndView();
 
     List<PersonAttributeTypeDTO> onlyMetadataPersonAttributeTypes =
-        HarmonizationUtils.getService().findAllMetadataPersonAttributeTypesNotInProductionServer();
+        HarmonizationUtils.getHarmonizationPersonAttributeTypeService()
+            .findAllMetadataPersonAttributeTypesNotInProductionServer();
     modelAndView.addObject("onlyMetadataPersonAttributeTypes", onlyMetadataPersonAttributeTypes);
     return modelAndView;
   }
@@ -35,7 +36,8 @@ public class HarmonizeAddNewPersonAttributeTypesController {
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
     List<PersonAttributeTypeDTO> onlyMetadataPersonAttributeTypes =
-        HarmonizationUtils.getService().findAllMetadataPersonAttributeTypesNotInProductionServer();
+        HarmonizationUtils.getHarmonizationPersonAttributeTypeService()
+            .findAllMetadataPersonAttributeTypesNotInProductionServer();
     modelAndView.addObject("onlyMetadataPersonAttributeTypes", onlyMetadataPersonAttributeTypes);
     return modelAndView;
   }
