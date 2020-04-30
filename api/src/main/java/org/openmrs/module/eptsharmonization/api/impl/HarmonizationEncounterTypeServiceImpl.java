@@ -121,7 +121,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       for (EncounterType pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
             && mdsItem.getId() == pdsItem.getId()
-            && !mdsItem.getName().equals(pdsItem.getName())) {
+            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }

@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
 
-<_encounter_type  encounter_type_id="1" name="S.TARV: ADULTO INICIAL B" description="Outpatient Adult Initial Visit part 2" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="e278f1c2-1d5f-11e0-b929-000c29ad1d07"/>
-<_encounter_type  encounter_type_id="2" name="MISAU: ITS" description="REGISTO DIARIO DE CASOS DE DTS" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="e278f460-1d5f-11e0-b929-000c29ad1d07"/>
+<_encounter_type  encounter_type_id="1" name="S.TARV: ADULTO INICIAL" description="Outpatient Adult Initial Visit part 2" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="e278f1c2-1d5f-11e0-b929-000c29ad1d07"/>
+<_encounter_type  encounter_type_id="2" name="MISAU: IT" description="REGISTO DIARIO DE CASOS DE DTS" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="e278f460-1d5f-11e0-b929-000c29ad1d07"/>
 <_encounter_type  encounter_type_id="3" name="S.TARV: PEDIATRIA INICIAL B" description="Primeira visita de paciente pediatrico, parte B. As duas ultimas paginas" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="e278f5aa-1d5f-11e0-b929-000c29ad1d07"/>
 <_encounter_type  encounter_type_id="4" name="TEMPLATE" description="Encounter type for all template forms" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="e278f6ea-1d5f-11e0-b929-000c29ad1d07"/>
 <_encounter_type  encounter_type_id="5" name="S.TARV: ADULTO INICIAL A" description="Primeira visita do paciente adulto" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="e278f820-1d5f-11e0-b929-000c29ad1d07"/>
