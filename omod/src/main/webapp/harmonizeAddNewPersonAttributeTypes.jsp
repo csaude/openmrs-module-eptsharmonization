@@ -17,7 +17,7 @@ table {
 	border-collapse: collapse;
 }
 
-tr:first-child {
+th {
 	background-color: #1aac9b;
 }
 
