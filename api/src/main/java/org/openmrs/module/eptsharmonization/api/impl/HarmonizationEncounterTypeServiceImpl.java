@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.EncounterType;
 import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
@@ -127,5 +128,18 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       }
     }
     return map;
+  }
+
+  @Override
+  public void saveEncounterTypesWithDifferentNames(
+      Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException {
+    for (String key : encounterTypes.keySet()) {
+      List<EncounterTypeDTO> list = encounterTypes.get(key);
+      EncounterTypeDTO mdsEncounter = list.get(0);
+      EncounterTypeDTO pdsEncounter = list.get(1);
+      EncounterType encounterType = pdsEncounter.getEncounterType();
+      encounterType.setName(mdsEncounter.getEncounterType().getName());
+      Context.getEncounterService().saveEncounterType(encounterType);
+    }
   }
 }
