@@ -137,7 +137,8 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       List<EncounterTypeDTO> list = encounterTypes.get(key);
       EncounterTypeDTO mdsEncounter = list.get(0);
       EncounterTypeDTO pdsEncounter = list.get(1);
-      EncounterType encounterType = pdsEncounter.getEncounterType();
+      EncounterType encounterType =
+          Context.getEncounterService().getEncounterType(pdsEncounter.getEncounterType().getId());
       encounterType.setName(mdsEncounter.getEncounterType().getName());
       Context.getEncounterService().saveEncounterType(encounterType);
     }
