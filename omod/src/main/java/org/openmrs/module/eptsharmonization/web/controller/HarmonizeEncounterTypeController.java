@@ -1,6 +1,5 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -30,23 +29,17 @@ public class HarmonizeEncounterTypeController {
 
     List<EncounterTypeDTO> onlyMetadataEncounterTypes =
         encounterTypeService.findAllMetadataEncounterNotContainedInProductionServer();
-    List<EncounterTypeDTO> OnlyProductionEncounterTypes =
+    List<EncounterTypeDTO> onlyProductionEncounterTypes =
         encounterTypeService.findAllProductionEncountersNotContainedInMetadataServer();
-    List<EncounterTypeDTO> mdsEncountersPartialEqual =
-        encounterTypeService.findAllMetadataEncounterPartialEqualsToProductionServer();
-    List<EncounterTypeDTO> pdsEncountersPartialEqual =
-        encounterTypeService.findAllProductionEncountersPartialEqualsToMetadataServer();
     Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentNames =
         encounterTypeService.findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
-
-    Collections.sort(mdsEncountersPartialEqual);
-    Collections.sort(pdsEncountersPartialEqual);
+    Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentIDsSameUUIDs =
+        encounterTypeService.findAllEncounterTypesWithDifferentIDAndSameUUID();
 
     modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
-    modelAndView.addObject("OnlyProductionEncounterTypes", OnlyProductionEncounterTypes);
-    modelAndView.addObject("mdsEncountersPartialEqual", mdsEncountersPartialEqual);
-    modelAndView.addObject("pdsEncountersPartialEqual", pdsEncountersPartialEqual);
+    modelAndView.addObject("onlyProductionEncounterTypes", onlyProductionEncounterTypes);
     modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
+    modelAndView.addObject("encounterTypesPartialEqual", encounterTypesWithDifferentIDsSameUUIDs);
 
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 
@@ -65,23 +58,17 @@ public class HarmonizeEncounterTypeController {
 
     List<EncounterTypeDTO> onlyMetadataEncounterTypes =
         encounterTypeService.findAllMetadataEncounterNotContainedInProductionServer();
-    List<EncounterTypeDTO> OnlyProductionEncounterTypes =
+    List<EncounterTypeDTO> onlyProductionEncounterTypes =
         encounterTypeService.findAllProductionEncountersNotContainedInMetadataServer();
-    List<EncounterTypeDTO> mdsEncountersPartialEqual =
-        encounterTypeService.findAllMetadataEncounterPartialEqualsToProductionServer();
-    List<EncounterTypeDTO> pdsEncountersPartialEqual =
-        encounterTypeService.findAllProductionEncountersPartialEqualsToMetadataServer();
     Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentNames =
         encounterTypeService.findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
-
-    Collections.sort(mdsEncountersPartialEqual);
-    Collections.sort(pdsEncountersPartialEqual);
+    Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentIDsSameUUIDs =
+        encounterTypeService.findAllEncounterTypesWithDifferentIDAndSameUUID();
 
     modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
-    modelAndView.addObject("OnlyProductionEncounterTypes", OnlyProductionEncounterTypes);
-    modelAndView.addObject("mdsEncountersPartialEqual", mdsEncountersPartialEqual);
-    modelAndView.addObject("pdsEncountersPartialEqual", pdsEncountersPartialEqual);
+    modelAndView.addObject("onlyProductionEncounterTypes", onlyProductionEncounterTypes);
     modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
+    modelAndView.addObject("encounterTypesPartialEqual", encounterTypesWithDifferentIDsSameUUIDs);
 
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 

@@ -12,6 +12,7 @@
 package org.openmrs.module.eptsharmonization.api;
 
 import java.util.List;
+import java.util.Map;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
@@ -51,4 +52,12 @@ public interface HarmonizationPersonAttributeTypeService extends OpenmrsService 
   @Authorized({"View Person Attribute Types"})
   public List<PersonAttributeTypeDTO>
       findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer() throws APIException;
+
+  @Authorized({"View Person Attribute Types"})
+  public Map<String, List<PersonAttributeTypeDTO>>
+      findAllPersonAttributeTypesWithDifferentNameAndSameUUIDAndID() throws APIException;
+
+  @Authorized({"View Person Attribute Types"})
+  public Map<String, List<PersonAttributeTypeDTO>>
+      findAllPersonAttributeTypesWithDifferentIDAndSameUUID() throws APIException;
 }

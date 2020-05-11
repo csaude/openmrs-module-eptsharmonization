@@ -16,7 +16,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
+import org.openmrs.Form;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
@@ -82,6 +84,28 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
             .getCurrentSession()
             .createSQLQuery("select p.* from _person_attribute_type p")
             .addEntity(PersonAttributeType.class);
+    return query.list();
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId) {
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select e.* from encounter e where e.encounter_type=" + encounterTypeId)
+            .addEntity(Encounter.class);
+
+    return query.list();
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId) {
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select f.* from form f where f.encounter_type=" + encounterTypeId)
+            .addEntity(Form.class);
+
     return query.list();
   }
 }

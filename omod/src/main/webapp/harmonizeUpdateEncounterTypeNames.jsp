@@ -121,7 +121,7 @@ td {
 				</tr>
 			</c:forEach>
 			<tr>
-				<td colspan="6">
+				<td colspan="7">
 					<div class="submit-btn" align="center">
 						<input type="submit"
 							value="<spring:message code="general.previous"/>"

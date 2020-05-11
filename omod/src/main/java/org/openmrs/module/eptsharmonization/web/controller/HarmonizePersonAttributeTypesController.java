@@ -1,7 +1,7 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
@@ -31,23 +31,14 @@ public class HarmonizePersonAttributeTypesController {
         personAttributeTypeService.findAllMetadataPersonAttributeTypesNotInProductionServer();
     List<PersonAttributeTypeDTO> OnlyProductionPersonAttributeTypes =
         personAttributeTypeService.findAllProductionPersonAttibuteTypesNotInMetadataServer();
-    List<PersonAttributeTypeDTO> mdsPersonAttributeTypesPartialEqual =
-        personAttributeTypeService
-            .findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer();
-    List<PersonAttributeTypeDTO> pdsPersonAttributeTypesPartialEqual =
-        personAttributeTypeService
-            .findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer();
-
-    Collections.sort(mdsPersonAttributeTypesPartialEqual);
-    Collections.sort(pdsPersonAttributeTypesPartialEqual);
+    Map<String, List<PersonAttributeTypeDTO>> personAttributeTypesWithDifferentIDsSameUUIDs =
+        personAttributeTypeService.findAllPersonAttributeTypesWithDifferentIDAndSameUUID();
 
     modelAndView.addObject("onlyMetadataPersonAttributeTypes", onlyMetadataPersonAttributeTypes);
     modelAndView.addObject(
         "OnlyProductionPersonAttributeTypes", OnlyProductionPersonAttributeTypes);
     modelAndView.addObject(
-        "mdsPersonAttributeTypesPartialEqual", mdsPersonAttributeTypesPartialEqual);
-    modelAndView.addObject(
-        "pdsPersonAttributeTypesPartialEqual", pdsPersonAttributeTypesPartialEqual);
+        "personAttributeTypesPartialEqual", personAttributeTypesWithDifferentIDsSameUUIDs);
 
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 
@@ -68,23 +59,14 @@ public class HarmonizePersonAttributeTypesController {
         personAttributeTypeService.findAllMetadataPersonAttributeTypesNotInProductionServer();
     List<PersonAttributeTypeDTO> OnlyProductionPersonAttributeTypes =
         personAttributeTypeService.findAllProductionPersonAttibuteTypesNotInMetadataServer();
-    List<PersonAttributeTypeDTO> mdsPersonAttributeTypesPartialEqual =
-        personAttributeTypeService
-            .findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer();
-    List<PersonAttributeTypeDTO> pdsPersonAttributeTypesPartialEqual =
-        personAttributeTypeService
-            .findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer();
-
-    Collections.sort(mdsPersonAttributeTypesPartialEqual);
-    Collections.sort(pdsPersonAttributeTypesPartialEqual);
+    Map<String, List<PersonAttributeTypeDTO>> personAttributeTypesWithDifferentIDsSameUUIDs =
+        personAttributeTypeService.findAllPersonAttributeTypesWithDifferentIDAndSameUUID();
 
     modelAndView.addObject("onlyMetadataPersonAttributeTypes", onlyMetadataPersonAttributeTypes);
     modelAndView.addObject(
         "OnlyProductionPersonAttributeTypes", OnlyProductionPersonAttributeTypes);
     modelAndView.addObject(
-        "mdsPersonAttributeTypesPartialEqual", mdsPersonAttributeTypesPartialEqual);
-    modelAndView.addObject(
-        "pdsPersonAttributeTypesPartialEqual", pdsPersonAttributeTypesPartialEqual);
+        "personAttributeTypesPartialEqual", personAttributeTypesWithDifferentIDsSameUUIDs);
 
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 

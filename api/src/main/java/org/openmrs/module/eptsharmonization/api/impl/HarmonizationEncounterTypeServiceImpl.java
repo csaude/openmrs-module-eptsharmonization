@@ -99,6 +99,17 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     return result;
   }
 
+  @Override
+  public Map<String, List<EncounterTypeDTO>> findAllEncounterTypesWithDifferentIDAndSameUUID()
+      throws APIException {
+    Map<String, List<EncounterTypeDTO>> result = new HashMap<>();
+    Map<String, List<EncounterType>> map = findByWithDifferentIDAndSameUUID();
+    for (String key : map.keySet()) {
+      result.put(key, DTOUtils.fromEncounterTypes(map.get(key)));
+    }
+    return result;
+  }
+
   private List<EncounterType> removeElementsWithDifferentIDsAndUUIDs(
       List<EncounterType> mdsEncounterTypes, List<EncounterType> pdsEncounterTypes) {
     List<EncounterType> auxMDS = new ArrayList<>();
@@ -130,6 +141,21 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     return map;
   }
 
+  public Map<String, List<EncounterType>> findByWithDifferentIDAndSameUUID() {
+    List<EncounterType> allPDS = dao.findAllProductionServerEncounterTypes();
+    List<EncounterType> allMDS = dao.findAllMetadataServerEncounterTypes();
+
+    Map<String, List<EncounterType>> map = new TreeMap<>();
+    for (EncounterType mdsItem : allMDS) {
+      for (EncounterType pdsItem : allPDS) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid()) && mdsItem.getId() != pdsItem.getId()) {
+          map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
+        }
+      }
+    }
+    return map;
+  }
+
   @Override
   public void saveEncounterTypesWithDifferentNames(
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException {
@@ -142,5 +168,15 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       encounterType.setName(mdsEncounter.getEncounterType().getName());
       Context.getEncounterService().saveEncounterType(encounterType);
     }
+  }
+
+  @Override
+  public int countEncounterRows(Integer encounterTypeId) {
+    return dao.findEncontersByEncounterTypeId(encounterTypeId).size();
+  }
+
+  @Override
+  public int countFormRows(Integer encounterTypeId) {
+    return dao.findFormsByEncounterTypeId(encounterTypeId).size();
   }
 }

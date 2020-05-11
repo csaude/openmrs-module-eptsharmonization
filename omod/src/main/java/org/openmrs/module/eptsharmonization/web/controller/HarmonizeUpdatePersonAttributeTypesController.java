@@ -1,79 +1,121 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
-import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
+import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
+import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
+@SessionAttributes({"harmonizationModel"})
 public class HarmonizeUpdatePersonAttributeTypesController {
 
-  protected final Log log = LogFactory.getLog(getClass());
+  private HarmonizationData harmonizationModel = null;
 
   @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.GET})
-  public ModelAndView getAffinityTypeList(
-      @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
+      value = "/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes",
+      method = RequestMethod.GET)
+  public ModelAndView initForm(
+      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
+
     ModelAndView modelAndView = new ModelAndView();
+    return modelAndView;
+  }
 
-    HarmonizationPersonAttributeTypeService personAttributeTypeService =
-        HarmonizationUtils.getHarmonizationPersonAttributeTypeService();
+  @RequestMapping(
+      value = "/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes",
+      method = RequestMethod.POST)
+  public ModelAndView confirmHarmonizationData(
+      HttpServletRequest request,
+      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
 
-    List<PersonAttributeTypeDTO> mdsPersonAttibruteTypePartialEqual =
-        personAttributeTypeService
-            .findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer();
-    List<PersonAttributeTypeDTO> pdsPersonAttibruteTypePartialEqual =
-        personAttributeTypeService
-            .findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer();
+    ModelAndView modelAndView =
+        new ModelAndView(
+            "redirect:/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes2.form");
+    return modelAndView;
+  }
 
-    Collections.sort(mdsPersonAttibruteTypePartialEqual);
-    Collections.sort(pdsPersonAttibruteTypePartialEqual);
+  @RequestMapping(
+      value = {"/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes2"},
+      method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+  public ModelAndView initFormProcessHarmonization(
+      HttpServletRequest request,
+      final SessionStatus status,
+      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
 
-    modelAndView.addObject(
-        "mdsPersonAttibruteTypePartialEqual", mdsPersonAttibruteTypePartialEqual);
-    modelAndView.addObject(
-        "pdsPersonAttibruteTypePartialEqual", pdsPersonAttibruteTypePartialEqual);
+    ModelAndView modelAndView = new ModelAndView();
+    modelAndView.addObject("harmonizationModel", harmonizationModel);
+    this.harmonizationModel = harmonizationModel;
+    status.setComplete();
+    return modelAndView;
+  }
 
+  @RequestMapping(
+      value = {"/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes2"},
+      method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+  public ModelAndView processHarmonization(
+      HttpServletRequest request,
+      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
+      ModelMap model) {
+
+    model.addAttribute("openmrs_msg", "eptsharmonization.PersonAttributeType.harmonized");
+    model.addAttribute("harmonizationModel", this.harmonizationModel);
+    ModelAndView modelAndView =
+        new ModelAndView(
+            "redirect:/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes3.form", model);
+    return modelAndView;
+  }
+
+  @RequestMapping(
+      value = {"/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes3"},
+      method = {org.springframework.web.bind.annotation.RequestMethod.GET})
+  public ModelAndView initExportLog(
+      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
+      @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg,
+      ModelMap model) {
+
+    ModelAndView modelAndView = new ModelAndView();
     modelAndView.addObject("openmrs_msg", openmrs_msg);
+    model.addAttribute("harmonizationModel", this.harmonizationModel);
 
     return modelAndView;
   }
 
   @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes"},
+      value = {"/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes3"},
       method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-  public ModelAndView processHarmonization(
-      @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
+  public ModelAndView exportLog(
+      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
+      @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg,
+      ModelMap model) {
+
     ModelAndView modelAndView = new ModelAndView();
-
-    HarmonizationPersonAttributeTypeService personAttributeTypeService =
-        HarmonizationUtils.getHarmonizationPersonAttributeTypeService();
-
-    List<PersonAttributeTypeDTO> mdsPersonAttributeTypesPartialEqual =
-        personAttributeTypeService
-            .findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer();
-    List<PersonAttributeTypeDTO> pdsPersonAttributeTypesPartialEqual =
-        personAttributeTypeService
-            .findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer();
-
-    Collections.sort(mdsPersonAttributeTypesPartialEqual);
-    Collections.sort(pdsPersonAttributeTypesPartialEqual);
-
-    modelAndView.addObject(
-        "mdsPersonAttributeTypesPartialEqual", mdsPersonAttributeTypesPartialEqual);
-    modelAndView.addObject(
-        "pdsPersonAttributeTypesPartialEqual", pdsPersonAttributeTypesPartialEqual);
-
     modelAndView.addObject("openmrs_msg", openmrs_msg);
-
+    model.addAttribute("harmonizationModel", this.harmonizationModel);
     return modelAndView;
+  }
+
+  @ModelAttribute("harmonizationModel")
+  public HarmonizationData getHarmonizationModel() {
+    List<HarmonizationItem> items = new ArrayList<>();
+    Map<String, List<PersonAttributeTypeDTO>> data =
+        HarmonizationUtils.getHarmonizationPersonAttributeTypeService()
+            .findAllPersonAttributeTypesWithDifferentIDAndSameUUID();
+    for (String key : data.keySet()) {
+      items.add(new HarmonizationItem(key, data.get(key)));
+    }
+    return new HarmonizationData(items);
   }
 }

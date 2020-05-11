@@ -1,9 +1,9 @@
 <%@ taglib prefix="springform"
 	uri="http://www.springframework.org/tags/form"%>
 <%@ include file="/WEB-INF/template/include.jsp"%>
-<openmrs:require privilege="Manage Encountery Types"
+<openmrs:require privilege="Manage Person Attribute Types"
 	otherwise="/login.htm"
-	redirect="/module/eptsharmonization/harmonizeUpdateEncounterTypeNames2.form" />
+	redirect="/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes2.form" />
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <%@ include file="template/localHeader.jsp"%>
@@ -73,51 +73,43 @@ td {
 </style>
 
 <h2>
-	<spring:message code="eptsharmonization.encountertype.harmonize" />
+	<spring:message code="eptsharmonization.personattributetype.harmonize" />
 </h2>
 <br />
 <br />
-
 <b class="boxHeader"><spring:message
-		code="eptsharmonization.encountertype.harmonize.differentNamesAndSameUUIDAndID" /></b>
+		code="eptsharmonization.personattributetype.harmonize.onlyOnMDServer" /></b>
+
 <springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
-		<table cellspacing="0" border="0" style="width: 100%">
+		<table id="tableOnlyMDS" cellspacing="0" border="0" style="width: 100%">
 			<tr>
-				<th><spring:message
-						code="eptsharmonization.encountertype.mdserver.name" /></th>
-				<th><spring:message
-						code="eptsharmonization.encountertype.mdserver.description" /></th>
-				<th><spring:message
-						code="eptsharmonization.encountertype.pdserver.name" /></th>
-				<th><spring:message
-						code="eptsharmonization.encountertype.pdserver.description" /></th>
 				<th><spring:message code="general.id" /></th>
+				<th><spring:message code="general.name" /></th>
+				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
 			</tr>
-			<c:forEach var="item" items="${harmonizationModel.items}"
-				varStatus="itemsRow">
+	
+			<c:forEach var="item" items="${harmonizationModel.items}" varStatus="itemsRow">
 				<c:if test="${item.selected}">
 					<tr class="oddAssessed">
-						<td valign="top">${item.value[0].encounterType.name}</td>
-						<td valign="top">${item.value[0].encounterType.description}</td>
-						<td valign="top">${item.value[1].encounterType.name}</td>
-						<td valign="top">${item.value[1].encounterType.description}</td>
-						<td valign="top" align="center">${item.value[0].encounterType.id}</td>
-						<td valign="top">${item.key}</td>
+						<td valign="top" align="center">${item.value.personAttributeType.id}</td>
+						<td valign="top">${item.value.personAttributeType.name}</td>
+						<td valign="top">${item.value.personAttributeType.description}</td>
+						<td valign="top">${item.value.personAttributeType.uuid}</td>
 					</tr>
 				</c:if>
 			</c:forEach>
 			<tr>
-				<td colspan="7">
+				<td colspan="4">
 					<div class="submit-btn" align="center">
 						<input type="submit"
 							value="<spring:message code="general.previous"/>"
-							onclick="window.location = 'harmonizeUpdateEncounterTypeNames.form';"
+							onclick="window.location = 'harmonizeAddNewPersonAttributeTypes.form';"
 							name="previous" />
 						<input type="submit"
 							value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
-							name="updateEncounterTypeNames" />
+							name="addPersonAttributeTypes" />
 					</div>
 				</td>
 			</tr>

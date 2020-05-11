@@ -1,11 +1,23 @@
+<%@ taglib prefix="springform"
+	uri="http://www.springframework.org/tags/form"%>
 <%@ include file="/WEB-INF/template/include.jsp"%>
 
-<openmrs:require privilege="Manage Encountery Types"
+<openmrs:require privilege="Manage Person Attribute Types"
 	otherwise="/login.htm"
 	redirect="/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes.form" />
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <%@ include file="template/localHeader.jsp"%>
+
+<openmrs:htmlInclude file="/scripts/jquery/jquery-1.3.2.min.js" />
+<openmrs:htmlInclude
+	file="/scripts/jquery/dataTables/css/dataTables.css" />
+<openmrs:htmlInclude
+	file="/scripts/jquery/dataTables/js/jquery.dataTables.min.js" />
+<openmrs:htmlInclude
+	file="/scripts/jquery-ui/js/jquery-ui-1.7.2.custom.min.js" />
+<openmrs:htmlInclude
+	file="/scripts/jquery-ui/css/redmond/jquery-ui-1.7.2.custom.css" />
 
 <style>
 p {
@@ -64,12 +76,16 @@ td {
 <h2>
 	<spring:message code="eptsharmonization.personattributetype.harmonize" />
 </h2>
+<div id="error_msg" hidden="hidden">
+	<br> <span class="error"> <spring:message
+			code="eptsharmonization.selectAtLeastOneRowToProceed" /></span>
+</div>
 <br />
 <br />
 <b class="boxHeader"><spring:message
 		code="eptsharmonization.personattributetype.harmonize.onlyOnMDServer" /></b>
-<form method="post" class="box"
-	action="harmonizePersonAttributeTypesList.form">
+<springform:form modelAttribute="harmonizationModel" method="post"
+	onsubmit="return validateBeforeNextPage();">
 	<fieldset>
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
@@ -79,27 +95,65 @@ td {
 				<th><spring:message code="general.uuid" /></th>
 				<th><spring:message code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 			</tr>
-			<c:forEach var="item" items="${onlyMetadataPersonAttributeTypes}">
-				<tr>
-					<td valign="top" align="center">${item.personAttributeType.id}</td>
-					<td valign="top">${item.personAttributeType.name}</td>
-					<td valign="top">${item.personAttributeType.description}</td>
-					<td valign="top">${item.personAttributeType.uuid}</td>
-					<td valign="top" align="center">0</td>
+			<c:forEach var="item" items="${harmonizationModel.items}"
+					varStatus="itemsRow">
+				<tr class="oddAssessed">
+					<spring:bind path="items[${itemsRow.index}].selected">
+						<td align="center"><input type="hidden"
+							name="_<c:out value="${status.expression}"/>"> <input
+							type="checkbox" class="info-checkBox"
+							name="<c:out value="${status.expression}"/>" value="true"
+							<c:if test="${status.value}">checked</c:if> /></td>
+					</spring:bind>
+				<td valign="top" align="center">${item.value.personAttributeType.id}</td>
+				<td valign="top">${item.value.personAttributeType.name}</td>
+				<td valign="top">${item.value.personAttributeType.description}</td>
+				<td valign="top">${item.value.personAttributeType.uuid}</td>
+				<td valign="top" align="center">0</td>
 				</tr>
 			</c:forEach>
 			<tr>
 				<td colspan="5">
 					<div class="submit-btn" align="center">
 						<input type="submit"
-							value="<spring:message code="general.previous"/>" name="previous" />
-						<input type="submit" value='<spring:message code="general.next"/>'
-							name="harmonizeNewFromMetadata" />
+							value="<spring:message code="general.previous"/>"
+							onclick="window.location = 'harmonizePersonAttributeTypesList.form';"
+							name="previous" /> <input type="submit"
+							value='<spring:message code="general.next"/>'
+							name="addPersonAttributeTypes" />
 					</div>
 				</td>
 			</tr>
 		</table>
 	</fieldset>
-</form>
+</springform:form>
+<script type="text/javascript">
+	var itemTrs = document.querySelectorAll(".oddAssessed");
+
+	function validateBeforeNextPage() {
+
+		var itemTrs = document.querySelectorAll(".oddAssessed");
+		var atLeastOneCkecked = false;
+		var validTable = true;
+
+		itemTrs.forEach(function(item) {
+
+			var inputCheckBox = item.querySelector(".info-checkBox");
+
+			if (inputCheckBox.checked) {
+				atLeastOneCkecked = true;
+			}
+		});
+
+		var divErrorMsg = document.querySelector("#error_msg");
+
+		if (!atLeastOneCkecked) {
+			divErrorMsg.hidden = "";
+		} else {
+			divErrorMsg.hidden = "hidden";
+		}
+		return atLeastOneCkecked;
+	}
+</script>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

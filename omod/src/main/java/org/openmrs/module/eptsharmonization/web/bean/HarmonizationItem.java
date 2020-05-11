@@ -9,6 +9,8 @@ public class HarmonizationItem implements Serializable {
   private Object value;
 
   private boolean selected;
+  private int encountersCount;
+  private int formsCount;
 
   public HarmonizationItem(Object key, Object value) {
     this.key = key;
@@ -37,5 +39,21 @@ public class HarmonizationItem implements Serializable {
 
   public void setSelected(boolean selected) {
     this.selected = selected;
+  }
+
+  public int getEncountersCount() {
+    return encountersCount;
+  }
+
+  public void setEncountersCount(int encountersCount) {
+    this.encountersCount = encountersCount;
+  }
+
+  public int getFormsCount() {
+    return formsCount;
+  }
+
+  public void setFormsCount(int formsCount) {
+    this.formsCount = formsCount;
   }
 }

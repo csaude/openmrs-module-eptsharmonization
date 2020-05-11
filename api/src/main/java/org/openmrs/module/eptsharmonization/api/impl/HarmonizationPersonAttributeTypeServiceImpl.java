@@ -12,19 +12,22 @@
 package org.openmrs.module.eptsharmonization.api.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
-import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 
-/** It is a default implementation of {@link HarmonizationEncounterTypeService}. */
+/** It is a default implementation of {@link HarmonizationPersonAttributeTypeService}. */
 public class HarmonizationPersonAttributeTypeServiceImpl extends BaseOpenmrsService
     implements HarmonizationPersonAttributeTypeService {
 
@@ -88,18 +91,72 @@ public class HarmonizationPersonAttributeTypeServiceImpl extends BaseOpenmrsServ
     return DTOUtils.fromPersonAttributeTypes(pdsPersonAttributeTypes);
   }
 
+  @Override
+  public Map<String, List<PersonAttributeTypeDTO>>
+      findAllPersonAttributeTypesWithDifferentNameAndSameUUIDAndID() throws APIException {
+    Map<String, List<PersonAttributeTypeDTO>> result = new HashMap<>();
+    Map<String, List<PersonAttributeType>> map = findByWithDifferentNameAndSameUUIDAndID();
+    for (String key : map.keySet()) {
+      result.put(key, DTOUtils.fromPersonAttributeTypes(map.get(key)));
+    }
+    return result;
+  }
+
+  @Override
+  public Map<String, List<PersonAttributeTypeDTO>>
+      findAllPersonAttributeTypesWithDifferentIDAndSameUUID() throws APIException {
+    Map<String, List<PersonAttributeTypeDTO>> result = new HashMap<>();
+    Map<String, List<PersonAttributeType>> map = findByWithDifferentIDAndSameUUID();
+    for (String key : map.keySet()) {
+      result.put(key, DTOUtils.fromPersonAttributeTypes(map.get(key)));
+    }
+    return result;
+  }
+
   private List<PersonAttributeType> removePATWithDifferentIDsAndUUIDs(
       List<PersonAttributeType> mdsPersonAttributeTypes,
       List<PersonAttributeType> pdsPersonAttributeTypes) {
     List<PersonAttributeType> auxMDS = new ArrayList<>();
-    for (PersonAttributeType mdsEncounterType : mdsPersonAttributeTypes) {
-      for (PersonAttributeType pdsEncounterType : pdsPersonAttributeTypes) {
-        if (mdsEncounterType.getId().compareTo(pdsEncounterType.getId()) != 0
-            && mdsEncounterType.getUuid().contentEquals(pdsEncounterType.getUuid())) {
-          auxMDS.add(mdsEncounterType);
+    for (PersonAttributeType mdsPersonAttributeType : mdsPersonAttributeTypes) {
+      for (PersonAttributeType pdsPersonAttributeType : pdsPersonAttributeTypes) {
+        if (mdsPersonAttributeType.getId().compareTo(pdsPersonAttributeType.getId()) != 0
+            && mdsPersonAttributeType.getUuid().contentEquals(pdsPersonAttributeType.getUuid())) {
+          auxMDS.add(mdsPersonAttributeType);
         }
       }
     }
     return auxMDS;
+  }
+
+  private Map<String, List<PersonAttributeType>> findByWithDifferentNameAndSameUUIDAndID() {
+    List<PersonAttributeType> allMDS = dao.findAllMetadataServerPersonAttributeTypes();
+    List<PersonAttributeType> allPDS = dao.findAllProductionServerPersonAttributeTypes();
+
+    Map<String, List<PersonAttributeType>> map = new TreeMap<>();
+    for (PersonAttributeType mdsItem : allMDS) {
+      for (PersonAttributeType pdsItem : allPDS) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid())
+            && mdsItem.getId() == pdsItem.getId()
+            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
+          map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
+        }
+      }
+    }
+    return map;
+  }
+
+  public Map<String, List<PersonAttributeType>> findByWithDifferentIDAndSameUUID() {
+    List<PersonAttributeType> allPDS = dao.findAllProductionServerPersonAttributeTypes();
+    List<PersonAttributeType> allMDS = dao.findAllMetadataServerPersonAttributeTypes();
+
+    Map<String, List<PersonAttributeType>> map = new TreeMap<>();
+    for (PersonAttributeType mdsItem : allMDS) {
+      for (PersonAttributeType pdsItem : allPDS) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid()) && mdsItem.getId() != pdsItem.getId()) {
+          map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
+        }
+      }
+    }
+    return map;
   }
 }
