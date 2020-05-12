@@ -1,11 +1,16 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLogUtils;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
 import org.springframework.stereotype.Controller;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -45,6 +51,7 @@ public class HarmonizeUpdateEncounterTypesController {
     return modelAndView;
   }
 
+  @SuppressWarnings("unchecked")
   @RequestMapping(
       value = {"/module/eptsharmonization/harmonizeUpdateEncounterTypes2"},
       method = {org.springframework.web.bind.annotation.RequestMethod.GET})
@@ -52,24 +59,26 @@ public class HarmonizeUpdateEncounterTypesController {
       HttpServletRequest request,
       @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
 
-    ModelAndView modelAndView = new ModelAndView();
-    modelAndView.addObject("harmonizationModel", harmonizationModel);
     this.harmonizationModel = harmonizationModel;
 
-    for (HarmonizationItem item : harmonizationModel.getItems()) {
-      @SuppressWarnings("unchecked")
-      List<EncounterTypeDTO> encounterTypes = (List<EncounterTypeDTO>) item.getValue();
-      EncounterTypeDTO encouterType = encounterTypes.get(0);
-      item.setEncountersCount(
-          HarmonizationUtils.getHarmonizationEncounterTypeService()
-              .countEncounterRows(encouterType.getEncounterType().getId()));
-      item.setFormsCount(
-          HarmonizationUtils.getHarmonizationEncounterTypeService()
-              .countFormRows(encouterType.getEncounterType().getId()));
+    for (HarmonizationItem item : this.harmonizationModel.getItems()) {
+      if (item.isSelected()) {
+        List<EncounterTypeDTO> encounterTypes = (List<EncounterTypeDTO>) item.getValue();
+        EncounterTypeDTO encouterType = encounterTypes.get(1);
+        item.setEncountersCount(
+            HarmonizationUtils.getHarmonizationEncounterTypeService()
+                .getNumberOfAffectedEncounters(encouterType));
+        item.setFormsCount(
+            HarmonizationUtils.getHarmonizationEncounterTypeService()
+                .getNumberOfAffectedForms(encouterType));
+      }
     }
+    ModelAndView modelAndView = new ModelAndView();
+    modelAndView.addObject("harmonizationModel", harmonizationModel);
     return modelAndView;
   }
 
+  @SuppressWarnings("unchecked")
   @RequestMapping(
       value = {"/module/eptsharmonization/harmonizeUpdateEncounterTypes2"},
       method = {org.springframework.web.bind.annotation.RequestMethod.POST})
@@ -77,6 +86,16 @@ public class HarmonizeUpdateEncounterTypesController {
       HttpServletRequest request,
       @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
       ModelMap model) {
+
+    Map<String, List<EncounterTypeDTO>> selectedRows = new HashMap<>();
+    for (HarmonizationItem item : this.harmonizationModel.getItems()) {
+
+      if (item.isSelected()) {
+        selectedRows.put((String) item.getKey(), (List<EncounterTypeDTO>) item.getValue());
+      }
+    }
+    HarmonizationUtils.getHarmonizationEncounterTypeService()
+        .saveEncounterTypesWithDifferentIDAndEqualUUID(selectedRows);
 
     model.addAttribute("openmrs_msg", "eptsharmonization.encountertype.harmonized");
     model.addAttribute("harmonizationModel", this.harmonizationModel);
@@ -101,18 +120,34 @@ public class HarmonizeUpdateEncounterTypesController {
     return modelAndView;
   }
 
+  @SuppressWarnings("unchecked")
   @RequestMapping(
       value = {"/module/eptsharmonization/harmonizeUpdateEncounterTypes3"},
       method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-  public ModelAndView exportLog(
-      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
-      @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg,
-      ModelMap model) {
+  public @ResponseBody byte[] exportLog(HttpServletRequest request, HttpServletResponse response) {
 
-    ModelAndView modelAndView = new ModelAndView();
-    modelAndView.addObject("openmrs_msg", openmrs_msg);
-    model.addAttribute("harmonizationModel", this.harmonizationModel);
-    return modelAndView;
+    Map<String, List<EncounterTypeDTO>> selectedRows = new HashMap<>();
+    for (HarmonizationItem item : this.harmonizationModel.getItems()) {
+
+      if (item.isSelected()) {
+        selectedRows.put((String) item.getKey(), (List<EncounterTypeDTO>) item.getValue());
+      }
+    }
+
+    String defaultLocationName =
+        Context.getAdministrationService().getGlobalProperty("default_location");
+    ByteArrayOutputStream outputStream =
+        HarmonizationCSVLogUtils.generateLogForHarmonizationMapOfEncounterTypes(
+            defaultLocationName,
+            selectedRows,
+            "Harmonized Encounter Types With different ID and equal UUID");
+
+    response.setContentType("text/csv");
+    response.setHeader(
+        "Content-Disposition",
+        "attachment; fileName=harmonized-encounter-types-different-names.csv");
+    response.setContentLength(outputStream.size());
+    return outputStream.toByteArray();
   }
 
   @ModelAttribute("harmonizationModel")

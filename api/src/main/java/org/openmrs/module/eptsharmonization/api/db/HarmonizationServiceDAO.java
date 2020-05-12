@@ -47,10 +47,18 @@ public interface HarmonizationServiceDAO {
 
   public Integer getNextEncounterTypeId() throws DAOException;
 
-  public EncounterType updateEncounterType(Integer nextId, EncounterType encounterType)
-      throws DAOException;
+  public EncounterType updateEncounterType(
+      Integer nextId, EncounterType encounterType, boolean swappable) throws DAOException;
+
+  public void updateEncounter(Encounter encounter, Integer encounterTypeId) throws DAOException;
+
+  public void updateForm(Form form, Integer encounterTypeId) throws DAOException;
 
   public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException;
+
+  public void setEnableCheckConstraints() throws DAOException, Exception;
+
+  public void setDisabledCheckConstraints() throws DAOException, Exception;
 
   public List<PersonAttribute> findPersonAttributeByTypeId(Integer personAttributeTypeId);
 }

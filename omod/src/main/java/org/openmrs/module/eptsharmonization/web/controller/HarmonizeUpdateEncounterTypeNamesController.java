@@ -125,8 +125,10 @@ public class HarmonizeUpdateEncounterTypeNamesController {
     }
     String LocationName = Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
-        HarmonizationCSVLogUtils.generateLogForHarmonizationEncounterTypesWithDifferentNames(
-            LocationName, resultMap);
+        HarmonizationCSVLogUtils.generateLogForHarmonizationMapOfEncounterTypes(
+            LocationName,
+            resultMap,
+            "Harmonized Encounter Types With different Name and Equal ID and UUID");
 
     response.setContentType("text/csv");
     response.setHeader(

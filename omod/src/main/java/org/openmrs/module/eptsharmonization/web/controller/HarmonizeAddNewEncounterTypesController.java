@@ -64,10 +64,10 @@ public class HarmonizeAddNewEncounterTypesController {
       EncounterTypeDTO encouterType = (EncounterTypeDTO) item.getValue();
       item.setEncountersCount(
           HarmonizationUtils.getHarmonizationEncounterTypeService()
-              .countEncounterRows(encouterType.getEncounterType().getId()));
+              .getNumberOfAffectedEncounters(encouterType));
       item.setFormsCount(
           HarmonizationUtils.getHarmonizationEncounterTypeService()
-              .countFormRows(encouterType.getEncounterType().getId()));
+              .getNumberOfAffectedForms(encouterType));
     }
 
     return modelAndView;
@@ -123,9 +123,13 @@ public class HarmonizeAddNewEncounterTypesController {
         list.add((EncounterTypeDTO) item.getValue());
       }
     }
-    String LocationName = Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName =
+        Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
-        HarmonizationCSVLogUtils.generateLogForNewHarmonizedFromMDS(LocationName, list);
+        HarmonizationCSVLogUtils.generateLogForNewHarmonizedFromMDS(
+            defaultLocationName,
+            list,
+            "Created New Entries from Metadata Server to Production Server");
 
     response.setContentType("text/csv");
     response.setHeader(

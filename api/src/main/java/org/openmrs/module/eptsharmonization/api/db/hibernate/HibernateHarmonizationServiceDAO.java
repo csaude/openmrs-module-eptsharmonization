@@ -11,6 +11,8 @@
  */
 package org.openmrs.module.eptsharmonization.api.db.hibernate;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -176,13 +178,14 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
   }
 
   @Override
-  public EncounterType updateEncounterType(Integer nextId, EncounterType encounterType) {
+  public EncounterType updateEncounterType(
+      Integer nextId, EncounterType encounterType, boolean swappable) {
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
             String.format(
-                "update encounter_type set encounter_type_id =%s where encounter_type_id =%s ",
-                nextId, encounterType.getId()))
+                "update encounter_type set encounter_type_id =%s, swappable =%s where encounter_type_id =%s ",
+                nextId, swappable, encounterType.getId()))
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
 
@@ -196,8 +199,6 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @Override
   public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException {
-
-    sessionFactory.getCurrentSession().clear();
     String insert =
         String.format(
             "insert into encounter_type (encounter_type_id, name, description, creator, date_created, retired, uuid, swappable) "
@@ -230,5 +231,47 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
             .addEntity(Form.class);
 
     return query.list();
+  }
+
+  @Override
+  public void updateEncounter(Encounter encounter, Integer encounterTypeId) throws DAOException {
+
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "update encounter set encounter_type =%s where encounter_id =%s ",
+                encounterTypeId, encounter.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+  }
+
+  @Override
+  public void updateForm(Form form, Integer encounterTypeId) throws DAOException {
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "update form set encounter_type =%s where form_id =%s ",
+                encounterTypeId, form.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+  }
+
+  @Override
+  public void setEnableCheckConstraints() throws Exception {
+    Connection connection = sessionFactory.getCurrentSession().connection();
+    Statement stmt = connection.createStatement();
+    stmt.addBatch("SET FOREIGN_KEY_CHECKS=1");
+    stmt.executeBatch();
+    Context.flushSession();
+  }
+
+  @Override
+  public void setDisabledCheckConstraints() throws Exception {
+    Connection connection = sessionFactory.getCurrentSession().connection();
+    Statement stmt = connection.createStatement();
+    stmt.addBatch("SET FOREIGN_KEY_CHECKS=0");
+    stmt.executeBatch();
   }
 }
