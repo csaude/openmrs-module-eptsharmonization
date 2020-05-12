@@ -68,6 +68,10 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
   public void saveEncounterTypesWithDifferentNames(
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException;
 
+  @Authorized({"Manage Encountery Types"})
+  public void saveNewEncounterTypesFromMDS(List<EncounterTypeDTO> encounterTypes)
+      throws APIException;
+
   public int countEncounterRows(Integer encounterTypeId);
 
   public int countFormRows(Integer encounterTypeId);

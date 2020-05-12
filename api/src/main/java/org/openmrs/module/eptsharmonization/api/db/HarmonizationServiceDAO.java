@@ -31,9 +31,23 @@ public interface HarmonizationServiceDAO {
   public List<PersonAttributeType> findAllProductionServerPersonAttributeTypes()
       throws DAOException;
 
-  public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId);
+  public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId)
+      throws DAOException;
 
-  public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId);
+  public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId) throws DAOException;
 
   public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws DAOException;
+
+  public EncounterType getEncounterTypeById(Integer encounterTypeId) throws DAOException;
+
+  public boolean isSwappable(EncounterType encounterType) throws DAOException;
+
+  public Integer getSwapId(EncounterType encounterType) throws DAOException;
+
+  public Integer getNextEncounterTypeId() throws DAOException;
+
+  public EncounterType updateEncounterType(Integer nextId, EncounterType encounterType)
+      throws DAOException;
+
+  public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException;
 }

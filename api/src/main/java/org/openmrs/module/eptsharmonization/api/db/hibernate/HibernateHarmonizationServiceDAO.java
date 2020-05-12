@@ -14,8 +14,10 @@ package org.openmrs.module.eptsharmonization.api.db.hibernate;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
@@ -43,16 +45,14 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
   @Override
   public List<EncounterType> findAllMetadataServerEncounterTypes() throws DAOException {
     // TODO: I had to do this to prevent cached data
-    Context.clearSession();
-    Context.flushSession();
+    this.evictCache();
     return this.findMDSEncounterTypes();
   }
 
   @Override
   public List<EncounterType> findAllProductionServerEncounterTypes() throws DAOException {
     // TODO: I had to do this to prevent cached data
-    Context.clearSession();
-    Context.flushSession();
+    this.evictCache();
     return Context.getEncounterService().getAllEncounterTypes();
   }
 
@@ -122,5 +122,96 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
                     + "         and _encounter_type.uuid = encounter_type.uuid)")
             .addEntity(EncounterType.class);
     return query.list();
+  }
+
+  public EncounterType getEncounterTypeById(Integer encounterTypeId) {
+    this.evictCache();
+    return Context.getEncounterService().getEncounterType(encounterTypeId);
+  }
+
+  public boolean isSwappable(EncounterType encounterType) {
+    return (boolean)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                String.format(
+                    "select swappable from encounter_type where encounter_type_id = %s ",
+                    encounterType.getId()))
+            .uniqueResult();
+  }
+
+  public Integer getSwapId(EncounterType encounterType) {
+    return (Integer)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                String.format(
+                    "select swap_id from encounter_type where encounter_type_id = %s ",
+                    encounterType.getId()))
+            .uniqueResult();
+  }
+
+  public Integer getNextEncounterTypeId() {
+    Integer maxId =
+        (Integer)
+            this.sessionFactory
+                .getCurrentSession()
+                .createSQLQuery("select max(encounter_type_id) from encounter_type ")
+                .uniqueResult();
+    return ++maxId;
+  }
+
+  // private Map<Integer, EncounterType> toMapEncounterTypes(List<EncounterType>
+  // encounterTypes) {
+  // Map<Integer, EncounterType> map = new HashMap<>();
+  // for (EncounterType encounterType : encounterTypes) {
+  // map.put(encounterType.getId(), encounterType);
+  // }
+  // return map;
+  // }
+
+  private void evictCache() {
+    Context.clearSession();
+    Context.flushSession();
+  }
+
+  @Override
+  public EncounterType updateEncounterType(Integer nextId, EncounterType encounterType) {
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "update encounter_type set encounter_type_id =%s where encounter_type_id =%s ",
+                nextId, encounterType.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+
+    final Criteria searchCriteria =
+        this.sessionFactory
+            .getCurrentSession()
+            .createCriteria(EncounterType.class, "encounterType");
+    searchCriteria.add(Restrictions.eq("encounterTypeId", nextId));
+    return (EncounterType) searchCriteria.uniqueResult();
+  }
+
+  @Override
+  public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException {
+
+    sessionFactory.getCurrentSession().clear();
+    String insert =
+        String.format(
+            "insert into encounter_type (encounter_type_id, name, description, creator, date_created, retired, uuid, swappable) "
+                + " values (%s, '%s', '%s', %s, '%s', %s, '%s', %s)",
+            encounterType.getId(),
+            encounterType.getName(),
+            encounterType.getDescription(),
+            Context.getAuthenticatedUser().getId(),
+            encounterType.getDateCreated(),
+            encounterType.getRetired(),
+            encounterType.getUuid(),
+            false);
+
+    Query query = sessionFactory.getCurrentSession().createSQLQuery(insert);
+    query.executeUpdate();
   }
 }

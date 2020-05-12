@@ -18,6 +18,15 @@ public class DTOUtils {
     return result;
   }
 
+  public static List<EncounterType> fromEncounterTypeDTOs(
+      List<EncounterTypeDTO> encounterTypeDTOs) {
+    List<EncounterType> result = new ArrayList<>();
+    for (EncounterTypeDTO encounterTypeDTO : encounterTypeDTOs) {
+      result.add(encounterTypeDTO.getEncounterType());
+    }
+    return result;
+  }
+
   public static EncounterTypeDTO fromEncounterType(EncounterType encounterType) {
     return new EncounterTypeDTO(encounterType);
   }

@@ -19,7 +19,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
+import org.openmrs.Form;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -157,6 +159,21 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  public int countEncounterRows(Integer encounterTypeId) {
+    return dao.findEncontersByEncounterTypeId(encounterTypeId).size();
+  }
+
+  @Override
+  public int countFormRows(Integer encounterTypeId) {
+    return dao.findFormsByEncounterTypeId(encounterTypeId).size();
+  }
+
+  @Override
+  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException {
+    return dao.findPDSEncounterTypesNotExistsInMDServer();
+  }
+
+  @Override
   public void saveEncounterTypesWithDifferentNames(
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException {
     for (String key : encounterTypes.keySet()) {
@@ -171,17 +188,46 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   @Override
-  public int countEncounterRows(Integer encounterTypeId) {
-    return dao.findEncontersByEncounterTypeId(encounterTypeId).size();
+  public void saveNewEncounterTypesFromMDS(List<EncounterTypeDTO> encounterTypes)
+      throws APIException {
+
+    for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
+
+      EncounterType found = this.dao.getEncounterTypeById(encounterType.getId());
+
+      if (found != null) {
+
+        if (!this.dao.isSwappable(found)) {
+
+          throw new APIException(
+              String.format(
+                  "Cannot Insert Encounter type with ID %s, UUID %s and NAME %s. This ID is being in use by another Enconter type from Metatada server with UUID %s and name %s ",
+                  encounterType.getId(),
+                  encounterType.getUuid(),
+                  encounterType.getName(),
+                  found.getUuid(),
+                  found.getName()));
+        }
+        List<Encounter> relatedEncounters = this.dao.findEncontersByEncounterTypeId(found.getId());
+        List<Form> relatedForms = this.dao.findFormsByEncounterTypeId(found.getId());
+        this.moveForNextAvailableId(found, relatedEncounters, relatedForms);
+      }
+      this.dao.saveNotSwappableEncounterType(encounterType);
+      Context.flushSession();
+    }
   }
 
-  @Override
-  public int countFormRows(Integer encounterTypeId) {
-    return dao.findFormsByEncounterTypeId(encounterTypeId).size();
-  }
-
-  @Override
-  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException {
-    return dao.findPDSEncounterTypesNotExistsInMDServer();
+  private void moveForNextAvailableId(
+      EncounterType encounterType, List<Encounter> relatedEncounters, List<Form> relatedForms) {
+    Integer nextId = this.dao.getNextEncounterTypeId();
+    EncounterType updated = this.dao.updateEncounterType(nextId, encounterType);
+    for (Form form : relatedForms) {
+      form.setEncounterType(updated);
+      Context.getFormService().saveForm(form);
+    }
+    for (Encounter encounter : relatedEncounters) {
+      encounter.setEncounterType(updated);
+      Context.getEncounterService().saveEncounter(encounter);
+    }
   }
 }

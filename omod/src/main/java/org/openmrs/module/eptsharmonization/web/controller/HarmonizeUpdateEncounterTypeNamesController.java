@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLogUtils;
@@ -122,9 +123,10 @@ public class HarmonizeUpdateEncounterTypeNamesController {
         resultMap.put((String) item.getKey(), (List<EncounterTypeDTO>) item.getValue());
       }
     }
+    String LocationName = Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
         HarmonizationCSVLogUtils.generateLogForHarmonizationEncounterTypesWithDifferentNames(
-            resultMap);
+            LocationName, resultMap);
 
     response.setContentType("text/csv");
     response.setHeader(

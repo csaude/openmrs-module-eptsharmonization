@@ -1,10 +1,14 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLogUtils;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
 import org.springframework.stereotype.Controller;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -76,6 +81,14 @@ public class HarmonizeAddNewEncounterTypesController {
       @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
       ModelMap model) {
 
+    List<EncounterTypeDTO> list = new ArrayList<>();
+    for (HarmonizationItem item : this.harmonizationModel.getItems()) {
+      if (item.isSelected()) {
+        list.add((EncounterTypeDTO) item.getValue());
+      }
+    }
+    HarmonizationUtils.getHarmonizationEncounterTypeService().saveNewEncounterTypesFromMDS(list);
+
     model.addAttribute("openmrs_msg", "eptsharmonization.encountertype.harmonized");
     model.addAttribute("harmonizationModel", this.harmonizationModel);
     ModelAndView modelAndView =
@@ -102,15 +115,24 @@ public class HarmonizeAddNewEncounterTypesController {
   @RequestMapping(
       value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes3",
       method = org.springframework.web.bind.annotation.RequestMethod.POST)
-  public ModelAndView exportLog(
-      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
-      @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg,
-      ModelMap model) {
+  public @ResponseBody byte[] exportLog(HttpServletRequest request, HttpServletResponse response) {
 
-    ModelAndView modelAndView = new ModelAndView();
-    modelAndView.addObject("openmrs_msg", openmrs_msg);
-    model.addAttribute("harmonizationModel", this.harmonizationModel);
-    return modelAndView;
+    List<EncounterTypeDTO> list = new ArrayList<>();
+    for (HarmonizationItem item : this.harmonizationModel.getItems()) {
+      if (item.isSelected()) {
+        list.add((EncounterTypeDTO) item.getValue());
+      }
+    }
+    String LocationName = Context.getAdministrationService().getGlobalProperty("default_location");
+    ByteArrayOutputStream outputStream =
+        HarmonizationCSVLogUtils.generateLogForNewHarmonizedFromMDS(LocationName, list);
+
+    response.setContentType("text/csv");
+    response.setHeader(
+        "Content-Disposition",
+        "attachment; fileName=harmonized-encounter-types-different-names.csv");
+    response.setContentLength(outputStream.size());
+    return outputStream.toByteArray();
   }
 
   @ModelAttribute("harmonizationModel")
