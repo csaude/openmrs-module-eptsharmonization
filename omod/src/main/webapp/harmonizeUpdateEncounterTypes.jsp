@@ -126,7 +126,7 @@ td {
 			<tr>
 				<td colspan="8">
 					<div class="submit-btn" align="center">
-						<input type="submit"
+						<input type="button"
 							value="<spring:message code="general.previous"/>"
 							onclick="window.location = 'harmonizeEncounterTypeList.form';"
 							name="previous" /> <input type="submit"

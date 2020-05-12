@@ -2,6 +2,7 @@ package org.openmrs.module.eptsharmonization.web.controller;
 
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
@@ -20,38 +21,12 @@ public class HarmonizeEncounterTypeController {
   @RequestMapping(
       value = {"/module/eptsharmonization/harmonizeEncounterTypeList"},
       method = {org.springframework.web.bind.annotation.RequestMethod.GET})
-  public ModelAndView getAffinityTypeList(
+  public ModelAndView getEncounterTypesList(
+      HttpSession session,
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
     ModelAndView modelAndView = new ModelAndView();
 
-    HarmonizationEncounterTypeService encounterTypeService =
-        HarmonizationUtils.getHarmonizationEncounterTypeService();
-
-    List<EncounterTypeDTO> onlyMetadataEncounterTypes =
-        encounterTypeService.findAllMetadataEncounterNotContainedInProductionServer();
-    List<EncounterTypeDTO> onlyProductionEncounterTypes =
-        encounterTypeService.findAllProductionEncountersNotContainedInMetadataServer();
-    Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentNames =
-        encounterTypeService.findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
-    Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentIDsSameUUIDs =
-        encounterTypeService.findAllEncounterTypesWithDifferentIDAndSameUUID();
-
-    modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
-    modelAndView.addObject("onlyProductionEncounterTypes", onlyProductionEncounterTypes);
-    modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
-    modelAndView.addObject("encounterTypesPartialEqual", encounterTypesWithDifferentIDsSameUUIDs);
-
-    modelAndView.addObject("openmrs_msg", openmrs_msg);
-
-    return modelAndView;
-  }
-
-  @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeEncounterTypeList"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-  public ModelAndView processForm(
-      @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg) {
-    ModelAndView modelAndView = new ModelAndView();
+    session.removeAttribute("harmonizationModel");
 
     HarmonizationEncounterTypeService encounterTypeService =
         HarmonizationUtils.getHarmonizationEncounterTypeService();

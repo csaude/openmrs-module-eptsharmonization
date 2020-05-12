@@ -1,5 +1,6 @@
 <%@ taglib prefix="springform"
 	uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <openmrs:require privilege="Manage Encountery Types"
 	otherwise="/login.htm"
@@ -120,7 +121,7 @@ td {
 			<tr>
 				<td colspan="5">
 					<div class="submit-btn" align="center">
-						<input type="submit"
+						<input type="button"
 							value="<spring:message code="general.previous"/>"
 							onclick="window.location = 'harmonizeEncounterTypeList.form';"
 							name="previous" /> <input type="submit"
