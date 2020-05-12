@@ -13,6 +13,7 @@ package org.openmrs.module.eptsharmonization.api;
 
 import java.util.List;
 import java.util.Map;
+import org.openmrs.EncounterType;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
@@ -70,4 +71,6 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
   public int countEncounterRows(Integer encounterTypeId);
 
   public int countFormRows(Integer encounterTypeId);
+
+  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException;
 }

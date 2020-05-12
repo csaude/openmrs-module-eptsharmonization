@@ -59,6 +59,24 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     log.info("Importing _person_attribute_type Metadata");
     dataImporter.importData("person-attribute-types.xml");
     log.info(" _person_attribute_type Metadata imported");
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swap_id` int");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter` ADD COLUMN `swap_id` int");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `form` ADD COLUMN `swap_id` int");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    HarmonizationUtils.onActivator();
   }
 
   @Override
@@ -74,6 +92,22 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
 
     sb = new StringBuilder();
     sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter_type` DROP `swap_id`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter` DROP `swap_id`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `form` DROP `swap_id`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder();

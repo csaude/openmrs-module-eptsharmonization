@@ -108,4 +108,19 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
     return query.list();
   }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws DAOException {
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                "select encounter_type.* from encounter_type "
+                    + "   where NOT EXISTS (select * from _encounter_type "
+                    + "        where _encounter_type.encounter_type_id = encounter_type.encounter_type_id "
+                    + "         and _encounter_type.uuid = encounter_type.uuid)")
+            .addEntity(EncounterType.class);
+    return query.list();
+  }
 }

@@ -179,4 +179,9 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   public int countFormRows(Integer encounterTypeId) {
     return dao.findFormsByEncounterTypeId(encounterTypeId).size();
   }
+
+  @Override
+  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException {
+    return dao.findPDSEncounterTypesNotExistsInMDServer();
+  }
 }

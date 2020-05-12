@@ -34,4 +34,6 @@ public interface HarmonizationServiceDAO {
   public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId);
 
   public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId);
+
+  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws DAOException;
 }
