@@ -21,6 +21,7 @@ import org.hibernate.criterion.Restrictions;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
+import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
@@ -68,12 +69,16 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @Override
   public List<PersonAttributeType> findAllMetadataServerPersonAttributeTypes() throws DAOException {
+    // TODO: I had to do this to prevent cached data
+    this.evictCache();
     return this.findMDSPersonAttributeType();
   }
 
   @Override
   public List<PersonAttributeType> findAllProductionServerPersonAttributeTypes()
       throws DAOException {
+    // TODO: I had to do this to prevent cached data
+    this.evictCache();
     return Context.getPersonService().getAllPersonAttributeTypes();
   }
 
@@ -89,6 +94,8 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @SuppressWarnings("unchecked")
   public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId) {
+    // TODO: I had to do this to prevent cached data
+    this.evictCache();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
@@ -100,6 +107,8 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @SuppressWarnings("unchecked")
   public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId) {
+    // TODO: I had to do this to prevent cached data
+    this.evictCache();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
@@ -161,15 +170,6 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
     return ++maxId;
   }
 
-  // private Map<Integer, EncounterType> toMapEncounterTypes(List<EncounterType>
-  // encounterTypes) {
-  // Map<Integer, EncounterType> map = new HashMap<>();
-  // for (EncounterType encounterType : encounterTypes) {
-  // map.put(encounterType.getId(), encounterType);
-  // }
-  // return map;
-  // }
-
   private void evictCache() {
     Context.clearSession();
     Context.flushSession();
@@ -213,5 +213,22 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
     Query query = sessionFactory.getCurrentSession().createSQLQuery(insert);
     query.executeUpdate();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<PersonAttribute> findPersonAttributeByTypeId(Integer personAttributeTypeId) {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                "select p.* from person_attribute p where p.person_attribute_type_id="
+                    + personAttributeTypeId)
+            .addEntity(Form.class);
+
+    return query.list();
   }
 }

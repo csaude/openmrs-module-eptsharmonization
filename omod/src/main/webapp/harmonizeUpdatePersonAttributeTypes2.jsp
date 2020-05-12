@@ -97,6 +97,7 @@ td {
 				<th><spring:message
 						code="eptsharmonization.encountertype.pdserver.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
+				<th><spring:message code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 			</tr>
 			<c:forEach var="item" items="${harmonizationModel.items}"
 				varStatus="itemsRow">
@@ -109,16 +110,18 @@ td {
 						<td valign="top">${item.value[1].personAttributeType.name}</td>
 						<td valign="top">${item.value[1].personAttributeType.description}</td>
 						<td valign="top">${item.key}</td>
+						<td valign="top" align="center">${item.encountersCount}</td>
 					</c:if>
 				</tr>
 			</c:forEach>
 			<tr>
-				<td colspan="7">
+				<td colspan="8">
 					<div class="submit-btn" align="center">
-						<input type="submit"
+						<input type="button"
 							value="<spring:message code="general.previous"/>"
-							onclick="window.location = 'harmonizeUpdatePersonAttributeTypes.form';"
-							name="previous" /> <input type="submit"
+							onclick="window.location='harmonizeUpdatePersonAttributeTypes.form';"
+							name="previous" /> 
+						<input type="submit"
 							value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
 							name="updatePersonAttributeTypes" />
 					</div>

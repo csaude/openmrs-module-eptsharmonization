@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
@@ -158,5 +159,25 @@ public class HarmonizationPersonAttributeTypeServiceImpl extends BaseOpenmrsServ
       }
     }
     return map;
+  }
+
+  @Override
+  public void savePersonAttributeTypesWithDifferentNames(
+      Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException {
+    for (String key : personAttributeTypes.keySet()) {
+      List<PersonAttributeTypeDTO> list = personAttributeTypes.get(key);
+      PersonAttributeTypeDTO mdsEncounter = list.get(0);
+      PersonAttributeTypeDTO pdsEncounter = list.get(1);
+      PersonAttributeType personAttributeType =
+          Context.getPersonService()
+              .getPersonAttributeType(pdsEncounter.getPersonAttributeType().getId());
+      personAttributeType.setName(mdsEncounter.getPersonAttributeType().getName());
+      Context.getPersonService().savePersonAttributeType(personAttributeType);
+    }
+  }
+
+  @Override
+  public int countPersonAttributeRows(Integer personAttributeTypeId) {
+    return dao.findPersonAttributeByTypeId(personAttributeTypeId).size();
   }
 }

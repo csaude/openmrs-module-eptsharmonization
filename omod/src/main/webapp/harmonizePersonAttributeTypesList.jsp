@@ -67,6 +67,51 @@ td {
 <br />
 <br />
 
+<c:if test="${not empty personAttributeTypesWithDifferentNames}">
+	<b class="boxHeader"><spring:message
+			code="eptsharmonization.personattributetype.harmonize.differentNamesAndSameUUIDAndID" /></b>
+	<form method="get" class="box"
+		action="harmonizeUpdatePersonAttributeTypesNames.form">
+		<fieldset>
+			<table cellspacing="0" border="0" style="width: 100%">
+				<tr>
+					<th><spring:message
+							code="eptsharmonization.encountertype.mdserver.name" /></th>
+					<th><spring:message
+							code="eptsharmonization.encountertype.mdserver.description" /></th>
+					<th><spring:message
+							code="eptsharmonization.encountertype.pdserver.name" /></th>
+					<th><spring:message
+							code="eptsharmonization.encountertype.pdserver.description" /></th>
+					<th><spring:message code="general.id" /></th>
+					<th><spring:message code="general.uuid" /></th>
+				</tr>
+				<c:forEach var="entry" items="${personAttributeTypesWithDifferentNames}">
+					<tr>
+						<td valign="top">${entry.value[0].personAttributeType.name}</td>
+						<td valign="top">${entry.value[0].personAttributeType.description}</td>
+						<td valign="top">${entry.value[1].personAttributeType.name}</td>
+						<td valign="top">${entry.value[1].personAttributeType.description}</td>
+						<td valign="top" align="center">${entry.value[0].personAttributeType.id}</td>
+						<td valign="top">${entry.key}</td>
+					</tr>
+				</c:forEach>
+				<tr>
+					<td colspan="6">
+						<div class="submit-btn" align="center">
+							<input type="submit"
+								value='<spring:message code="general.next"/>'
+								name="updatePersonAttributeTypesNames" />
+						</div>
+					</td>
+				</tr>
+			</table>
+		</fieldset>
+	</form>
+	<br />
+	<br />
+</c:if>
+
 <c:if test="${not empty onlyMetadataPersonAttributeTypes}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.personattributetype.harmonize.onlyOnMDServer" /></b>
@@ -156,15 +201,15 @@ td {
 					<th><spring:message code="eptsharmonization.encountertype.pdserver.description" /></th>
 					<th><spring:message code="general.uuid" /></th>
 				</tr>
-				<c:forEach var="item" items="${personAttributeTypesPartialEqual}">
+				<c:forEach var="entry" items="${personAttributeTypesPartialEqual}">
 					<tr>
-						<td valign="top" align="center">${item.value[0].personAttributeType.id}</td>
-						<td valign="top">${item.value[0].personAttributeType.name}</td>
-						<td valign="top">${item.value[0].personAttributeType.description}</td>
-						<td valign="top" align="center">${item.value[1].personAttributeType.id}</td>
-						<td valign="top">${item.value[1].personAttributeType.name}</td>
-						<td valign="top">${item.value[1].personAttributeType.description}</td>
-						<td valign="top">${item.key}</td>
+						<td valign="top" align="center">${entry.value[0].personAttributeType.id}</td>
+						<td valign="top">${entry.value[0].personAttributeType.name}</td>
+						<td valign="top">${entry.value[0].personAttributeType.description}</td>
+						<td valign="top" align="center">${entry.value[1].personAttributeType.id}</td>
+						<td valign="top">${entry.value[1].personAttributeType.name}</td>
+						<td valign="top">${entry.value[1].personAttributeType.description}</td>
+						<td valign="top">${entry.key}</td>
 					</tr>
 				</c:forEach>
 				<tr>

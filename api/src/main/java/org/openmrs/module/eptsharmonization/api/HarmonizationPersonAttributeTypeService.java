@@ -60,4 +60,10 @@ public interface HarmonizationPersonAttributeTypeService extends OpenmrsService 
   @Authorized({"View Person Attribute Types"})
   public Map<String, List<PersonAttributeTypeDTO>>
       findAllPersonAttributeTypesWithDifferentIDAndSameUUID() throws APIException;
+
+  @Authorized({"Manage Person Attribute Types"})
+  public void savePersonAttributeTypesWithDifferentNames(
+      Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException;
+
+  public int countPersonAttributeRows(Integer encounterTypeId);
 }
