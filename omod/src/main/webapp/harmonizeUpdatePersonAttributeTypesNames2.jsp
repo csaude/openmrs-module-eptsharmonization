@@ -3,7 +3,7 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <openmrs:require privilege="Manage Person Attribute Types"
 	otherwise="/login.htm"
-	redirect="/module/eptsharmonization/harmonizeUpdatePersonAttributeTypes3.form" />
+	redirect="/module/eptsharmonization/harmonizeUpdatePersonAttributeTypesNames2.form" />
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <%@ include file="template/localHeader.jsp"%>
@@ -17,7 +17,6 @@
 	file="/scripts/jquery-ui/js/jquery-ui-1.7.2.custom.min.js" />
 <openmrs:htmlInclude
 	file="/scripts/jquery-ui/css/redmond/jquery-ui-1.7.2.custom.css" />
-
 
 <style>
 p {
@@ -77,59 +76,48 @@ td {
 	<spring:message code="eptsharmonization.personattributetype.harmonize" />
 </h2>
 <br />
-<c:if test="${not empty openmrs_msg}">
-	<div id="openmrs_msg">
-		<span> <spring:message code="${openmrs_msg}"
-				text="${openmrs_msg}" />
-		</span>
-	</div>
-	<br />
-</c:if>
+<br />
 
 <b class="boxHeader"><spring:message
-		code="eptsharmonization.personattributetype.harmonize.differentID.andEqualUUID" /></b>
-<springform:form modelAttribute="harmonizationModel" method="post"
-	onsubmit="return validateBeforeNextPage();">
+		code="eptsharmonization.personattributetype.harmonize.differentNamesAndSameUUIDAndID" /></b>
+<springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
-				<th><spring:message
-						code="eptsharmonization.encountertype.mdserver.id" /></th>
 				<th><spring:message
 						code="eptsharmonization.encountertype.mdserver.name" /></th>
 				<th><spring:message
 						code="eptsharmonization.encountertype.mdserver.description" /></th>
 				<th><spring:message
-						code="eptsharmonization.encountertype.pdserver.id" /></th>
-				<th><spring:message
 						code="eptsharmonization.encountertype.pdserver.name" /></th>
 				<th><spring:message
 						code="eptsharmonization.encountertype.pdserver.description" /></th>
+				<th><spring:message code="general.id" /></th>
 				<th><spring:message code="general.uuid" /></th>
-				<th><spring:message
-						code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 			</tr>
 			<c:forEach var="item" items="${harmonizationModel.items}"
 				varStatus="itemsRow">
-				<tr class="oddAssessed">
-					<c:if test="${item.selected}">
-						<td valign="top" align="center">${item.value[0].personAttributeType.id}</td>
+				<c:if test="${item.selected}">
+					<tr class="oddAssessed">
 						<td valign="top">${item.value[0].personAttributeType.name}</td>
 						<td valign="top">${item.value[0].personAttributeType.description}</td>
-						<td valign="top" align="center">${item.value[1].personAttributeType.id}
 						<td valign="top">${item.value[1].personAttributeType.name}</td>
 						<td valign="top">${item.value[1].personAttributeType.description}</td>
+						<td valign="top" align="center">${item.value[0].personAttributeType.id}</td>
 						<td valign="top">${item.key}</td>
-						<td valign="top" align="center">${item.encountersCount}</td>
-					</c:if>
-				</tr>
+					</tr>
+				</c:if>
 			</c:forEach>
 			<tr>
-				<td colspan="8">
+				<td colspan="7">
 					<div class="submit-btn" align="center">
+						<input type="button"
+							value="<spring:message code="general.previous"/>"
+							onclick="window.location = 'harmonizeUpdatePersonAttributeTypesNames.form';"
+							name="previous" /> 
 						<input type="submit"
-							value='<spring:message code="eptsharmonization.encountertype.harmonized.exportLog"/>'
-							name="exportLogs" />
+							value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
+							name="updatePersonAttributeTypesNames" />
 					</div>
 				</td>
 			</tr>

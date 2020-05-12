@@ -19,6 +19,7 @@ import org.hibernate.SessionFactory;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
+import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
@@ -68,12 +69,18 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @Override
   public List<PersonAttributeType> findAllMetadataServerPersonAttributeTypes() throws DAOException {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
     return this.findMDSPersonAttributeType();
   }
 
   @Override
   public List<PersonAttributeType> findAllProductionServerPersonAttributeTypes()
       throws DAOException {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
     return Context.getPersonService().getAllPersonAttributeTypes();
   }
 
@@ -89,6 +96,9 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @SuppressWarnings("unchecked")
   public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId) {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
@@ -100,6 +110,9 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
 
   @SuppressWarnings("unchecked")
   public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId) {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
@@ -121,6 +134,23 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
                     + "        where _encounter_type.encounter_type_id = encounter_type.encounter_type_id "
                     + "         and _encounter_type.uuid = encounter_type.uuid)")
             .addEntity(EncounterType.class);
+    return query.list();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<PersonAttribute> findPersonAttributeByTypeId(Integer personAttributeTypeId) {
+    // TODO: I had to do this to prevent cached data
+    Context.clearSession();
+    Context.flushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                "select p.* from person_attribute p where p.person_attribute_type_id="
+                    + personAttributeTypeId)
+            .addEntity(Form.class);
+
     return query.list();
   }
 }

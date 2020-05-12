@@ -93,10 +93,11 @@ td {
 				<th><spring:message code="general.name" /></th>
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
-				<th><spring:message code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
+				<th><spring:message
+						code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 			</tr>
 			<c:forEach var="item" items="${harmonizationModel.items}"
-					varStatus="itemsRow">
+				varStatus="itemsRow">
 				<tr class="oddAssessed">
 					<spring:bind path="items[${itemsRow.index}].selected">
 						<td align="center"><input type="hidden"
@@ -105,19 +106,18 @@ td {
 							name="<c:out value="${status.expression}"/>" value="true"
 							<c:if test="${status.value}">checked</c:if> /></td>
 					</spring:bind>
-				<td valign="top" align="center">${item.value.personAttributeType.id}</td>
-				<td valign="top">${item.value.personAttributeType.name}</td>
-				<td valign="top">${item.value.personAttributeType.description}</td>
-				<td valign="top">${item.value.personAttributeType.uuid}</td>
-				<td valign="top" align="center">0</td>
+					<td valign="top" align="center">${item.value.personAttributeType.id}</td>
+					<td valign="top">${item.value.personAttributeType.name}</td>
+					<td valign="top">${item.value.personAttributeType.description}</td>
+					<td valign="top">${item.value.personAttributeType.uuid}</td>
 				</tr>
 			</c:forEach>
 			<tr>
 				<td colspan="5">
 					<div class="submit-btn" align="center">
-						<input type="submit"
+						<input type="button"
 							value="<spring:message code="general.previous"/>"
-							onclick="window.location = 'harmonizePersonAttributeTypesList.form';"
+							onclick="window.location='harmonizePersonAttributeTypesList.form'"
 							name="previous" /> <input type="submit"
 							value='<spring:message code="general.next"/>'
 							name="addPersonAttributeTypes" />

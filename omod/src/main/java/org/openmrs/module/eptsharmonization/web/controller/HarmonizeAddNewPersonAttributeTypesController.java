@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -51,13 +50,18 @@ public class HarmonizeAddNewPersonAttributeTypesController {
       method = org.springframework.web.bind.annotation.RequestMethod.GET)
   public ModelAndView initFormProcessHarmonization(
       HttpServletRequest request,
-      final SessionStatus status,
       @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
 
     ModelAndView modelAndView = new ModelAndView();
     modelAndView.addObject("harmonizationModel", harmonizationModel);
     this.harmonizationModel = harmonizationModel;
-    status.setComplete();
+
+    for (HarmonizationItem item : harmonizationModel.getItems()) {
+      PersonAttributeTypeDTO personAttributeType = (PersonAttributeTypeDTO) item.getValue();
+      item.setEncountersCount(
+          HarmonizationUtils.getHarmonizationPersonAttributeTypeService()
+              .countPersonAttributeRows(personAttributeType.getPersonAttributeType().getId()));
+    }
     return modelAndView;
   }
 

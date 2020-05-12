@@ -15,6 +15,7 @@ import java.util.List;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
+import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
@@ -36,4 +37,6 @@ public interface HarmonizationServiceDAO {
   public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId);
 
   public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws DAOException;
+
+  public List<PersonAttribute> findPersonAttributeByTypeId(Integer personAttributeTypeId);
 }
