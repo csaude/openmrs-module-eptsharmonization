@@ -114,7 +114,7 @@ td {
 				</c:if>
 			</c:forEach>
 			<tr>
-				<td colspan="4">
+				<td colspan="6">
 					<div class="submit-btn" align="center">
 						<input type="submit"
 							value='<spring:message code="eptsharmonization.encountertype.harmonized.exportLog"/>'
