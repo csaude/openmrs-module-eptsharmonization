@@ -1,12 +1,10 @@
 package org.openmrs.module.eptsharmonization;
 
-import java.util.Collection;
 import java.util.List;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.TransformerUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.EncounterType;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
@@ -26,22 +24,30 @@ public class HarmonizationUtils {
         Context.getService(HarmonizationPersonAttributeTypeService.class);
   }
 
-  @SuppressWarnings("unchecked")
   public static void onActivator() {
-    HarmonizationEncounterTypeService encounterTypeService =
-        Context.getService(HarmonizationEncounterTypeService.class);
+
     List<EncounterType> swappableEncounterTypes =
-        encounterTypeService.findPDSEncounterTypesNotExistsInMDServer();
-    Collection<Integer> ids =
-        CollectionUtils.collect(
-            swappableEncounterTypes, TransformerUtils.invokerTransformer("getId"));
-    int countSwapp = 1000;
-    for (Integer id : ids) {
+        Context.getService(HarmonizationEncounterTypeService.class)
+            .findPDSEncounterTypesNotExistsInMDServer();
+    for (EncounterType item : swappableEncounterTypes) {
       StringBuilder sb = new StringBuilder();
       sb.append(
           String.format(
-              "update encounter_type set swappable = true,  swap_id = %s where encounter_type_id = %s",
-              countSwapp++, id));
+              "update encounter_type set swappable = true where encounter_type_id = %s",
+              item.getEncounterTypeId()));
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+
+    List<PersonAttributeType> swappablePersonAttTypes =
+        Context.getService(HarmonizationPersonAttributeTypeService.class)
+            .findPDSPersonAttributeTypesNotExistsInMDServer();
+    for (PersonAttributeType item : swappablePersonAttTypes) {
+
+      StringBuilder sb = new StringBuilder();
+      sb.append(
+          String.format(
+              "update person_attribute_type set swappable = true where person_attribute_type_id = %s",
+              item.getPersonAttributeTypeId()));
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
   }

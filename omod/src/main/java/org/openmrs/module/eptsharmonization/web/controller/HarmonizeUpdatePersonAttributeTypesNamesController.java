@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLogUtils;
@@ -125,14 +126,18 @@ public class HarmonizeUpdatePersonAttributeTypesNamesController {
         resultMap.put((String) item.getKey(), (List<PersonAttributeTypeDTO>) item.getValue());
       }
     }
+    String defaultLocationName =
+        Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
-        HarmonizationCSVLogUtils.generateLogForHarmonizationPersonAttributeTypesWithDifferentNames(
-            resultMap);
+        HarmonizationCSVLogUtils.generateLogForHarmonizationMapOfPersonAttributeTypes(
+            defaultLocationName,
+            resultMap,
+            "Harmonized PersonAttributeTypes With different Name and equal ID and UUID");
 
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=harmonized-person-attribute-types-different-names.csv");
+        "attachment; fileName=harmonized-person-attribute-types-different-names-and-equal-id-and-uuid.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }

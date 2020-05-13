@@ -65,15 +65,7 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder();
-    sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swap_id` int");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
-
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `encounter` ADD COLUMN `swap_id` int");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
-
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `form` ADD COLUMN `swap_id` int");
+    sb.append("ALTER TABLE `person_attribute_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     HarmonizationUtils.onActivator();
@@ -99,15 +91,7 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder();
-    sb.append("ALTER TABLE `encounter_type` DROP `swap_id`");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
-
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `encounter` DROP `swap_id`");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
-
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `form` DROP `swap_id`");
+    sb.append("ALTER TABLE `person_attribute_type` DROP `swappable`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder();

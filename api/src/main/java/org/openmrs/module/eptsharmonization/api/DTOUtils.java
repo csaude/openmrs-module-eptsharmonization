@@ -43,6 +43,15 @@ public class DTOUtils {
     return result;
   }
 
+  public static List<PersonAttributeType> fromPersonAttributeDTOs(
+      List<PersonAttributeTypeDTO> personAttributeDTOs) {
+    List<PersonAttributeType> result = new ArrayList<>();
+    for (PersonAttributeTypeDTO item : personAttributeDTOs) {
+      result.add(item.getPersonAttributeType());
+    }
+    return result;
+  }
+
   public static PersonAttributeTypeDTO fromPersonAttributeType(
       PersonAttributeType personAttributeType) {
     return new PersonAttributeTypeDTO(personAttributeType);

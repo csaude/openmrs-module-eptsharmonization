@@ -13,6 +13,7 @@ package org.openmrs.module.eptsharmonization.api;
 
 import java.util.List;
 import java.util.Map;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
@@ -61,9 +62,20 @@ public interface HarmonizationPersonAttributeTypeService extends OpenmrsService 
   public Map<String, List<PersonAttributeTypeDTO>>
       findAllPersonAttributeTypesWithDifferentIDAndSameUUID() throws APIException;
 
+  public int getNumberOfAffectedPersonAttributes(PersonAttributeTypeDTO personAttributeTypeDTO);
+
+  public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
+      throws APIException;
+
   @Authorized({"Manage Person Attribute Types"})
   public void savePersonAttributeTypesWithDifferentNames(
       Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException;
 
-  public int countPersonAttributeRows(Integer encounterTypeId);
+  @Authorized({"Manage Person Attribute Types"})
+  public void saveNewPersonAttributeTypesFromMDS(List<PersonAttributeTypeDTO> personAttributeTypes)
+      throws APIException;
+
+  @Authorized({"Manage Person Attribute Types"})
+  public void savePersonAttributeTypesWithDifferentIDAndEqualUUID(
+      Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException;
 }

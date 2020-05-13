@@ -76,7 +76,67 @@ public class HarmonizationCSVLogUtils {
     return outputStream;
   }
 
-  public static ByteArrayOutputStream generateLogForNewHarmonizedFromMDS(
+  public static ByteArrayOutputStream generateLogForHarmonizationMapOfPersonAttributeTypes(
+      String defaultLocationName,
+      Map<String, List<PersonAttributeTypeDTO>> data,
+      String harmonizationFlow) {
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+    try {
+      CSVPrinter printer =
+          new CSVPrinter(
+              new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1),
+              new CSVStrategy(
+                  '\t',
+                  ' ',
+                  CSVStrategy.COMMENTS_DISABLED,
+                  CSVStrategy.ESCAPE_DISABLED,
+                  false,
+                  false,
+                  false,
+                  true));
+
+      printer.print("Location: " + defaultLocationName);
+      printer.println();
+      printer.print("Execution Date: " + Calendar.getInstance().getTime());
+      printer.println();
+      printer.print("Metadata Harmonization Process Flow: " + harmonizationFlow);
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+      printer.println();
+
+      for (String key : data.keySet()) {
+        List<PersonAttributeTypeDTO> dtos = data.get(key);
+        PersonAttributeType mdServerET = dtos.get(0).getPersonAttributeType();
+        PersonAttributeType pdServerET = dtos.get(1).getPersonAttributeType();
+        try {
+          printer.print(
+              String.format(
+                  "MDS [ID={%s}, UUID={%s}, NAME={%s}] =>> PS [ID={%s}, UUID={%s}, NAME={%s}]",
+                  mdServerET.getId(),
+                  mdServerET.getUuid(),
+                  mdServerET.getName(),
+                  pdServerET.getId(),
+                  pdServerET.getUuid(),
+                  pdServerET.getName()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+      printer.flush();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
+    }
+    return outputStream;
+  }
+
+  public static ByteArrayOutputStream generateLogForNewHarmonizedFromMDSEncounterTypes(
       String defaultLocationName, List<EncounterTypeDTO> data, String harmonizationFlow) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -128,9 +188,8 @@ public class HarmonizationCSVLogUtils {
     return outputStream;
   }
 
-  public static ByteArrayOutputStream
-      generateLogForHarmonizationPersonAttributeTypesWithDifferentNames(
-          Map<String, List<PersonAttributeTypeDTO>> data) {
+  public static ByteArrayOutputStream generateLogForNewHarmonizedFromMDSPersonAttributeTypes(
+      String defaultLocationName, List<PersonAttributeTypeDTO> data, String harmonizationFlow) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -148,18 +207,25 @@ public class HarmonizationCSVLogUtils {
                   false,
                   true));
 
-      for (String key : data.keySet()) {
-        List<PersonAttributeTypeDTO> dtos = data.get(key);
-        PersonAttributeType mdServerPAT = dtos.get(0).getPersonAttributeType();
-        PersonAttributeType pdServerPAT = dtos.get(1).getPersonAttributeType();
+      printer.print("Location: " + defaultLocationName);
+      printer.println();
+      printer.print("Execution Date: " + Calendar.getInstance().getTime());
+      printer.println();
+      printer.print("Metadata Harmonization Process Flow: " + harmonizationFlow);
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+      printer.println();
+
+      for (PersonAttributeTypeDTO item : data) {
         try {
           printer.print(
               String.format(
-                  "EncounterType with ID %s and UUID %s, updated name from  %s TO ->>  %s ",
-                  mdServerPAT.getId(),
-                  mdServerPAT.getUuid(),
-                  pdServerPAT.getName(),
-                  mdServerPAT.getName()));
+                  "EncounterType[ID = {%s}, UUID = {%s}, NAME = {%s}]",
+                  item.getPersonAttributeType().getId(),
+                  item.getPersonAttributeType().getUuid(),
+                  item.getPersonAttributeType().getName()));
           printer.println();
         } catch (Exception e) {
           e.printStackTrace();

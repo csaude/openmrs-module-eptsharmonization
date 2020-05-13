@@ -126,7 +126,7 @@ public class HarmonizeAddNewEncounterTypesController {
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
-        HarmonizationCSVLogUtils.generateLogForNewHarmonizedFromMDS(
+        HarmonizationCSVLogUtils.generateLogForNewHarmonizedFromMDSEncounterTypes(
             defaultLocationName,
             list,
             "Created New Entries from Metadata Server to Production Server");

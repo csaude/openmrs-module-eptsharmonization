@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
@@ -162,6 +163,19 @@ public class HarmonizationPersonAttributeTypeServiceImpl extends BaseOpenmrsServ
   }
 
   @Override
+  public int getNumberOfAffectedPersonAttributes(PersonAttributeTypeDTO personAttributeTypeDTO) {
+    return dao.findPersonAttributeByPersonAttributeTypeId(
+            personAttributeTypeDTO.getPersonAttributeType().getId())
+        .size();
+  }
+
+  @Override
+  public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
+      throws APIException {
+    return this.dao.findPDSPersonAttributeTypesNotExistsInMDServer();
+  }
+
+  @Override
   public void savePersonAttributeTypesWithDifferentNames(
       Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException {
     for (String key : personAttributeTypes.keySet()) {
@@ -172,12 +186,112 @@ public class HarmonizationPersonAttributeTypeServiceImpl extends BaseOpenmrsServ
           Context.getPersonService()
               .getPersonAttributeType(pdsEncounter.getPersonAttributeType().getId());
       personAttributeType.setName(mdsEncounter.getPersonAttributeType().getName());
+      personAttributeType.setDescription(mdsEncounter.getPersonAttributeType().getDescription());
       Context.getPersonService().savePersonAttributeType(personAttributeType);
     }
   }
 
   @Override
-  public int countPersonAttributeRows(Integer personAttributeTypeId) {
-    return dao.findPersonAttributeByTypeId(personAttributeTypeId).size();
+  public void saveNewPersonAttributeTypesFromMDS(List<PersonAttributeTypeDTO> personAttributeTypes)
+      throws APIException {
+
+    try {
+      this.dao.setDisabledCheckConstraints();
+      for (PersonAttributeType personAttributeType :
+          DTOUtils.fromPersonAttributeDTOs(personAttributeTypes)) {
+
+        PersonAttributeType found =
+            this.dao.getPersonAttributeTypeById(personAttributeType.getId());
+
+        if (found != null) {
+
+          if (!this.dao.isSwappable(found)) {
+
+            throw new APIException(
+                String.format(
+                    "Cannot Insert PersonAttributeType with ID %s, UUID %s and NAME %s. This ID is being in use by another PersonAttributeType from Metatada server with UUID %s and name %s ",
+                    personAttributeType.getId(),
+                    personAttributeType.getUuid(),
+                    personAttributeType.getName(),
+                    found.getUuid(),
+                    found.getName()));
+          }
+          List<PersonAttribute> relatedPersonAttributes =
+              this.dao.findPersonAttributeByPersonAttributeTypeId(found.getId());
+          Integer nextId = this.dao.getNextPersonAttriTypeId();
+
+          this.updateToGivenId(found, nextId, true, relatedPersonAttributes);
+        }
+        this.dao.saveNotSwappablePersonAttributeType(personAttributeType);
+        Context.flushSession();
+      }
+      this.dao.setEnableCheckConstraints();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void savePersonAttributeTypesWithDifferentIDAndEqualUUID(
+      Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException {
+
+    try {
+
+      this.dao.setDisabledCheckConstraints();
+      for (String uuid : personAttributeTypes.keySet()) {
+
+        List<PersonAttributeTypeDTO> list = personAttributeTypes.get(uuid);
+        PersonAttributeType mdsPersonAttributeType = list.get(0).getPersonAttributeType();
+        PersonAttributeType pdSPersonAttributeType = list.get(1).getPersonAttributeType();
+        Integer mdServerEncounterId = mdsPersonAttributeType.getPersonAttributeTypeId();
+
+        PersonAttributeType foundMDS =
+            this.dao.getPersonAttributeTypeById(mdsPersonAttributeType.getId());
+
+        if (foundMDS != null) {
+          if (!this.dao.isSwappable(foundMDS)) {
+            throw new APIException(
+                String.format(
+                    "Cannot update the Production Server PersonAttributeType [ID = {%s}, UUID = {%s}, NAME = {%s}] with the ID {%s} this new ID is already referencing an Existing PersonAttributeType In Metadata Server",
+                    pdSPersonAttributeType.getId(),
+                    pdSPersonAttributeType.getUuid(),
+                    pdSPersonAttributeType.getName(),
+                    mdServerEncounterId));
+          }
+          List<PersonAttribute> personAttributes =
+              this.dao.findPersonAttributeByPersonAttributeTypeId(foundMDS.getId());
+          Integer nextId = this.dao.getNextPersonAttriTypeId();
+          this.updateToGivenId(foundMDS, nextId, true, personAttributes);
+        }
+
+        PersonAttributeType foundPDS =
+            this.dao.getPersonAttributeTypeById(pdSPersonAttributeType.getId());
+        if (!this.dao.isSwappable(foundPDS)) {
+          throw new APIException(
+              String.format(
+                  "Cannot update the Production Server PersonAttributeType with ID {%s}, UUID {%s} and NAME {%s}. This PersonAttributeType is a Reference from an PersonAttributeType of Metadata Server",
+                  foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
+        }
+        List<PersonAttribute> personAttributes =
+            this.dao.findPersonAttributeByPersonAttributeTypeId(foundPDS.getId());
+        this.updateToGivenId(foundPDS, mdServerEncounterId, true, personAttributes);
+      }
+      this.dao.setEnableCheckConstraints();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void updateToGivenId(
+      PersonAttributeType personAttributeType,
+      Integer personAttributeTypeId,
+      boolean swappable,
+      List<PersonAttribute> relatedPersonAttributes) {
+    this.dao.updatePersonAttributeType(personAttributeTypeId, personAttributeType, swappable);
+    for (PersonAttribute personAttribute : relatedPersonAttributes) {
+      this.dao.updatePersonAttribute(personAttribute, personAttributeTypeId);
+    }
   }
 }
