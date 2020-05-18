@@ -67,7 +67,7 @@ public class HarmonizeUpdatePersonAttributeTypesController {
       @SuppressWarnings("unchecked")
       List<PersonAttributeTypeDTO> PersonAttributeTypes =
           (List<PersonAttributeTypeDTO>) item.getValue();
-      PersonAttributeTypeDTO personAttributeType = PersonAttributeTypes.get(0);
+      PersonAttributeTypeDTO personAttributeType = PersonAttributeTypes.get(1);
       item.setEncountersCount(
           HarmonizationUtils.getHarmonizationPersonAttributeTypeService()
               .getNumberOfAffectedPersonAttributes(personAttributeType));
@@ -93,7 +93,7 @@ public class HarmonizeUpdatePersonAttributeTypesController {
     HarmonizationUtils.getHarmonizationPersonAttributeTypeService()
         .savePersonAttributeTypesWithDifferentIDAndEqualUUID(selectedRows);
 
-    model.addAttribute("openmrs_msg", "eptsharmonization.PersonAttributeType.harmonized");
+    model.addAttribute("openmrs_msg", "eptsharmonization.personattributetype.harmonized");
     model.addAttribute("harmonizationModel", this.harmonizationModel);
     ModelAndView modelAndView =
         new ModelAndView(

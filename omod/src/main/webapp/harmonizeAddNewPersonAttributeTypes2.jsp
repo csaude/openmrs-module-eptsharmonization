@@ -76,42 +76,46 @@ td {
 	<spring:message code="eptsharmonization.personattributetype.harmonize" />
 </h2>
 <br />
-<br />
+<c:if test="${not empty openmrs_msg}">
+	<div id="openmrs_msg">
+		<span> <spring:message code="${openmrs_msg}"
+				text="${openmrs_msg}" />
+		</span>
+	</div>
+	<br />
+</c:if>
 <b class="boxHeader"><spring:message
-		code="eptsharmonization.personattributetype.harmonize.onlyOnMDServer" /></b>
+		code="eptsharmonization.personattributeType.harmonize.onlyOnMDServer" /></b>
 
 <springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
-		<table id="tableOnlyMDS" cellspacing="0" border="0" style="width: 100%">
+		<table id="tableOnlyMDS" cellspacing="0" border="0"
+			style="width: 100%">
 			<tr>
 				<th><spring:message code="general.id" /></th>
 				<th><spring:message code="general.name" /></th>
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
-				<th><spring:message code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
+				<th><spring:message
+						code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 			</tr>
-	
-			<c:forEach var="item" items="${harmonizationModel.items}" varStatus="itemsRow">
-				<c:if test="${item.selected}">
-					<tr class="oddAssessed">
-						<td valign="top" align="center">${item.value.personAttributeType.id}</td>
-						<td valign="top">${item.value.personAttributeType.name}</td>
-						<td valign="top">${item.value.personAttributeType.description}</td>
-						<td valign="top">${item.value.personAttributeType.uuid}</td>
-						<td valign="top" align="center">${item.encountersCount}</td>
-					</tr>
-				</c:if>
+
+			<c:forEach var="item" items="${harmonizationModel.items}"
+				varStatus="itemsRow">
+				<tr class="oddAssessed">
+					<td valign="top" align="center">${item.value.personAttributeType.id}</td>
+					<td valign="top">${item.value.personAttributeType.name}</td>
+					<td valign="top">${item.value.personAttributeType.description}</td>
+					<td valign="top">${item.value.personAttributeType.uuid}</td>
+					<td valign="top" align="center">${item.encountersCount}</td>
+				</tr>
 			</c:forEach>
 			<tr>
 				<td colspan="5">
 					<div class="submit-btn" align="center">
-						<input type="button"
-							value="<spring:message code="general.previous"/>"
-							onclick="window.location='harmonizeAddNewPersonAttributeTypes.form'"
-							name="previous" />
 						<input type="submit"
-							value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
-							name="addPersonAttributeTypes" />
+							value='<spring:message code="eptsharmonization.encountertype.harmonized.exportLog"/>'
+							name="exportLogs" />
 					</div>
 				</td>
 			</tr>

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -29,28 +28,6 @@ public class HarmonizeAddNewEncounterTypesController {
 
   @RequestMapping(
       value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes",
-      method = RequestMethod.GET)
-  public ModelAndView initForm(
-      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
-
-    ModelAndView modelAndView = new ModelAndView();
-    return modelAndView;
-  }
-
-  @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes",
-      method = RequestMethod.POST)
-  public ModelAndView confirmHarmonizationData(
-      HttpServletRequest request,
-      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
-
-    ModelAndView modelAndView =
-        new ModelAndView("redirect:/module/eptsharmonization/harmonizeAddNewEncounterTypes2.form");
-    return modelAndView;
-  }
-
-  @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes2",
       method = org.springframework.web.bind.annotation.RequestMethod.GET)
   public ModelAndView initFormProcessHarmonization(
       HttpServletRequest request,
@@ -74,7 +51,7 @@ public class HarmonizeAddNewEncounterTypesController {
   }
 
   @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes2",
+      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes",
       method = org.springframework.web.bind.annotation.RequestMethod.POST)
   public ModelAndView processHarmonization(
       HttpServletRequest request,
@@ -83,9 +60,7 @@ public class HarmonizeAddNewEncounterTypesController {
 
     List<EncounterTypeDTO> list = new ArrayList<>();
     for (HarmonizationItem item : this.harmonizationModel.getItems()) {
-      if (item.isSelected()) {
-        list.add((EncounterTypeDTO) item.getValue());
-      }
+      list.add((EncounterTypeDTO) item.getValue());
     }
     HarmonizationUtils.getHarmonizationEncounterTypeService().saveNewEncounterTypesFromMDS(list);
 
@@ -93,12 +68,12 @@ public class HarmonizeAddNewEncounterTypesController {
     model.addAttribute("harmonizationModel", this.harmonizationModel);
     ModelAndView modelAndView =
         new ModelAndView(
-            "redirect:/module/eptsharmonization/harmonizeAddNewEncounterTypes3.form", model);
+            "redirect:/module/eptsharmonization/harmonizeAddNewEncounterTypes2.form", model);
     return modelAndView;
   }
 
   @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes3",
+      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes2",
       method = org.springframework.web.bind.annotation.RequestMethod.GET)
   public ModelAndView initExportLog(
       @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
@@ -113,15 +88,13 @@ public class HarmonizeAddNewEncounterTypesController {
   }
 
   @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes3",
+      value = "/module/eptsharmonization/harmonizeAddNewEncounterTypes2",
       method = org.springframework.web.bind.annotation.RequestMethod.POST)
   public @ResponseBody byte[] exportLog(HttpServletRequest request, HttpServletResponse response) {
 
     List<EncounterTypeDTO> list = new ArrayList<>();
     for (HarmonizationItem item : this.harmonizationModel.getItems()) {
-      if (item.isSelected()) {
-        list.add((EncounterTypeDTO) item.getValue());
-      }
+      list.add((EncounterTypeDTO) item.getValue());
     }
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");

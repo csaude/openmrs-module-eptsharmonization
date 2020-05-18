@@ -76,44 +76,49 @@ td {
 	<spring:message code="eptsharmonization.encountertype.harmonize" />
 </h2>
 <br />
-<br />
+<c:if test="${not empty openmrs_msg}">
+	<div id="openmrs_msg">
+		<span> <spring:message code="${openmrs_msg}"
+				text="${openmrs_msg}" />
+		</span>
+	</div>
+	<br />
+</c:if>
 <b class="boxHeader"><spring:message
 		code="eptsharmonization.encountertype.harmonize.onlyOnMDServer" /></b>
 
 <springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
-		<table id="tableOnlyMDS" cellspacing="0" border="0" style="width: 100%">
+		<table id="tableOnlyMDS" cellspacing="0" border="0"
+			style="width: 100%">
 			<tr>
 				<th><spring:message code="general.id" /></th>
 				<th><spring:message code="general.name" /></th>
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
-				<th><spring:message code="eptsharmonization.encountertype.harmonize.encounters" /></th>
-				<th><spring:message code="eptsharmonization.encountertype.harmonize.forms" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.harmonize.encounters" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.harmonize.forms" /></th>
 			</tr>
-	
-			<c:forEach var="item" items="${harmonizationModel.items}" varStatus="itemsRow">
-				<c:if test="${item.selected}">
-					<tr class="oddAssessed">
-						<td valign="top" align="center">${item.value.encounterType.id}</td>
-						<td valign="top">${item.value.encounterType.name}</td>
-						<td valign="top">${item.value.encounterType.description}</td>
-						<td valign="top">${item.value.encounterType.uuid}</td>
-						<td valign="top" align="center">${item.encountersCount}</td>
-						<td valign="top" align="center">${item.formsCount}</td>
-					</tr>
-				</c:if>
+
+			<c:forEach var="item" items="${harmonizationModel.items}"
+				varStatus="itemsRow">
+				<tr class="oddAssessed">
+					<td valign="top" align="center">${item.value.encounterType.id}</td>
+					<td valign="top">${item.value.encounterType.name}</td>
+					<td valign="top">${item.value.encounterType.description}</td>
+					<td valign="top">${item.value.encounterType.uuid}</td>
+					<td valign="top" align="center">${item.encountersCount}</td>
+					<td valign="top" align="center">${item.formsCount}</td>
+				</tr>
 			</c:forEach>
 			<tr>
 				<td colspan="6">
 					<div class="submit-btn" align="center">
-						<input type="button"
-							value="<spring:message code="general.previous"/>"
-							onclick="window.location = 'harmonizeAddNewEncounterTypes.form';"
-							name="previous" />
 						<input type="submit"
-							value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
-							name="addEncounterTypes" />
+							value='<spring:message code="eptsharmonization.encountertype.harmonized.exportLog"/>'
+							name="exportLogs" />
 					</div>
 				</td>
 			</tr>

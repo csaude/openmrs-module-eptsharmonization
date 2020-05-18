@@ -1,7 +1,6 @@
 <%@ taglib prefix="springform"
 	uri="http://www.springframework.org/tags/form"%>
 <%@ include file="/WEB-INF/template/include.jsp"%>
-
 <openmrs:require privilege="Manage Person Attribute Types"
 	otherwise="/login.htm"
 	redirect="/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes.form" />
@@ -76,40 +75,29 @@ td {
 <h2>
 	<spring:message code="eptsharmonization.personattributetype.harmonize" />
 </h2>
-<div id="error_msg" hidden="hidden">
-	<br> <span class="error"> <spring:message
-			code="eptsharmonization.selectAtLeastOneRowToProceed" /></span>
-</div>
 <br />
 <br />
 <b class="boxHeader"><spring:message
 		code="eptsharmonization.personattributetype.harmonize.onlyOnMDServer" /></b>
-<springform:form modelAttribute="harmonizationModel" method="post"
-	onsubmit="return validateBeforeNextPage();">
+
+<springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
-		<table cellspacing="0" border="0" style="width: 100%">
+		<table id="tableOnlyMDS" cellspacing="0" border="0" style="width: 100%">
 			<tr>
 				<th><spring:message code="general.id" /></th>
 				<th><spring:message code="general.name" /></th>
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
-				<th><spring:message
-						code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
+				<th><spring:message code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 			</tr>
-			<c:forEach var="item" items="${harmonizationModel.items}"
-				varStatus="itemsRow">
+	
+			<c:forEach var="item" items="${harmonizationModel.items}" varStatus="itemsRow">
 				<tr class="oddAssessed">
-					<spring:bind path="items[${itemsRow.index}].selected">
-						<td align="center"><input type="hidden"
-							name="_<c:out value="${status.expression}"/>"> <input
-							type="checkbox" class="info-checkBox"
-							name="<c:out value="${status.expression}"/>" value="true"
-							<c:if test="${status.value}">checked</c:if> /></td>
-					</spring:bind>
 					<td valign="top" align="center">${item.value.personAttributeType.id}</td>
 					<td valign="top">${item.value.personAttributeType.name}</td>
 					<td valign="top">${item.value.personAttributeType.description}</td>
 					<td valign="top">${item.value.personAttributeType.uuid}</td>
+					<td valign="top" align="center">${item.encountersCount}</td>
 				</tr>
 			</c:forEach>
 			<tr>
@@ -118,8 +106,9 @@ td {
 						<input type="button"
 							value="<spring:message code="general.previous"/>"
 							onclick="window.location='harmonizePersonAttributeTypesList.form'"
-							name="previous" /> <input type="submit"
-							value='<spring:message code="general.next"/>'
+							name="previous" />
+						<input type="submit"
+							value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
 							name="addPersonAttributeTypes" />
 					</div>
 				</td>
@@ -127,33 +116,5 @@ td {
 		</table>
 	</fieldset>
 </springform:form>
-<script type="text/javascript">
-	var itemTrs = document.querySelectorAll(".oddAssessed");
-
-	function validateBeforeNextPage() {
-
-		var itemTrs = document.querySelectorAll(".oddAssessed");
-		var atLeastOneCkecked = false;
-		var validTable = true;
-
-		itemTrs.forEach(function(item) {
-
-			var inputCheckBox = item.querySelector(".info-checkBox");
-
-			if (inputCheckBox.checked) {
-				atLeastOneCkecked = true;
-			}
-		});
-
-		var divErrorMsg = document.querySelector("#error_msg");
-
-		if (!atLeastOneCkecked) {
-			divErrorMsg.hidden = "";
-		} else {
-			divErrorMsg.hidden = "hidden";
-		}
-		return atLeastOneCkecked;
-	}
-</script>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

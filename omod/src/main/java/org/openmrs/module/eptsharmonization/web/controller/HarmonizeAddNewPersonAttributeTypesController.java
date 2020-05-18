@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -29,29 +28,6 @@ public class HarmonizeAddNewPersonAttributeTypesController {
 
   @RequestMapping(
       value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes",
-      method = RequestMethod.GET)
-  public ModelAndView initForm(
-      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
-
-    ModelAndView modelAndView = new ModelAndView();
-    return modelAndView;
-  }
-
-  @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes",
-      method = RequestMethod.POST)
-  public ModelAndView confirmHarmonizationData(
-      HttpServletRequest request,
-      @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel) {
-
-    ModelAndView modelAndView =
-        new ModelAndView(
-            "redirect:/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes2.form");
-    return modelAndView;
-  }
-
-  @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes2",
       method = org.springframework.web.bind.annotation.RequestMethod.GET)
   public ModelAndView initFormProcessHarmonization(
       HttpServletRequest request,
@@ -71,7 +47,7 @@ public class HarmonizeAddNewPersonAttributeTypesController {
   }
 
   @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes2",
+      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes",
       method = org.springframework.web.bind.annotation.RequestMethod.POST)
   public ModelAndView processHarmonization(
       HttpServletRequest request,
@@ -80,9 +56,7 @@ public class HarmonizeAddNewPersonAttributeTypesController {
 
     List<PersonAttributeTypeDTO> list = new ArrayList<>();
     for (HarmonizationItem item : this.harmonizationModel.getItems()) {
-      if (item.isSelected()) {
-        list.add((PersonAttributeTypeDTO) item.getValue());
-      }
+      list.add((PersonAttributeTypeDTO) item.getValue());
     }
     HarmonizationUtils.getHarmonizationPersonAttributeTypeService()
         .saveNewPersonAttributeTypesFromMDS(list);
@@ -90,16 +64,16 @@ public class HarmonizeAddNewPersonAttributeTypesController {
     model.addAttribute("openmrs_msg", "eptsharmonization.encountertype.harmonized");
     model.addAttribute("harmonizationModel", this.harmonizationModel);
 
-    model.addAttribute("openmrs_msg", "eptsharmonization.PersonAttributeType.harmonized");
+    model.addAttribute("openmrs_msg", "eptsharmonization.personattributetype.harmonized");
     model.addAttribute("harmonizationModel", this.harmonizationModel);
     ModelAndView modelAndView =
         new ModelAndView(
-            "redirect:/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes3.form", model);
+            "redirect:/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes2.form", model);
     return modelAndView;
   }
 
   @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes3",
+      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes2",
       method = org.springframework.web.bind.annotation.RequestMethod.GET)
   public ModelAndView initExportLog(
       @ModelAttribute("harmonizationModel") HarmonizationData harmonizationModel,
@@ -114,15 +88,13 @@ public class HarmonizeAddNewPersonAttributeTypesController {
   }
 
   @RequestMapping(
-      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes3",
+      value = "/module/eptsharmonization/harmonizeAddNewPersonAttributeTypes2",
       method = org.springframework.web.bind.annotation.RequestMethod.POST)
   public @ResponseBody byte[] exportLog(HttpServletRequest request, HttpServletResponse response) {
 
     List<PersonAttributeTypeDTO> list = new ArrayList<>();
     for (HarmonizationItem item : this.harmonizationModel.getItems()) {
-      if (item.isSelected()) {
-        list.add((PersonAttributeTypeDTO) item.getValue());
-      }
+      list.add((PersonAttributeTypeDTO) item.getValue());
     }
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
