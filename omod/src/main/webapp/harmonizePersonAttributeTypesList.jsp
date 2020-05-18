@@ -152,7 +152,8 @@ td {
 <c:if test="${not empty OnlyProductionPersonAttributeTypes}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.personattributetype.harmonize.onlyOnPServer" /></b>
-	<form method="get" class="box">
+	<form method="get" class="box"
+		action="harmonizeExportPersonAttributeTypes.form">
 		<fieldset>
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>
@@ -173,7 +174,7 @@ td {
 					<td colspan="4">
 						<div class="submit-btn" align="center">
 							<input type="submit"
-								value='<spring:message code="eptshaeptsharmonization.personattributetypexportNewFromPDS"/>'
+								value='<spring:message code="general.next"/>'
 								name="exporNewFromProduction" />
 						</div>
 					</td>
