@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface HarmonizationEncounterTypeService extends OpenmrsService {
 
-  // @Authorized({ "Manage Encountery Types" })
   @Transactional(readOnly = true)
   @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
@@ -45,7 +44,6 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
   public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException;
 
-  // @Authorized({ "Manage Encountery Types" })
   @Transactional(readOnly = true)
   @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllMetadataEncounterPartialEqualsToProductionServer()

@@ -43,6 +43,13 @@
 									</property>
 								</bean>
 							</property>
+							<property name="encounterTypeServiceDAO">
+								<bean class="org.openmrs.module.eptsharmonization.api.db.hibernate.HibernateHarmonizationEncounterTypeServiceDAO">
+									<property name="sessionFactory">
+										<ref bean="sessionFactory" />
+									</property>
+								</bean>
+							</property>
 						</bean>
 					</property>
 					<property name="preInterceptors">
@@ -68,6 +75,13 @@
 						<bean class="org.openmrs.module.eptsharmonization.api.impl.HarmonizationPersonAttributeTypeServiceImpl">
 							<property name="dao">
 								<bean class="org.openmrs.module.eptsharmonization.api.db.hibernate.HibernateHarmonizationServiceDAO">
+									<property name="sessionFactory">
+										<ref bean="sessionFactory" />
+									</property>
+								</bean>
+							</property>
+							<property name="personAttributeServiceDAO">
+								<bean class="org.openmrs.module.eptsharmonization.api.db.hibernate.HibernateHarmonizationPersonAttributeTypeServiceDAO">
 									<property name="sessionFactory">
 										<ref bean="sessionFactory" />
 									</property>

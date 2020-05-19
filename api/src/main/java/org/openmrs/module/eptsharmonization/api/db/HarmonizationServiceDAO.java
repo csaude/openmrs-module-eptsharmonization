@@ -11,73 +11,13 @@
  */
 package org.openmrs.module.eptsharmonization.api.db;
 
-import java.util.List;
-import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
-import org.openmrs.Form;
-import org.openmrs.PersonAttribute;
-import org.openmrs.PersonAttributeType;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 
 /** Database methods for {@link HarmonizationEncounterTypeService}. */
 public interface HarmonizationServiceDAO {
 
-  public List<EncounterType> findAllMetadataServerEncounterTypes() throws DAOException;
-
-  public List<EncounterType> findAllProductionServerEncounterTypes() throws DAOException;
-
-  public List<PersonAttributeType> findAllMetadataServerPersonAttributeTypes() throws DAOException;
-
-  public List<PersonAttributeType> findAllProductionServerPersonAttributeTypes()
-      throws DAOException;
-
-  public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId)
-      throws DAOException;
-
-  public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId) throws DAOException;
-
-  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws DAOException;
-
-  public EncounterType getEncounterTypeById(Integer encounterTypeId) throws DAOException;
-
-  public PersonAttributeType getPersonAttributeTypeById(Integer personAttributeType)
-      throws DAOException;
-
-  public boolean isSwappable(EncounterType encounterType) throws DAOException;
-
-  public boolean isSwappable(PersonAttributeType personAttributeType) throws DAOException;
-
-  public Integer getNextEncounterTypeId() throws DAOException;
-
-  public Integer getNextPersonAttriTypeId() throws DAOException;
-
-  public EncounterType updateEncounterType(
-      Integer nextId, EncounterType encounterType, boolean swappable) throws DAOException;
-
-  public PersonAttributeType updatePersonAttributeType(
-      Integer nextId, PersonAttributeType personAttributeType, boolean swappable)
-      throws DAOException;
-
-  public void updateEncounter(Encounter encounter, Integer encounterTypeId) throws DAOException;
-
-  public void updatePersonAttribute(PersonAttribute personAttribute, Integer personAttTypeId)
-      throws DAOException;
-
-  public void updateForm(Form form, Integer encounterTypeId) throws DAOException;
-
-  public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException;
-
-  public void saveNotSwappablePersonAttributeType(PersonAttributeType personAttributeType)
-      throws DAOException;
-
   public void setEnableCheckConstraints() throws DAOException, Exception;
 
   public void setDisabledCheckConstraints() throws DAOException, Exception;
-
-  public List<PersonAttribute> findPersonAttributeByPersonAttributeTypeId(
-      Integer personAttributeTypeId);
-
-  public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
-      throws DAOException;
 }
