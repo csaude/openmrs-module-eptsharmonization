@@ -137,7 +137,7 @@ td {
 	<br />
 </c:if>
 
-<c:if test="${not empty productionItemsToExport && empty onlyMetadataEncounterTypes && empty productionItemsToDelete}">
+<c:if test="${not empty productionItemsToExport && empty onlyMetadataEncounterTypes && empty productionItemsToDelete && empty encounterTypesPartialEqual && empty encounterTypesWithDifferentNames}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.export" /></b>
 	<form method="get" class="box"
@@ -172,7 +172,7 @@ td {
 	<br />
 </c:if>
 
-<c:if test="${not empty encounterTypesPartialEqual && empty onlyMetadataEncounterTypes && empty productionItemsToDelete}">
+<c:if test="${not empty encounterTypesPartialEqual && empty onlyMetadataEncounterTypes && empty productionItemsToDelete && empty encounterTypesWithDifferentNames}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.differentID.andEqualUUID" /></b>
 	<form method="get" class="box"
