@@ -1,9 +1,10 @@
 <%@ taglib prefix="springform"
 	uri="http://www.springframework.org/tags/form"%>
 <%@ include file="/WEB-INF/template/include.jsp"%>
+
 <openmrs:require privilege="Manage Encountery Types"
 	otherwise="/login.htm"
-	redirect="/module/eptsharmonization/harmonizeAddNewEncounterTypes2.form" />
+	redirect="/module/eptsharmonization/harmonizeDeleteEncounterTypes.form" />
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <%@ include file="template/localHeader.jsp"%>
@@ -76,33 +77,22 @@ td {
 	<spring:message code="eptsharmonization.encountertype.harmonize" />
 </h2>
 <br />
-<c:if test="${not empty openmrs_msg}">
-	<div id="openmrs_msg">
-		<span> <spring:message code="${openmrs_msg}"
-				text="${openmrs_msg}" />
-		</span>
-	</div>
-	<br />
-</c:if>
+<br />
 <b class="boxHeader"><spring:message
-		code="eptsharmonization.encountertype.harmonize.onlyOnMDServer" /></b>
+			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.delete" /></b>
 <springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
-		<table id="tableOnlyMDS" cellspacing="0" border="0"
-			style="width: 100%">
+		<table id="tableOnlyMDS" cellspacing="0" border="0" style="width: 100%">
 			<tr>
 				<th><spring:message code="general.id" /></th>
 				<th><spring:message code="general.name" /></th>
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
-				<th><spring:message
-						code="eptsharmonization.encountertype.harmonize.encounters" /></th>
-				<th><spring:message
-						code="eptsharmonization.encountertype.harmonize.forms" /></th>
+				<th><spring:message code="eptsharmonization.encountertype.harmonize.encounters" /></th>
+				<th><spring:message code="eptsharmonization.encountertype.harmonize.forms" /></th>
 			</tr>
-
-			<c:forEach var="item" items="${harmonizationModel.items}"
-				varStatus="itemsRow">
+	
+			<c:forEach var="item" items="${harmonizationModel.items}" varStatus="itemsRow">
 				<tr class="oddAssessed">
 					<td valign="top" align="center">${item.value.encounterType.id}</td>
 					<td valign="top">${item.value.encounterType.name}</td>
@@ -115,9 +105,13 @@ td {
 			<tr>
 				<td colspan="6">
 					<div class="submit-btn" align="center">
+						<input type="button"
+							value="<spring:message code="general.previous"/>"
+							onclick="window.location = 'harmonizeEncounterTypeList.form';"
+							name="previous" />
 						<input type="submit"
-							value='<spring:message code="eptsharmonization.encountertype.harmonized.exportLog"/>'
-							name="exportLogs" />
+							value='<spring:message code="eptsharmonization.encountertype.btn.removeNewFromPDS"/>'
+							name="deleteEncounterTypes" />
 					</div>
 				</td>
 			</tr>

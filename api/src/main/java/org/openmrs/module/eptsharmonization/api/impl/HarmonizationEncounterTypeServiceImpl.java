@@ -321,4 +321,12 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       this.encounterTypeServiceDAO.updateEncounter(encounter, encounterTypeId);
     }
   }
+
+  @Override
+  public void deleteNewEncounterTypesFromPDS(List<EncounterTypeDTO> encounterTypes)
+      throws APIException {
+    for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
+      Context.getEncounterService().purgeEncounterType(encounterType);
+    }
+  }
 }

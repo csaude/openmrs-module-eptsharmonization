@@ -1,5 +1,6 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
@@ -40,8 +41,27 @@ public class HarmonizeEncounterTypeController {
     Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentIDsSameUUIDs =
         encounterTypeService.findAllEncounterTypesWithDifferentIDAndSameUUID();
 
+    List<EncounterTypeDTO> productionItemsToDelete = new ArrayList();
+    List<EncounterTypeDTO> productionItemsToExport = new ArrayList();
+
+    for (EncounterTypeDTO encounterTypeDTO : onlyProductionEncounterTypes) {
+      final int numberOfAffectedEncounters =
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedEncounters(encounterTypeDTO);
+      final int numberOfAffectedForms =
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedForms(encounterTypeDTO);
+      if (numberOfAffectedEncounters == 0 && numberOfAffectedForms == 0) {
+        productionItemsToDelete.add(encounterTypeDTO);
+      } else {
+        productionItemsToExport.add(encounterTypeDTO);
+      }
+    }
+
     modelAndView.addObject("onlyMetadataEncounterTypes", onlyMetadataEncounterTypes);
     modelAndView.addObject("onlyProductionEncounterTypes", onlyProductionEncounterTypes);
+    modelAndView.addObject("productionItemsToDelete", productionItemsToDelete);
+    modelAndView.addObject("productionItemsToExport", productionItemsToExport);
     modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
     modelAndView.addObject("encounterTypesPartialEqual", encounterTypesWithDifferentIDsSameUUIDs);
 

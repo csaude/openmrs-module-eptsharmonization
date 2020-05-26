@@ -47,7 +47,17 @@ public class HarmonizeExportEncounterTypesController {
             .findAllProductionEncountersNotContainedInMetadataServer();
 
     for (EncounterTypeDTO encounterTypeDTO : data) {
-      items.add(new HarmonizationItem(encounterTypeDTO.getUuid(), encounterTypeDTO));
+      final HarmonizationItem harmonizationItem =
+          new HarmonizationItem(encounterTypeDTO.getUuid(), encounterTypeDTO);
+      harmonizationItem.setEncountersCount(
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedEncounters(encounterTypeDTO));
+      harmonizationItem.setFormsCount(
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedForms(encounterTypeDTO));
+      if (harmonizationItem.getEncountersCount() != 0 || harmonizationItem.getFormsCount() != 0) {
+        items.add(harmonizationItem);
+      }
     }
     return new HarmonizationData(items);
   }
