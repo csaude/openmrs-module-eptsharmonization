@@ -79,7 +79,7 @@ td {
 <br />
 <br />
 <b class="boxHeader"><spring:message
-			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.delete" /></b>
+			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.unused" /></b>
 <springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
 		<table id="tableOnlyMDS" cellspacing="0" border="0" style="width: 100%">

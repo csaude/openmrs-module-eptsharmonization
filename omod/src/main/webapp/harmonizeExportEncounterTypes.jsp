@@ -69,7 +69,7 @@ td {
 
 
 <b class="boxHeader"><spring:message
-		code="eptsharmonization.encountertype.harmonize.onlyOnPServer.export" /></b>
+		code="eptsharmonization.encountertype.harmonize.onlyOnPServer.inuse" /></b>
 <springform:form modelAttribute="harmonizationModel" method="post">
 	<fieldset>
 		<table cellspacing="0" border="0" style="width: 100%">
