@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.EncounterType;
 import org.openmrs.PersonAttributeType;
+import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 
 public class DTOUtils {
 
@@ -55,5 +57,21 @@ public class DTOUtils {
   public static PersonAttributeTypeDTO fromPersonAttributeType(
       PersonAttributeType personAttributeType) {
     return new PersonAttributeTypeDTO(personAttributeType);
+  }
+
+  public static List<VisitTypeDTO> fromVisitTypes(final List<VisitType> visitTypes) {
+    List<VisitTypeDTO> visitTypeDTOList = new ArrayList<>();
+    for (VisitType visitType : visitTypes) {
+      visitTypeDTOList.add(new VisitTypeDTO(visitType));
+    }
+    return visitTypeDTOList;
+  }
+
+  public static List<VisitType> fromVisitTypeDTOs(List<VisitTypeDTO> visitTypeDTOs) {
+    List<VisitType> result = new ArrayList<>();
+    for (VisitTypeDTO visitTypeDTO : visitTypeDTOs) {
+      result.add(visitTypeDTO.getVisitType());
+    }
+    return result;
   }
 }

@@ -13,6 +13,11 @@
 		href="${pageContext.request.contextPath}/module/eptsharmonization/personAttributeTypes/harmonizePersonAttributeTypesList.form"><spring:message
 				code="eptsharmonization.harmonize.personattributetypes" /></a>
 	</li>
+	<li>
+		<a
+				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeVisitType.form"><spring:message
+				code="eptsharmonization.visittype.harmonize" /></a>
+	</li>
 		
 	<!-- Add further links here -->
 </ul>
