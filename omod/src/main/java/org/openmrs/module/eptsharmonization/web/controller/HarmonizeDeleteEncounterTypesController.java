@@ -62,7 +62,7 @@ public class HarmonizeDeleteEncounterTypesController {
             "redirect:/module/eptsharmonization/harmonizeDeleteEncounterTypes2.form", model);
 
     HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
-        "eptsharmonization.encountertype.harmonize.onlyOnPServer.delete");
+        "eptsharmonization.encountertype.harmonize.onlyOnPServer.unused");
 
     return modelAndView;
   }
