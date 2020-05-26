@@ -104,7 +104,7 @@ td {
 
 <c:if test="${not empty productionItemsToDelete && empty onlyMetadataEncounterTypes}">
 	<b class="boxHeader"><spring:message
-			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.delete" /></b>
+			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.unused" /></b>
 	<form method="get" class="box"
 		action="harmonizeDeleteEncounterTypes.form">
 		<table cellspacing="0" border="0" style="width: 100%">
@@ -139,7 +139,7 @@ td {
 
 <c:if test="${not empty productionItemsToExport && empty onlyMetadataEncounterTypes && empty productionItemsToDelete && empty encounterTypesPartialEqual && empty encounterTypesWithDifferentNames}">
 	<b class="boxHeader"><spring:message
-			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.export" /></b>
+			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.inuse" /></b>
 	<form method="get" class="box"
 		action="harmonizeExportEncounterTypes.form">
 		<table cellspacing="0" border="0" style="width: 100%">
