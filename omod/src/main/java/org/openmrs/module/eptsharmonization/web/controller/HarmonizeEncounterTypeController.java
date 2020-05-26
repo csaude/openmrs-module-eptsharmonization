@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
@@ -17,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class HarmonizeEncounterTypeController {
 
-  protected final Log log = LogFactory.getLog(getClass());
+  public static List<String> HARMONIZED_CACHED_SUMMARY = new ArrayList<>();
 
   @RequestMapping(
       value = {"/module/eptsharmonization/harmonizeEncounterTypeList"},
@@ -41,8 +39,8 @@ public class HarmonizeEncounterTypeController {
     Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentIDsSameUUIDs =
         encounterTypeService.findAllEncounterTypesWithDifferentIDAndSameUUID();
 
-    List<EncounterTypeDTO> productionItemsToDelete = new ArrayList();
-    List<EncounterTypeDTO> productionItemsToExport = new ArrayList();
+    List<EncounterTypeDTO> productionItemsToDelete = new ArrayList<>();
+    List<EncounterTypeDTO> productionItemsToExport = new ArrayList<>();
 
     for (EncounterTypeDTO encounterTypeDTO : onlyProductionEncounterTypes) {
       final int numberOfAffectedEncounters =
@@ -64,7 +62,7 @@ public class HarmonizeEncounterTypeController {
     modelAndView.addObject("productionItemsToExport", productionItemsToExport);
     modelAndView.addObject("encounterTypesWithDifferentNames", encounterTypesWithDifferentNames);
     modelAndView.addObject("encounterTypesPartialEqual", encounterTypesWithDifferentIDsSameUUIDs);
-
+    modelAndView.addObject("harmonizedETSummary", HARMONIZED_CACHED_SUMMARY);
     modelAndView.addObject("openmrs_msg", openmrs_msg);
 
     return modelAndView;

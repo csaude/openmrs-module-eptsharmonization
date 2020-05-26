@@ -60,6 +60,10 @@ public class HarmonizeDeleteEncounterTypesController {
     ModelAndView modelAndView =
         new ModelAndView(
             "redirect:/module/eptsharmonization/harmonizeDeleteEncounterTypes2.form", model);
+
+    HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+        "eptsharmonization.encountertype.harmonize.onlyOnPServer.delete");
+
     return modelAndView;
   }
 
@@ -95,8 +99,7 @@ public class HarmonizeDeleteEncounterTypesController {
 
     response.setContentType("text/csv");
     response.setHeader(
-        "Content-Disposition",
-        "attachment; fileName=deleted-new-unused-encounter-types.csv");
+        "Content-Disposition", "attachment; fileName=deleted-new-unused-encounter-types.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }

@@ -102,6 +102,11 @@ public class HarmonizeUpdateEncounterTypesController {
     ModelAndView modelAndView =
         new ModelAndView(
             "redirect:/module/eptsharmonization/harmonizeUpdateEncounterTypes3.form", model);
+
+    if (getHarmonizationModel().getItems().isEmpty()) {
+      HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+          "eptsharmonization.encountertype.harmonize.differentID.andEqualUUID");
+    }
     return modelAndView;
   }
 

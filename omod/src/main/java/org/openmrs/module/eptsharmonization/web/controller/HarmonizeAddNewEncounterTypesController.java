@@ -69,6 +69,9 @@ public class HarmonizeAddNewEncounterTypesController {
     ModelAndView modelAndView =
         new ModelAndView(
             "redirect:/module/eptsharmonization/harmonizeAddNewEncounterTypes2.form", model);
+
+    HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+        "eptsharmonization.encountertype.harmonize.onlyOnMDServer");
     return modelAndView;
   }
 

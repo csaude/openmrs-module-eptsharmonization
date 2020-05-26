@@ -93,6 +93,11 @@ public class HarmonizeUpdateEncounterTypeNamesController {
         new ModelAndView(
             "redirect:/module/eptsharmonization/harmonizeUpdateEncounterTypeNames3.form", model);
     status.setComplete();
+
+    if (getHarmonizationModel().getItems().isEmpty()) {
+      HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+          "eptsharmonization.encountertype.harmonize.differentNamesAndSameUUIDAndID");
+    }
     return modelAndView;
   }
 

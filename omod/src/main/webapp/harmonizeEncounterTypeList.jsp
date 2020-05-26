@@ -66,6 +66,17 @@ td {
 </h2>
 <br />
 <br />
+<c:if test="${not empty harmonizedETSummary}">
+	<div id="openmrs_msg">
+	   <b> <spring:message code="eptsharmonization.summay.of.already.harmonized.mapping" 	/> :</b><br />
+		<c:forEach var="msg" items="${harmonizedETSummary}">
+			<span> <spring:message code="${msg}" text="${msg}" />
+			</span>
+			<br />
+		</c:forEach>
+	</div>
+	<br />
+</c:if>
 
 <c:if test="${not empty onlyMetadataEncounterTypes}">
 	<b class="boxHeader"><spring:message
@@ -90,8 +101,7 @@ td {
 			<tr>
 				<td colspan="4">
 					<div class="submit-btn" align="center">
-						<input type="submit"
-							value='<spring:message code="general.next"/>'
+						<input type="submit" value='<spring:message code="general.next"/>'
 							name="harmonizeNewFromMetadata" />
 					</div>
 				</td>
@@ -102,7 +112,8 @@ td {
 	<br />
 </c:if>
 
-<c:if test="${not empty productionItemsToDelete && empty onlyMetadataEncounterTypes}">
+<c:if
+	test="${not empty productionItemsToDelete && empty onlyMetadataEncounterTypes}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.delete" /></b>
 	<form method="get" class="box"
@@ -125,8 +136,7 @@ td {
 			<tr>
 				<td colspan="4">
 					<div class="submit-btn" align="center">
-						<input type="submit"
-							value='<spring:message code="general.next"/>'
+						<input type="submit" value='<spring:message code="general.next"/>'
 							name="exportNewFromProduction" />
 					</div>
 				</td>
@@ -137,7 +147,8 @@ td {
 	<br />
 </c:if>
 
-<c:if test="${not empty productionItemsToExport && empty onlyMetadataEncounterTypes && empty productionItemsToDelete && empty encounterTypesPartialEqual && empty encounterTypesWithDifferentNames}">
+<c:if
+	test="${not empty productionItemsToExport && empty onlyMetadataEncounterTypes && empty productionItemsToDelete && empty encounterTypesPartialEqual && empty encounterTypesWithDifferentNames}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.export" /></b>
 	<form method="get" class="box"
@@ -160,8 +171,7 @@ td {
 			<tr>
 				<td colspan="4">
 					<div class="submit-btn" align="center">
-						<input type="submit"
-							value='<spring:message code="general.next"/>'
+						<input type="submit" value='<spring:message code="general.next"/>'
 							name="exportNewFromProduction" />
 					</div>
 				</td>
@@ -172,19 +182,26 @@ td {
 	<br />
 </c:if>
 
-<c:if test="${not empty encounterTypesPartialEqual && empty onlyMetadataEncounterTypes && empty productionItemsToDelete && empty encounterTypesWithDifferentNames}">
+<c:if
+	test="${not empty encounterTypesPartialEqual && empty onlyMetadataEncounterTypes && empty productionItemsToDelete && empty encounterTypesWithDifferentNames}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.differentID.andEqualUUID" /></b>
 	<form method="get" class="box"
 		action="harmonizeUpdateEncounterTypes.form">
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
-				<th><spring:message code="eptsharmonization.encountertype.mdserver.id" /></th>
-				<th><spring:message code="eptsharmonization.encountertype.mdserver.name" /></th>
-				<th><spring:message code="eptsharmonization.encountertype.mdserver.description" /></th>
-				<th><spring:message code="eptsharmonization.encountertype.pdserver.id" /></th>
-				<th><spring:message code="eptsharmonization.encountertype.pdserver.name" /></th>
-				<th><spring:message code="eptsharmonization.encountertype.pdserver.description" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.mdserver.id" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.mdserver.name" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.mdserver.description" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.pdserver.id" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.pdserver.name" /></th>
+				<th><spring:message
+						code="eptsharmonization.encountertype.pdserver.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
 			</tr>
 			<c:forEach var="item" items="${encounterTypesPartialEqual}">
@@ -201,8 +218,7 @@ td {
 			<tr>
 				<td colspan="7">
 					<div class="submit-btn" align="center">
-						<input type="submit"
-							value='<spring:message code="general.next"/>'
+						<input type="submit" value='<spring:message code="general.next"/>'
 							name="harmonizeNewFromMetadata" />
 					</div>
 				</td>
@@ -213,7 +229,8 @@ td {
 	<br />
 </c:if>
 
-<c:if test="${not empty encounterTypesWithDifferentNames && empty onlyMetadataEncounterTypes && empty productionItemsToDelete}">
+<c:if
+	test="${not empty encounterTypesWithDifferentNames && empty onlyMetadataEncounterTypes && empty productionItemsToDelete}">
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.differentNamesAndSameUUIDAndID" /></b>
 	<form method="get" class="box"
@@ -244,8 +261,7 @@ td {
 			<tr>
 				<td colspan="6">
 					<div class="submit-btn" align="center">
-						<input type="submit"
-							value='<spring:message code="general.next"/>'
+						<input type="submit" value='<spring:message code="general.next"/>'
 							name="updateEncounterTypeNames" />
 					</div>
 				</td>
