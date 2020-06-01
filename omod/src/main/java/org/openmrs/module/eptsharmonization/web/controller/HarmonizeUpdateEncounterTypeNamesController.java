@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
-import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLogUtils;
+import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLog;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
 import org.springframework.stereotype.Controller;
@@ -130,7 +130,7 @@ public class HarmonizeUpdateEncounterTypeNamesController {
     }
     String LocationName = Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
-        HarmonizationCSVLogUtils.generateLogForHarmonizationMapOfEncounterTypes(
+        HarmonizationCSVLog.generateLogForHarmonizationMapOfEncounterTypes(
             LocationName,
             resultMap,
             "Harmonized Encounter Types With different Name and Equal ID and UUID");

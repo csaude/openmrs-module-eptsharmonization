@@ -36,7 +36,9 @@ public interface HarmonizationEncounterTypeServiceDAO {
 
   public boolean isSwappable(EncounterType encounterType) throws DAOException;
 
-  public Integer getNextEncounterTypeId() throws DAOException;
+  public List<EncounterType> findAllSwappable() throws DAOException;
+
+  public List<EncounterType> findAllNotSwappable() throws DAOException;
 
   public EncounterType updateEncounterType(
       Integer nextId, EncounterType encounterType, boolean swappable) throws DAOException;
@@ -46,4 +48,6 @@ public interface HarmonizationEncounterTypeServiceDAO {
   public void updateForm(Form form, Integer encounterTypeId) throws DAOException;
 
   public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException;
+
+  public EncounterType updateToNextAvailableId(EncounterType encounterType) throws DAOException;
 }

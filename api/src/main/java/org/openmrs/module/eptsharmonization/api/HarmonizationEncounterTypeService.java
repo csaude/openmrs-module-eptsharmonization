@@ -62,6 +62,12 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
   public Map<String, List<EncounterTypeDTO>> findAllEncounterTypesWithDifferentIDAndSameUUID()
       throws APIException;
 
+  @Authorized({"View Encountery Types"})
+  public List<EncounterType> findAllNotSwappableEncounterTypes() throws APIException;
+
+  @Authorized({"View Encountery Types"})
+  public List<EncounterType> findAllSwappableEncounterTypes() throws APIException;
+
   public int getNumberOfAffectedEncounters(EncounterTypeDTO encounterTypeDTO);
 
   public int getNumberOfAffectedForms(EncounterTypeDTO encounterTypeDTO);
@@ -78,6 +84,9 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
 
   public void saveEncounterTypesWithDifferentIDAndEqualUUID(
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException;
+
+  public void saveEncounterTypesWithDifferentIDAndUUID(
+      Map<EncounterType, EncounterType> encounterTypes) throws APIException;
 
   @Authorized({"Manage Encountery Types"})
   public void deleteNewEncounterTypesFromPDS(List<EncounterTypeDTO> encounterTypes)

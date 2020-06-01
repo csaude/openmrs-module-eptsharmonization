@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
-import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLogUtils;
+import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLog;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
 import org.springframework.stereotype.Controller;
@@ -99,7 +99,7 @@ public class HarmonizeAddNewPersonAttributeTypesController {
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
-        HarmonizationCSVLogUtils.generateLogForNewHarmonizedFromMDSPersonAttributeTypes(
+        HarmonizationCSVLog.generateLogForNewHarmonizedFromMDSPersonAttributeTypes(
             defaultLocationName,
             list,
             "Created New Person Attribute Types from Metadata Server to Production Server");

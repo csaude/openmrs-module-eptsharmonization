@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
-import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLogUtils;
+import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLog;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
 import org.springframework.stereotype.Controller;
@@ -131,7 +131,7 @@ public class HarmonizeUpdatePersonAttributeTypesController {
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     ByteArrayOutputStream outputStream =
-        HarmonizationCSVLogUtils.generateLogForHarmonizationMapOfPersonAttributeTypes(
+        HarmonizationCSVLog.generateLogForHarmonizationMapOfPersonAttributeTypes(
             defaultLocationName,
             selectedRows,
             "Harmonized PersonAttributeTypes With different ID and equal UUID");

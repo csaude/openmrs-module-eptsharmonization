@@ -17,6 +17,8 @@ public class HarmonizationItem implements Serializable {
     this.value = value;
   }
 
+  public HarmonizationItem() {}
+
   public Object getKey() {
     return key;
   }

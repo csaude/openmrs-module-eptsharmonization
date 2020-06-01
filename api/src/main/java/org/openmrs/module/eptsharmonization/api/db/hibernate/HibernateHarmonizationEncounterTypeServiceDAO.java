@@ -41,7 +41,6 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
 
   @Override
   public List<EncounterType> findAllMetadataServerEncounterTypes() throws DAOException {
-    // TODO: I had to do this to prevent cached data
     this.evictCache();
     return this.findMDSEncounterTypes();
   }
@@ -110,7 +109,7 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
             .uniqueResult();
   }
 
-  public Integer getNextEncounterTypeId() {
+  private Integer getNextEncounterTypeId() {
     Integer maxId =
         (Integer)
             this.sessionFactory
@@ -118,6 +117,28 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
                 .createSQLQuery("select max(encounter_type_id) from encounter_type ")
                 .uniqueResult();
     return ++maxId;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<EncounterType> findAllSwappable() throws DAOException {
+    return this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format("select  encounter_type.* from encounter_type where swappable = true "))
+        .addEntity(EncounterType.class)
+        .list();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<EncounterType> findAllNotSwappable() throws DAOException {
+    return this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format("select  encounter_type.* from encounter_type where swappable = false "))
+        .addEntity(EncounterType.class)
+        .list();
   }
 
   @Override
@@ -137,6 +158,27 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
             .getCurrentSession()
             .createCriteria(EncounterType.class, "encounterType");
     searchCriteria.add(Restrictions.eq("encounterTypeId", nextId));
+    return (EncounterType) searchCriteria.uniqueResult();
+  }
+
+  @Override
+  public EncounterType updateToNextAvailableId(EncounterType encounterType) throws DAOException {
+
+    Integer nextAvailableEncounterTypeId = this.getNextEncounterTypeId();
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "update encounter_type set encounter_type_id =%s, swappable = true where encounter_type_id =%s ",
+                nextAvailableEncounterTypeId, encounterType.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+
+    final Criteria searchCriteria =
+        this.sessionFactory
+            .getCurrentSession()
+            .createCriteria(EncounterType.class, "encounterType");
+    searchCriteria.add(Restrictions.eq("encounterTypeId", nextAvailableEncounterTypeId));
     return (EncounterType) searchCriteria.uniqueResult();
   }
 
