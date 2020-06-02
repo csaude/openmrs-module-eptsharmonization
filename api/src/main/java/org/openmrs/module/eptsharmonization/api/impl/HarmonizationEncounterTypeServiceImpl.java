@@ -60,8 +60,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
       throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> mdsEncounterTypes =
         encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
     List<EncounterType> pdsEncounterTypes =
@@ -73,8 +71,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> pdsEncounterTypes =
         encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
     List<EncounterType> mdsEncounterTypes =
@@ -86,8 +82,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public List<EncounterTypeDTO> findAllMetadataEncounterPartialEqualsToProductionServer()
       throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> allMDS = encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
     List<EncounterType> allPDS = encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
     List<EncounterType> mdsEncounterTypes =
@@ -100,8 +94,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public List<EncounterTypeDTO> findAllProductionEncountersPartialEqualsToMetadataServer()
       throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> allPDS = encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
     List<EncounterType> allMDS = encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
     List<EncounterType> pdsEncounterTypes =
@@ -114,8 +106,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public Map<String, List<EncounterTypeDTO>>
       findAllEncounterTypesWithDifferentNameAndSameUUIDAndID() throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     Map<String, List<EncounterTypeDTO>> result = new HashMap<>();
     Map<String, List<EncounterType>> map = findByWithDifferentNameAndSameUUIDAndID();
     for (String key : map.keySet()) {
@@ -127,8 +117,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public Map<String, List<EncounterTypeDTO>> findAllEncounterTypesWithDifferentIDAndSameUUID()
       throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     Map<String, List<EncounterTypeDTO>> result = new HashMap<>();
     Map<String, List<EncounterType>> map = findByWithDifferentIDAndSameUUID();
     for (String key : map.keySet()) {
@@ -138,11 +126,8 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   public Map<String, List<EncounterType>> findByWithDifferentIDAndSameUUID() {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> allPDS = encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
     List<EncounterType> allMDS = encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
-
     Map<String, List<EncounterType>> map = new TreeMap<>();
     for (EncounterType mdsItem : allMDS) {
       for (EncounterType pdsItem : allPDS) {
@@ -156,8 +141,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
 
   @Override
   public int getNumberOfAffectedEncounters(EncounterTypeDTO encounterTypeDTO) {
-    Context.clearSession();
-    Context.flushSession();
     return encounterTypeServiceDAO
         .findEncontersByEncounterTypeId(encounterTypeDTO.getEncounterType().getEncounterTypeId())
         .size();
@@ -165,8 +148,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
 
   @Override
   public int getNumberOfAffectedForms(EncounterTypeDTO encounterTypeDTO) {
-    Context.clearSession();
-    Context.flushSession();
     return encounterTypeServiceDAO
         .findFormsByEncounterTypeId(encounterTypeDTO.getEncounterType().getEncounterTypeId())
         .size();
@@ -174,24 +155,18 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
 
   @Override
   public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> result = encounterTypeServiceDAO.findPDSEncounterTypesNotExistsInMDServer();
     return result;
   }
 
   @Override
   public List<EncounterType> findAllNotSwappableEncounterTypes() throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> result = this.encounterTypeServiceDAO.findAllNotSwappable();
     return result;
   }
 
   @Override
   public List<EncounterType> findAllSwappableEncounterTypes() throws APIException {
-    Context.clearSession();
-    Context.flushSession();
     List<EncounterType> findAllSwappable = this.encounterTypeServiceDAO.findAllSwappable();
     return findAllSwappable;
   }
@@ -199,7 +174,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public void saveEncounterTypesWithDifferentNames(
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException {
-    Context.openSessionWithCurrentUser();
     for (String key : encounterTypes.keySet()) {
       List<EncounterTypeDTO> list = encounterTypes.get(key);
       EncounterTypeDTO mdsEncounter = list.get(0);
@@ -209,14 +183,11 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       encounterType.setName(mdsEncounter.getEncounterType().getName());
       Context.getEncounterService().saveEncounterType(encounterType);
     }
-    Context.flushSession();
-    Context.closeSessionWithCurrentUser();
   }
 
   @Override
   public void saveNewEncounterTypesFromMDS(List<EncounterTypeDTO> encounterTypes)
       throws APIException {
-    Context.openSessionWithCurrentUser();
     try {
       this.dao.setDisabledCheckConstraints();
       for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
@@ -245,8 +216,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
         }
         this.encounterTypeServiceDAO.saveNotSwappableEncounterType(encounterType);
       }
-      Context.flushSession();
-      Context.closeSessionWithCurrentUser();
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -261,7 +230,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public void saveEncounterTypesWithDifferentIDAndEqualUUID(
       Map<String, List<EncounterTypeDTO>> mapEncounterTypes) throws APIException {
-    Context.openSessionWithCurrentUser();
     try {
 
       this.dao.setDisabledCheckConstraints();
@@ -306,8 +274,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
             this.encounterTypeServiceDAO.findFormsByEncounterTypeId(foundPDS.getId());
         this.updateToGivenId(foundPDS, mdServerEncounterId, false, relatedEncounters, relatedForms);
       }
-      Context.flushSession();
-      Context.closeSessionWithCurrentUser();
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
@@ -322,18 +288,14 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   public void deleteNewEncounterTypesFromPDS(List<EncounterTypeDTO> encounterTypes)
       throws APIException {
-    Context.openSessionWithCurrentUser();
     for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
       Context.getEncounterService().purgeEncounterType(encounterType);
     }
-    Context.flushSession();
-    Context.closeSessionWithCurrentUser();
   }
 
   @Override
   public void saveEncounterTypesWithDifferentIDAndUUID(
       Map<EncounterType, EncounterType> mapEncounterTypes) throws APIException {
-    Context.openSessionWithCurrentUser();
     try {
 
       this.dao.setDisabledCheckConstraints();
@@ -360,8 +322,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
         }
         Context.getEncounterService().purgeEncounterType(foundPDS);
       }
-      Context.flushSession();
-      Context.closeSessionWithCurrentUser();
     } catch (Exception e) {
       e.printStackTrace();
     } finally {

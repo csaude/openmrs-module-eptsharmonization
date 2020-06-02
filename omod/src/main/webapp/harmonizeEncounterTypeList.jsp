@@ -88,7 +88,7 @@ td {
 			<div class="submit-btn" align="right">
 				<input type="submit"
 					style="width: 8.6em; padding: 6px; font-size: 6pt;"
-					value='<spring:message code="eptsharmonization.encountertype.harmonized.exportLog"/>'
+					value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
 					name="harmonizeAllEncounterTypes" />
 			</div>
 		</form>
@@ -97,7 +97,7 @@ td {
 </c:if>
 
 <c:if
-	test="${ (empty productionItemsToExport || fn:length(productionItemsToExport.items) == 0) && (empty onlyMetadataEncounterTypes || fn:length(onlyMetadataEncounterTypes.items) == 0) && empty productionItemsToDelete && (empty encounterTypesPartialEqual || fn:length(encounterTypesPartialEqual.items) == 0) && empty encounterTypesWithDifferentNames}">
+	test="${isFirstStepHarmonizationCompleted && !hasSecondStepHarmonization}">
 	<div id="openmrs_msg">
 		<b> <spring:message
 				code="eptsharmonization.encounterType.harmonizationFinish" />
@@ -105,8 +105,7 @@ td {
 	</div>
 </c:if>
 
-<c:if
-	test="${not empty onlyMetadataEncounterTypes && fn:length(onlyMetadataEncounterTypes.items) > 0 }">
+<c:if test="${not empty onlyMetadataEncounterTypes.items}">
 	<br />
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.onlyOnMDServer" /></b>
@@ -163,8 +162,7 @@ td {
 	<br />
 </c:if>
 
-<c:if
-	test="${not empty encounterTypesPartialEqual && fn:length(encounterTypesPartialEqual.items) > 0}">
+<c:if test="${not empty encounterTypesPartialEqual.items}">
 	<br />
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.differentID.andEqualUUID" /></b>
@@ -241,8 +239,7 @@ td {
 	<br />
 </c:if>
 
-<c:if
-	test="${ (not empty onlyMetadataEncounterTypes && fn:length(onlyMetadataEncounterTypes.items) > 0 ) || not empty productionItemsToDelete || (not empty encounterTypesPartialEqual && fn:length(encounterTypesPartialEqual.items) > 0 ) || not empty encounterTypesWithDifferentNames}">
+<c:if test="${!isFirstStepHarmonizationCompleted}">
 	<br />
 	<form method="post" class="box"
 		action="harmonizeEncounterTypeList.form">
@@ -256,7 +253,7 @@ td {
 </c:if>
 
 <c:if
-	test="${ (not empty productionItemsToExport && fn:length(productionItemsToExport.items) > 0 ) && (empty onlyMetadataEncounterTypes || fn:length(onlyMetadataEncounterTypes.items) == 0) && empty productionItemsToDelete && (empty encounterTypesPartialEqual || fn:length(encounterTypesPartialEqual.items) == 0) && empty encounterTypesWithDifferentNames}">
+	test="${hasSecondStepHarmonization && isFirstStepHarmonizationCompleted}">
 	<br />
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.inuse" /></b>
@@ -298,7 +295,7 @@ td {
 </c:if>
 
 <c:if
-	test="${ (not empty productionItemsToExport  && fn:length(productionItemsToExport.items) > 0) && (empty onlyMetadataEncounterTypes || fn:length(onlyMetadataEncounterTypes.items) == 0) && empty productionItemsToDelete && (empty encounterTypesPartialEqual || fn:length(encounterTypesPartialEqual.items) == 0) && empty encounterTypesWithDifferentNames}">
+	test="${hasSecondStepHarmonization && isFirstStepHarmonizationCompleted}">
 
 	<c:if
 		test="${not empty swappableEncounterTypesClone && not empty notSwappableEncounterTypesClone}">
