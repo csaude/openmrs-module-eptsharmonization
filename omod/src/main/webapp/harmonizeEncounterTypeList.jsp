@@ -355,7 +355,7 @@ td {
 							</c:choose></td>
 					</tr>
 				</form>
-				<form class="box">
+				<fieldset>
 					<tr>
 						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
 								code="eptsharmonization.encounterType.from.metadataServer" /></th>
@@ -385,10 +385,10 @@ td {
 									<td valign="top">${item.value.description}</td>
 									<td colspan="2">
 										<div class="submit-btn" align="left">
-											<spring:bind path="harmonizationItem.key">
-												<input type="hidden" name="mdsID" value="${item.key.uuid}">
-											</spring:bind>
-											<input type="submit"
+											<input type="hidden" id="${item.key.uuid}"
+												name="metadataServerEncounterTypeUuID"
+												value="${item.key.uuid}" /> <input type="submit"
+												id="${item.key.uuid}"
 												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
 												value='<spring:message code="general.remove"/>'
 												name="removeMapping" />
@@ -411,8 +411,7 @@ td {
 							</td>
 						</tr>
 					</c:if>
-
-				</form>
+				</fieldset>
 			</table>
 		</fieldset>
 		<br />

@@ -210,7 +210,8 @@ public class HarmonizeEncounterTypeController {
       HttpServletRequest request) {
 
     EncounterType mdsEncounterType =
-        Context.getEncounterService().getEncounterTypeByUuid(request.getParameter("mdsID"));
+        Context.getEncounterService()
+            .getEncounterTypeByUuid(request.getParameter("metadataServerEncounterTypeUuID"));
 
     Map<EncounterType, EncounterType> manualHarmonizeEtypes =
         (Map<EncounterType, EncounterType>) session.getAttribute("manualHarmonizeEtypes");
