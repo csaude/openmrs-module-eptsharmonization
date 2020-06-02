@@ -191,9 +191,6 @@ public class HarmonizeEncounterTypeController {
     List<EncounterType> swappableEncounterTypes =
         (List<EncounterType>) session.getAttribute("swappableEncounterTypes");
 
-    List<EncounterType> notSwappableEncounterTypes =
-        (List<EncounterType>) session.getAttribute("notSwappableEncounterTypes");
-    notSwappableEncounterTypes.remove(mdsEncounterType);
     swappableEncounterTypes.remove(pdsEncounterType);
     manualHarmonizeEtypes.put(mdsEncounterType, pdsEncounterType);
     session.setAttribute("manualHarmonizeEtypes", manualHarmonizeEtypes);
@@ -205,7 +202,12 @@ public class HarmonizeEncounterTypeController {
   @RequestMapping(
       value = {"/module/eptsharmonization/removeEncounterTypeMapping"},
       method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-  public ModelAndView removeEncounterTypeMapping(HttpSession session, HttpServletRequest request) {
+  public ModelAndView removeEncounterTypeMapping(
+      HttpSession session,
+      @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
+      BindingResult result,
+      SessionStatus status,
+      HttpServletRequest request) {
 
     EncounterType mdsEncounterType =
         Context.getEncounterService().getEncounterTypeByUuid(request.getParameter("mdsID"));
@@ -216,12 +218,9 @@ public class HarmonizeEncounterTypeController {
     EncounterType pdsEncounterType = manualHarmonizeEtypes.get(mdsEncounterType);
     List<EncounterType> swappableEncounterTypes =
         (List<EncounterType>) session.getAttribute("swappableEncounterTypes");
-    List<EncounterType> notSwappableEncounterTypes =
-        (List<EncounterType>) session.getAttribute("notSwappableEncounterTypes");
 
-    swappableEncounterTypes.add(pdsEncounterType);
-    notSwappableEncounterTypes.add(mdsEncounterType);
     manualHarmonizeEtypes.remove(mdsEncounterType);
+    swappableEncounterTypes.add(pdsEncounterType);
 
     if (manualHarmonizeEtypes.isEmpty()) {
       session.removeAttribute("manualHarmonizeEtypes");

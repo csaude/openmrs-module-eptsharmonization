@@ -7,9 +7,6 @@
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <%@ include file="template/localHeader.jsp"%>
 
-<openmrs:htmlInclude
-	file="${pageContext.request.contextPath}/moduleResources/eptsharmonization/lib/jquery/jquery.min.js" />
-
 <style>
 p {
 	border: 1px solid black;
@@ -344,14 +341,18 @@ td {
 									</span>
 								</c:if>
 							</spring:bind></td>
-						<td colspan="2" style="text-align: left; width: 10%;">
-							<div class="submit-btn" align="left">
-								<input type="submit"
-									style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
-									value='<spring:message code="general.add"/>'
-									name="addNewMapping" />
-							</div>
-						</td>
+						<td colspan="2" style="text-align: left; width: 10%;"><c:choose>
+								<c:when test="${not empty swappableEncounterTypes}">
+									<div class="submit-btn" align="left">
+										<input type="submit"
+											style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
+											value='<spring:message code="general.add"/>'
+											name="addNewMapping" />
+									</div>
+								</c:when>
+								<c:otherwise>
+								</c:otherwise>
+							</c:choose></td>
 					</tr>
 				</form>
 				<form class="box">
@@ -371,9 +372,10 @@ td {
 						<th><spring:message code="general.description" /></th>
 						<th colspan="2"></th>
 					</tr>
-					<logic:present name="manualHarmonizeEtypes">
-						<c:if test="${not empty manualHarmonizeEtypes}">
-							<c:forEach var="item" items="${manualHarmonizeEtypes}">
+					<c:if test="${not empty manualHarmonizeEtypes}">
+						<form method="post" action="removeEncounterTypeMapping.form">
+							<c:forEach var="item" items="${manualHarmonizeEtypes}"
+								varStatus="itemsRow">
 								<tr>
 									<td valign="top">${item.key.id}</td>
 									<td valign="top">${item.key.name}</td>
@@ -382,32 +384,34 @@ td {
 									<td valign="top">${item.value.name}</td>
 									<td valign="top">${item.value.description}</td>
 									<td colspan="2">
-										<form method="post" action="removeEncounterTypeMapping.form">
-											<div class="submit-btn" align="left">
+										<div class="submit-btn" align="left">
+											<spring:bind path="harmonizationItem.key">
 												<input type="hidden" name="mdsID" value="${item.key.uuid}">
-												<input type="submit"
-													style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
-													value='<spring:message code="general.remove"/>'
-													name="removeMapping" />
-											</div>
-										</form>
+											</spring:bind>
+											<input type="submit"
+												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
+												value='<spring:message code="general.remove"/>'
+												name="removeMapping" />
+										</div>
+
 									</td>
 								</tr>
 							</c:forEach>
-							<tr>
-								<td colspan="8">
-									<form method="post"
-										action="processHarmonizeManualMappingEncounterType.form">
-										<div class="submit-btn" align="center">
-											<input type="submit"
-												value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
-												name="harmonizeMapping" />
-										</div>
-									</form>
-								</td>
-							</tr>
-						</c:if>
-					</logic:present>
+						</form>
+						<tr>
+							<td colspan="8">
+								<form method="post"
+									action="processHarmonizeManualMappingEncounterType.form">
+									<div class="submit-btn" align="center">
+										<input type="submit"
+											value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
+											name="harmonizeMapping" />
+									</div>
+								</form>
+							</td>
+						</tr>
+					</c:if>
+
 				</form>
 			</table>
 		</fieldset>
