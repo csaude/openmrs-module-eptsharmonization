@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,36 +20,55 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
-import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLog;
-import org.openmrs.module.eptsharmonization.web.bean.HarmonizationCSVLog.Builder;
+import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
+import org.openmrs.module.eptsharmonization.web.bean.EncounterTypeHarmonizationCSVLog;
+import org.openmrs.module.eptsharmonization.web.bean.EncounterTypeHarmonizationCSVLog.Builder;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
+import org.openmrs.module.eptsharmonization.web.bean.ProcessHarmonization;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
-@Controller
+@Controller(EptsHarmonizationConstants.MODULE_ID + ".HarmonizeEncounterTypeController")
 public class HarmonizeEncounterTypeController {
 
-  public static List<String> HARMONIZED_CACHED_SUMMARY = new ArrayList<>();
+  public static final String CONTROLLER_PATH =
+      EptsHarmonizationConstants.MODULE_PATH + "/encounterType";
 
-  @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeEncounterTypeList"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.GET})
-  public ModelAndView getHarmonizationDataToDashboard(
+  public static final String ENCOUNTER_TYPES_LIST =
+      HarmonizeEncounterTypeController.CONTROLLER_PATH + "/harmonizeEncounterTypeList";
+
+  public static final String ADD_ENCOUNTER_TYPE_MAPPING =
+      HarmonizeEncounterTypeController.CONTROLLER_PATH + "/addEncounterTypeMapping";
+
+  public static final String REMOVE_ENCOUNTER_TYPE_MAPPING =
+      HarmonizeEncounterTypeController.CONTROLLER_PATH + "/removeEncounterTypeMapping";
+
+  public static final String PROCESS_MANUAL_HARMONIZATION_MAPPING =
+      HarmonizeEncounterTypeController.CONTROLLER_PATH
+          + "/processHarmonizeManualMappingEncounterType";
+
+  public static final String EXPORT_LOG =
+      HarmonizeEncounterTypeController.CONTROLLER_PATH + "/harmonizeEncounterTypeListExportLog";
+
+  private static List<String> EXECUTED_SCENARIOS_SUMMARY = new ArrayList<>();
+
+  @RequestMapping(value = ENCOUNTER_TYPES_LIST, method = RequestMethod.GET)
+  public void getHarmonizationDataToDashboard(
       HttpSession session,
       @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg,
       @RequestParam(required = false, value = "errorRequiredMdsValue") String errorRequiredMdsValue,
       @RequestParam(required = false, value = "errorRequiredPDSValue")
           String errorRequiredPDSValue) {
-    ModelAndView modelAndView = new ModelAndView();
 
     HarmonizationEncounterTypeService encounterTypeService =
         HarmonizationUtils.getHarmonizationEncounterTypeService();
@@ -104,18 +124,14 @@ public class HarmonizeEncounterTypeController {
     session.setAttribute("swappableEncounterTypes", swappableEncounterTypes);
     session.setAttribute("notSwappableEncounterTypes", notSwappableEncounterTypes);
     this.setHarmonizationStatus(session);
-    session.setAttribute("harmonizedETSummary", HARMONIZED_CACHED_SUMMARY);
+    session.setAttribute("harmonizedETSummary", EXECUTED_SCENARIOS_SUMMARY);
     session.setAttribute("openmrs_msg", openmrs_msg);
     session.setAttribute("errorRequiredMdsValue", errorRequiredMdsValue);
     session.setAttribute("errorRequiredPDSValue", errorRequiredPDSValue);
-
-    return modelAndView;
   }
 
   @SuppressWarnings("unchecked")
-  @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeEncounterTypeList"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+  @RequestMapping(value = ENCOUNTER_TYPES_LIST, method = RequestMethod.POST)
   public ModelAndView processFirstStepHarmonization(
       HttpServletRequest request,
       HttpServletResponse response,
@@ -125,7 +141,7 @@ public class HarmonizeEncounterTypeController {
 
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new HarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
 
     this.processAddNewFromMetadataServer(
         (HarmonizationData) session.getAttribute("onlyMetadataEncounterTypes"), logBuilder);
@@ -143,17 +159,14 @@ public class HarmonizeEncounterTypeController {
 
     logBuilder.build();
 
-    ModelAndView modelAndView =
-        new ModelAndView("redirect:/module/eptsharmonization/harmonizeEncounterTypeList.form");
+    ModelAndView modelAndView = this.getRedirectModelAndView();
     modelAndView.addObject("openmrs_msg", "eptsharmonization.encountertype.harmonized");
 
     return modelAndView;
   }
 
   @SuppressWarnings("unchecked")
-  @RequestMapping(
-      value = {"/module/eptsharmonization/addEncounterTypeMapping"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+  @RequestMapping(value = ADD_ENCOUNTER_TYPE_MAPPING, method = RequestMethod.POST)
   public ModelAndView addEncounterTypeMapping(
       HttpSession session,
       @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
@@ -161,8 +174,7 @@ public class HarmonizeEncounterTypeController {
       SessionStatus status,
       HttpServletRequest request) {
 
-    ModelAndView modelAndView =
-        new ModelAndView("redirect:/module/eptsharmonization/harmonizeEncounterTypeList.form");
+    ModelAndView modelAndView = this.getRedirectModelAndView();
 
     if (harmonizationItem.getKey() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
@@ -198,10 +210,7 @@ public class HarmonizeEncounterTypeController {
     return modelAndView;
   }
 
-  @SuppressWarnings("unchecked")
-  @RequestMapping(
-      value = {"/module/eptsharmonization/removeEncounterTypeMapping"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+  @RequestMapping(value = REMOVE_ENCOUNTER_TYPE_MAPPING, method = RequestMethod.POST)
   public ModelAndView removeEncounterTypeMapping(
       HttpSession session,
       @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
@@ -213,10 +222,12 @@ public class HarmonizeEncounterTypeController {
         Context.getEncounterService()
             .getEncounterTypeByUuid(request.getParameter("metadataServerEncounterTypeUuID"));
 
+    @SuppressWarnings("unchecked")
     Map<EncounterType, EncounterType> manualHarmonizeEtypes =
         (Map<EncounterType, EncounterType>) session.getAttribute("manualHarmonizeEtypes");
 
     EncounterType pdsEncounterType = manualHarmonizeEtypes.get(mdsEncounterType);
+    @SuppressWarnings("unchecked")
     List<EncounterType> swappableEncounterTypes =
         (List<EncounterType>) session.getAttribute("swappableEncounterTypes");
 
@@ -226,14 +237,12 @@ public class HarmonizeEncounterTypeController {
     if (manualHarmonizeEtypes.isEmpty()) {
       session.removeAttribute("manualHarmonizeEtypes");
     }
-    return new ModelAndView("redirect:/module/eptsharmonization/harmonizeEncounterTypeList.form");
+    return this.getRedirectModelAndView();
   }
 
   @SuppressWarnings("unchecked")
-  @RequestMapping(
-      value = {"/module/eptsharmonization/processHarmonizeManualMappingEncounterType"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.POST})
-  public ModelAndView harmonizeManualMappedEncounterTypes(
+  @RequestMapping(value = PROCESS_MANUAL_HARMONIZATION_MAPPING, method = RequestMethod.POST)
+  public ModelAndView processSecondStepHarmonization(
       HttpSession session, HttpServletRequest request) {
 
     Map<EncounterType, EncounterType> manualHarmonizeEtypes =
@@ -243,21 +252,17 @@ public class HarmonizeEncounterTypeController {
 
       HarmonizationUtils.getHarmonizationEncounterTypeService()
           .saveEncounterTypesWithDifferentIDAndUUID(manualHarmonizeEtypes);
-      HarmonizationCSVLog.appendNewMappedEncounterTypes(manualHarmonizeEtypes);
-      HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
-          "eptsharmonization.encounterType.newDefinedMapping");
+      EncounterTypeHarmonizationCSVLog.appendNewMappedEncounterTypes(manualHarmonizeEtypes);
+      EXECUTED_SCENARIOS_SUMMARY.add("eptsharmonization.encounterType.newDefinedMapping");
     }
-    ModelAndView modelAndView =
-        new ModelAndView("redirect:/module/eptsharmonization/harmonizeEncounterTypeList.form");
+    ModelAndView modelAndView = getRedirectModelAndView();
     modelAndView.addObject("openmrs_msg", "eptsharmonization.encountertype.harmonized");
     session.removeAttribute("manualHarmonizeEtypes");
 
     return modelAndView;
   }
 
-  @RequestMapping(
-      value = {"/module/eptsharmonization/harmonizeEncounterTypeListExportLog"},
-      method = {org.springframework.web.bind.annotation.RequestMethod.POST})
+  @RequestMapping(value = EXPORT_LOG, method = RequestMethod.POST)
   public @ResponseBody byte[] exportLog(
       HttpServletRequest request,
       HttpServletResponse response,
@@ -288,6 +293,20 @@ public class HarmonizeEncounterTypeController {
     return new HarmonizationItem();
   }
 
+  @ModelAttribute("processHarmonization")
+  public List<ProcessHarmonization> getDefaultLocation() {
+    return Arrays.asList(
+        new ProcessHarmonization("proceed"), new ProcessHarmonization("notProceed"));
+  }
+
+  @ModelAttribute("encounterTypesPartialEqual")
+  public HarmonizationData getHarmonizationModel() {
+    Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentIDsSameUUIDs =
+        HarmonizationUtils.getHarmonizationEncounterTypeService()
+            .findAllEncounterTypesWithDifferentIDAndSameUUID();
+    return getData(encounterTypesWithDifferentIDsSameUUIDs);
+  }
+
   @SuppressWarnings("unchecked")
   private void setHarmonizationStatus(HttpSession session) {
 
@@ -315,6 +334,10 @@ public class HarmonizeEncounterTypeController {
     session.setAttribute("hasSecondStepHarmonization", hasSecondStepHarmonization);
   }
 
+  private ModelAndView getRedirectModelAndView() {
+    return new ModelAndView("redirect:" + ENCOUNTER_TYPES_LIST + ".form");
+  }
+
   @SuppressWarnings("unchecked")
   private void removeAllChoosenToManualHarmonize(
       HttpSession session,
@@ -339,7 +362,7 @@ public class HarmonizeEncounterTypeController {
     }
     if (!list.isEmpty()) {
       HarmonizationUtils.getHarmonizationEncounterTypeService().saveNewEncounterTypesFromMDS(list);
-      HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+      EXECUTED_SCENARIOS_SUMMARY.add(
           "eptsharmonization.summary.encountertype.harmonize.onlyOnMDServer");
       logBuilder.appendLogForNewHarmonizedFromMDSEncounterTypes(list);
     }
@@ -349,7 +372,7 @@ public class HarmonizeEncounterTypeController {
     if (!list.isEmpty()) {
       HarmonizationUtils.getHarmonizationEncounterTypeService()
           .deleteNewEncounterTypesFromPDS(list);
-      HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+      EXECUTED_SCENARIOS_SUMMARY.add(
           "eptsharmonization.summary.encountertype.harmonize.onlyOnPServer.unused");
       logBuilder.appendLogForDeleteFromProductionServer(list);
     }
@@ -360,7 +383,7 @@ public class HarmonizeEncounterTypeController {
     if (!data.isEmpty()) {
       HarmonizationUtils.getHarmonizationEncounterTypeService()
           .saveEncounterTypesWithDifferentNames(data);
-      HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+      EXECUTED_SCENARIOS_SUMMARY.add(
           "eptsharmonization.summary.encountertype.harmonize.differentNamesAndSameUUIDAndID");
       logBuilder.appendLogForUpdatedEncounterNames(data);
     }
@@ -376,7 +399,7 @@ public class HarmonizeEncounterTypeController {
     if (!list.isEmpty()) {
       HarmonizationUtils.getHarmonizationEncounterTypeService()
           .saveEncounterTypesWithDifferentIDAndEqualUUID(list);
-      HarmonizeEncounterTypeController.HARMONIZED_CACHED_SUMMARY.add(
+      EXECUTED_SCENARIOS_SUMMARY.add(
           "eptsharmonization.summary.encountertype.harmonize.differentID.andEqualUUID");
       logBuilder.appendLogForEncounterTypesWithDiferrentIdsAndEqualUUID(list);
     }

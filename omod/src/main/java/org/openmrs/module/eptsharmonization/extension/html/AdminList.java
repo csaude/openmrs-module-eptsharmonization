@@ -37,7 +37,7 @@ public class AdminList extends AdministrationSectionExt {
   public Map<String, String> getLinks() {
     Map<String, String> map = new HashMap<String, String>();
     map.put(
-        "module/eptsharmonization/harmonizeEncounterTypeList.form",
+        "module/eptsharmonization/encounterType/harmonizeEncounterTypeList.form",
         "eptsharmonization.harmonize.encountertype");
     map.put(
         "module/eptsharmonization/harmonizePersonAttributeTypesList.form",

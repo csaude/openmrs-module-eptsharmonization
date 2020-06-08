@@ -8,7 +8,7 @@ public class HarmonizationItem implements Serializable {
   private Object key;
   private Object value;
 
-  private boolean selected;
+  private Boolean selected = null;
   private int encountersCount;
   private int formsCount;
 
@@ -35,11 +35,11 @@ public class HarmonizationItem implements Serializable {
     this.value = value;
   }
 
-  public boolean isSelected() {
+  public Boolean isSelected() {
     return selected;
   }
 
-  public void setSelected(boolean selected) {
+  public void setSelected(Boolean selected) {
     this.selected = selected;
   }
 
