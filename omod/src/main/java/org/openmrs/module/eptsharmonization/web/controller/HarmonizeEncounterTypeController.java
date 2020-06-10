@@ -74,9 +74,11 @@ public class HarmonizeEncounterTypeController {
 
   public static List<String> EXECUTED_SCENARIOS_SUMMARY = new ArrayList<>();
 
-  public static boolean isUUIDsAndIDsHarmonized = false;
-  public static boolean isNamesHarmonized = false;
-  public static boolean hasAtLeastOneRowHarmonized = false;
+  private static boolean isUUIDsAndIDsHarmonized = false;
+  private static boolean isNamesHarmonized = false;
+  private static boolean hasAtLeastOneRowHarmonized = false;
+
+  private static List<EncounterType> encounterTypesNotProcessed = new ArrayList<>();
 
   @RequestMapping(value = ENCOUNTER_TYPES_LIST, method = RequestMethod.GET)
   public void getHarmonizationDataToDashboard(
@@ -460,7 +462,6 @@ public class HarmonizeEncounterTypeController {
     session.setAttribute("hasSecondStepHarmonization", hasSecondStepHarmonization);
   }
 
-  @SuppressWarnings("unchecked")
   private void addEncounterTypesToManualMappings(
       HttpSession session,
       HarmonizationData differentIDsAndEqualUUID,
@@ -470,43 +471,16 @@ public class HarmonizeEncounterTypeController {
       boolean isUUIDsAndIDsHarmonized,
       boolean isNamesHarmonized) {
 
-    List<EncounterType> lstEncounterTypes = new ArrayList<>();
-    if (isUUIDsAndIDsHarmonized) {
-      for (HarmonizationItem item : differentIDsAndEqualUUID.getItems()) {
-        if (!item.isSelected()) {
-          List<EncounterTypeDTO> list = (List<EncounterTypeDTO>) item.getValue();
-          EncounterType encounterType = list.get(1).getEncounterType();
-          EncounterType found =
-              Context.getEncounterService().getEncounterTypeByUuid(encounterType.getUuid());
-          if (found != null && !swappableEncounterTypes.contains(found)) {
-            swappableEncounterTypes.add(found);
-          }
-          if (found != null && !lstEncounterTypes.contains(found)) {
-            lstEncounterTypes.add(encounterType);
-          }
-        }
-      }
-    }
-    if (isNamesHarmonized) {
-      for (HarmonizationItem item : differentNameAndSameUUIDAndID.getItems()) {
-        if (!item.isSelected()) {
-          List<EncounterTypeDTO> list = (List<EncounterTypeDTO>) item.getValue();
-          EncounterType encounterType = list.get(1).getEncounterType();
-          EncounterType found =
-              Context.getEncounterService().getEncounterTypeByUuid(encounterType.getUuid());
-          if (found != null && !swappableEncounterTypes.contains(found)) {
-            swappableEncounterTypes.add(found);
-          }
-          if (found != null && !lstEncounterTypes.contains(found)) {
-            lstEncounterTypes.add(found);
-          }
-        }
+    for (EncounterType encounterType : encounterTypesNotProcessed) {
+      if (!swappableEncounterTypes.contains(encounterType)) {
+        swappableEncounterTypes.add(encounterType);
       }
     }
 
     HarmonizationData productionItemsToExport =
         (HarmonizationData) session.getAttribute("productionItemsToExport");
-    HarmonizationData newItemsToExport = getData(DTOUtils.fromEncounterTypes(lstEncounterTypes));
+    HarmonizationData newItemsToExport =
+        getData(DTOUtils.fromEncounterTypes(encounterTypesNotProcessed));
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
     session.setAttribute("productionItemsToExport", productionItemsToExport);
     session.setAttribute(
@@ -563,8 +537,11 @@ public class HarmonizeEncounterTypeController {
   private void processUpdateEncounterNames(HarmonizationData data, Builder logBuilder) {
     Map<String, List<EncounterTypeDTO>> list = new HashMap<>();
     for (HarmonizationItem item : data.getItems()) {
+      List<EncounterTypeDTO> value = (List<EncounterTypeDTO>) item.getValue();
       if (item.isSelected()) {
-        list.put((String) item.getKey(), (List<EncounterTypeDTO>) item.getValue());
+        list.put((String) item.getKey(), value);
+      } else {
+        encounterTypesNotProcessed.add(value.get(1).getEncounterType());
       }
     }
 
@@ -584,8 +561,11 @@ public class HarmonizeEncounterTypeController {
     Map<String, List<EncounterTypeDTO>> list = new HashMap<>();
 
     for (HarmonizationItem item : data.getItems()) {
+      List<EncounterTypeDTO> value = (List<EncounterTypeDTO>) item.getValue();
       if (item.isSelected()) {
-        list.put((String) item.getKey(), (List<EncounterTypeDTO>) item.getValue());
+        list.put((String) item.getKey(), value);
+      } else {
+        encounterTypesNotProcessed.add(value.get(1).getEncounterType());
       }
     }
 
