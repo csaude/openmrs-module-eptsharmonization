@@ -181,6 +181,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       EncounterType encounterType =
           Context.getEncounterService().getEncounterType(pdsEncounter.getEncounterType().getId());
       encounterType.setName(mdsEncounter.getEncounterType().getName());
+      encounterType.setDescription(mdsEncounter.getEncounterType().getDescription());
       Context.getEncounterService().saveEncounterType(encounterType);
     }
   }
@@ -294,8 +295,8 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   @Override
-  public void saveEncounterTypesWithDifferentIDAndUUID(
-      Map<EncounterType, EncounterType> mapEncounterTypes) throws APIException {
+  public void saveManualMapping(Map<EncounterType, EncounterType> mapEncounterTypes)
+      throws APIException {
     try {
 
       this.dao.setDisabledCheckConstraints();
@@ -307,20 +308,29 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
         EncounterType foundPDS =
             this.encounterTypeServiceDAO.getEncounterTypeById(pdSEncounterType.getId());
 
-        List<Encounter> relatedEncounters =
-            this.encounterTypeServiceDAO.findEncontersByEncounterTypeId(pdSEncounterType.getId());
+        if (mdsEncounterType.getUuid().equals(pdSEncounterType.getUuid())
+            && mdsEncounterType.getId().equals(pdSEncounterType.getId())) {
 
-        List<Form> relatedForms =
-            this.encounterTypeServiceDAO.findFormsByEncounterTypeId(pdSEncounterType.getId());
+          foundPDS.setName(mdsEncounterType.getName());
+          foundPDS.setDescription(mdsEncounterType.getDescription());
+          Context.getEncounterService().saveEncounterType(foundPDS);
 
-        for (Form form : relatedForms) {
-          this.encounterTypeServiceDAO.updateForm(form, mdsEncounterType.getEncounterTypeId());
+        } else {
+          List<Encounter> relatedEncounters =
+              this.encounterTypeServiceDAO.findEncontersByEncounterTypeId(foundPDS.getId());
+
+          List<Form> relatedForms =
+              this.encounterTypeServiceDAO.findFormsByEncounterTypeId(foundPDS.getId());
+
+          for (Form form : relatedForms) {
+            this.encounterTypeServiceDAO.updateForm(form, mdsEncounterType.getEncounterTypeId());
+          }
+          for (Encounter encounter : relatedEncounters) {
+            this.encounterTypeServiceDAO.updateEncounter(
+                encounter, mdsEncounterType.getEncounterTypeId());
+          }
+          Context.getEncounterService().purgeEncounterType(foundPDS);
         }
-        for (Encounter encounter : relatedEncounters) {
-          this.encounterTypeServiceDAO.updateEncounter(
-              encounter, mdsEncounterType.getEncounterTypeId());
-        }
-        Context.getEncounterService().purgeEncounterType(foundPDS);
       }
     } catch (Exception e) {
       e.printStackTrace();

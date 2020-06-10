@@ -1,3 +1,6 @@
+<%@ taglib prefix="springform"
+	uri="http://www.springframework.org/tags/form"%>
+<%@ include file="/WEB-INF/template/include.jsp"%>
 <%@ include file="../template/localInclude.jsp"%>
 <%@ include file="../template/localHeader.jsp"%>
 <openmrs:require privilege="Manage Encountery Types"
@@ -9,6 +12,10 @@
 	<spring:message code="eptsharmonization.encountertype.harmonize" />
 </h2>
 <br />
+<div id="error_msg" hidden="hidden">
+	<span> <spring:message
+			code="eptsharmonization.confirmAllHarmonization" /></span> <br />
+</div>
 <c:if test="${not empty harmonizedETSummary}">
 	<div id="openmrs_msg">
 		<b> <spring:message
@@ -33,7 +40,7 @@
 </c:if>
 
 <c:if
-	test="${isFirstStepHarmonizationCompleted && !hasSecondStepHarmonization}">
+	test="${isFirstStepHarmonizationCompleted && isUUIDsAndIDsHarmonized && isNamesHarmonized && !hasSecondStepHarmonization}">
 	<div id="openmrs_msg">
 		<b> <spring:message
 				code="eptsharmonization.encounterType.harmonizationFinish" />
@@ -41,8 +48,9 @@
 	</div>
 </c:if>
 
-<%@ include file="harmonizationEncounterType-1.jsp"%>
-<%@ include file="harmonizationEncounterType-2.jsp"%>
-<%@ include file="harmonizationEncounterType-3.jsp"%>
+<%@ include file="EncounterTypeHarmonizationStep-1.jsp"%>
+<%@ include file="EncounterTypeHarmonizationStep-2.jsp"%>
+<%@ include file="EncounterTypeHarmonizationStep-3.jsp"%>
+<%@ include file="EncounterTypeHarmonizationStep-4.jsp"%>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

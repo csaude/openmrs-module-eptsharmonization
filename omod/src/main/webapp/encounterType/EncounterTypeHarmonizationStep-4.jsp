@@ -1,9 +1,9 @@
 <c:if
-	test="${hasSecondStepHarmonization && isFirstStepHarmonizationCompleted}">
+	test="${hasSecondStepHarmonization && isFirstStepHarmonizationCompleted && isUUIDsAndIDsHarmonized && isNamesHarmonized}">
 	<br />
 	<b class="boxHeader"><spring:message
 			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.inuse" /></b>
-	<form method="get" class="box"
+	<form method="post" class="box"
 		action="harmonizeExportEncounterTypes.form">
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
@@ -38,10 +38,6 @@
 		</table>
 	</form>
 	<br />
-</c:if>
-
-<c:if
-	test="${hasSecondStepHarmonization && isFirstStepHarmonizationCompleted}">
 
 	<c:if
 		test="${not empty swappableEncounterTypesClone && not empty notSwappableEncounterTypesClone}">
@@ -149,12 +145,11 @@
 						</form>
 						<tr>
 							<td colspan="8">
-								<form method="post"
-									action="processHarmonizeManualMappingEncounterType.form">
+								<form method="post" action="processHarmonizationStep4.form">
 									<div class="submit-btn" align="center">
 										<input type="submit"
 											value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
-											name="harmonizeMapping" />
+											name="processHarmonizationStep3" />
 									</div>
 								</form>
 							</td>
@@ -164,10 +159,6 @@
 			</table>
 		</fieldset>
 		<br />
-	</c:if>
-
-	<c:if
-		test="${not empty swappableEncounterTypesClone && not empty notSwappableEncounterTypesClone}">
 		<br />
 		<div class="box">
 			<table cellspacing="0" border="0" style="width: 100%">

@@ -24,7 +24,7 @@ public class EncounterTypeHarmonizationCSVLog {
 
   public static class Builder {
 
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    ByteArrayOutputStream outputStream = getByteArrayOutputStream();
     private CSVPrinter printer;
 
     public Builder(String defaultLocationName) {
@@ -54,6 +54,76 @@ public class EncounterTypeHarmonizationCSVLog {
         e.printStackTrace();
         throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
       }
+    }
+
+    public Builder appendLogForNewHarmonizedFromMDSEncounterTypes(List<EncounterTypeDTO> data) {
+
+      try {
+        printer.print(
+            "Metadata Harmonization Process Flow: Added New Encounter Types from Metadata Server");
+        printer.println();
+        printer.print(
+            "===============================================================================================================================");
+        printer.println();
+
+        for (EncounterTypeDTO item : data) {
+          try {
+            printer.print(
+                String.format(
+                    "EncounterType ID:{%s}, UUID:%s, NAME:'%s', DESCRIPTION:'%s'",
+                    item.getEncounterType().getId(),
+                    item.getEncounterType().getUuid(),
+                    item.getEncounterType().getName(),
+                    item.getEncounterType().getDescription()));
+            printer.println();
+          } catch (Exception e) {
+            e.printStackTrace();
+            throw new APIException("Unable to write record to CSV: " + e.getMessage());
+          }
+        }
+        printer.println();
+
+        printer.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
+      }
+      return this;
+    }
+
+    public Builder appendLogForDeleteFromProductionServer(List<EncounterTypeDTO> data) {
+
+      try {
+        printer.print(
+            "Metadata Harmonization Process Flow: Encounter Types deleted in Production Server");
+        printer.println();
+        printer.print(
+            "===============================================================================================================================");
+        printer.println();
+
+        for (EncounterTypeDTO item : data) {
+          try {
+            printer.print(
+                String.format(
+                    "EncounterType ID:{%s}, UUID:%s, NAME:'%s', DESCRIPTION:'%s'",
+                    item.getEncounterType().getId(),
+                    item.getEncounterType().getUuid(),
+                    item.getEncounterType().getName(),
+                    item.getEncounterType().getDescription()));
+            printer.println();
+          } catch (Exception e) {
+            e.printStackTrace();
+            throw new APIException("Unable to write record to CSV: " + e.getMessage());
+          }
+        }
+        printer.println();
+
+        printer.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
+      }
+      return this;
     }
 
     public Builder appendLogForUpdatedEncounterNames(Map<String, List<EncounterTypeDTO>> data) {
@@ -132,135 +202,10 @@ public class EncounterTypeHarmonizationCSVLog {
       return this;
     }
 
-    public Builder appendLogForNewHarmonizedFromMDSEncounterTypes(List<EncounterTypeDTO> data) {
+    public Builder appendNewMappedEncounterTypes(
+        Map<EncounterType, EncounterType> mapEncounterTypes) {
 
       try {
-        printer.print(
-            "Metadata Harmonization Process Flow: Added New Encounter Types from Metadata Server");
-        printer.println();
-        printer.print(
-            "===============================================================================================================================");
-        printer.println();
-
-        for (EncounterTypeDTO item : data) {
-          try {
-            printer.print(
-                String.format(
-                    "EncounterType ID:{%s}, UUID:%s, NAME:'%s', DESCRIPTION:'%s'",
-                    item.getEncounterType().getId(),
-                    item.getEncounterType().getUuid(),
-                    item.getEncounterType().getName(),
-                    item.getEncounterType().getDescription()));
-            printer.println();
-          } catch (Exception e) {
-            e.printStackTrace();
-            throw new APIException("Unable to write record to CSV: " + e.getMessage());
-          }
-        }
-        printer.println();
-
-        printer.flush();
-      } catch (Exception e) {
-        e.printStackTrace();
-        throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
-      }
-      return this;
-    }
-
-    public Builder appendLogForDeleteFromProductionServer(List<EncounterTypeDTO> data) {
-
-      try {
-        printer.print(
-            "Metadata Harmonization Process Flow: Encounter Types deleted in Production Server");
-        printer.println();
-        printer.print(
-            "===============================================================================================================================");
-        printer.println();
-
-        for (EncounterTypeDTO item : data) {
-          try {
-            printer.print(
-                String.format(
-                    "EncounterType ID:{%s}, UUID:%s, NAME:'%s', DESCRIPTION:'%s'",
-                    item.getEncounterType().getId(),
-                    item.getEncounterType().getUuid(),
-                    item.getEncounterType().getName(),
-                    item.getEncounterType().getDescription()));
-            printer.println();
-          } catch (Exception e) {
-            e.printStackTrace();
-            throw new APIException("Unable to write record to CSV: " + e.getMessage());
-          }
-        }
-        printer.println();
-
-        printer.flush();
-      } catch (Exception e) {
-        e.printStackTrace();
-        throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
-      }
-      return this;
-    }
-
-    public EncounterTypeHarmonizationCSVLog build() {
-
-      FileOutputStream fos = null;
-      try {
-        fos = new FileOutputStream(new File("harmonizationEncounterTypeLog"));
-        outputStream.writeTo(fos);
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      } finally {
-        try {
-          fos.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-      return new EncounterTypeHarmonizationCSVLog();
-    }
-  }
-
-  private EncounterTypeHarmonizationCSVLog() {}
-
-  public static ByteArrayOutputStream appendNewMappedEncounterTypes(
-      Map<EncounterType, EncounterType> mapEncounterTypes) {
-
-    ByteArrayOutputStream outputStream = null;
-    try {
-      File file = new File("harmonizationEncounterTypeLog");
-      FileInputStream fis = new FileInputStream(file);
-      outputStream = new ByteArrayOutputStream();
-
-      byte[] buf = new byte[1024];
-      try {
-        for (int readNum; (readNum = fis.read(buf)) != -1; ) {
-          outputStream.write(buf, 0, readNum);
-        }
-      } catch (IOException ex) {
-      }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-
-    if (outputStream != null) {
-      try {
-        CSVPrinter printer =
-            new CSVPrinter(
-                new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1),
-                new CSVStrategy(
-                    '\t',
-                    ' ',
-                    CSVStrategy.COMMENTS_DISABLED,
-                    CSVStrategy.ESCAPE_DISABLED,
-                    false,
-                    false,
-                    false,
-                    true));
-
-        printer.println();
-        printer.print("Execution Date: " + Calendar.getInstance().getTime());
-        printer.println();
         printer.print("Metadata Harmonization Process Flow: Added new EncounterType Mappings ");
         printer.println();
         printer.print(
@@ -289,12 +234,16 @@ public class EncounterTypeHarmonizationCSVLog {
             throw new APIException("Unable to write record to CSV: " + e.getMessage());
           }
         }
-        printer.flush();
-      } catch (Exception e) {
-        e.printStackTrace();
-        throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
-      }
+        printer.println();
 
+        printer.flush();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      return this;
+    }
+
+    public EncounterTypeHarmonizationCSVLog build() {
       try {
         FileOutputStream fos = new FileOutputStream(new File("harmonizationEncounterTypeLog"));
         outputStream.writeTo(fos);
@@ -307,8 +256,89 @@ public class EncounterTypeHarmonizationCSVLog {
         e.printStackTrace();
         throw new APIException("Unable To Append the log file'harmonizationEncounterTypeLog'");
       }
-      return outputStream;
+      return new EncounterTypeHarmonizationCSVLog();
     }
-    throw new APIException("Unable To Append the log  file 'harmonizationEncounterTypeLog' ");
+  }
+
+  private EncounterTypeHarmonizationCSVLog() {}
+
+  private static ByteArrayOutputStream getByteArrayOutputStream() {
+
+    ByteArrayOutputStream outputStream = null;
+    try {
+      File file = new File("harmonizationEncounterTypeLog");
+      file.createNewFile();
+      FileInputStream fis = new FileInputStream(file);
+      outputStream = new ByteArrayOutputStream();
+
+      byte[] buf = new byte[1024];
+      try {
+        for (int readNum; (readNum = fis.read(buf)) != -1; ) {
+          outputStream.write(buf, 0, readNum);
+        }
+      } catch (IOException ex) {
+      }
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return outputStream;
+  }
+
+  public static ByteArrayOutputStream exportEncounterTypeLogs(
+      String defaultLocationName, List<EncounterTypeDTO> data) {
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+    try {
+      CSVPrinter printer =
+          new CSVPrinter(
+              new OutputStreamWriter(outputStream, StandardCharsets.ISO_8859_1),
+              new CSVStrategy(
+                  '\t',
+                  ' ',
+                  CSVStrategy.COMMENTS_DISABLED,
+                  CSVStrategy.ESCAPE_DISABLED,
+                  false,
+                  false,
+                  false,
+                  true));
+
+      printer.print("Location: " + defaultLocationName);
+      printer.println();
+      printer.print("Execution Date: " + Calendar.getInstance().getTime());
+      printer.println();
+      printer.print("Metadata Harmonization Process Flow: Export Encounter Types for Analysis ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+      printer.println();
+
+      for (EncounterTypeDTO dto : data) {
+
+        EncounterType encounterType = dto.getEncounterType();
+        try {
+          printer.print(
+              String.format(
+                  "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
+                  encounterType.getId(),
+                  encounterType.getName(),
+                  encounterType.getDescription(),
+                  encounterType.getUuid()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+      printer.flush();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
+    }
+    return outputStream;
   }
 }
