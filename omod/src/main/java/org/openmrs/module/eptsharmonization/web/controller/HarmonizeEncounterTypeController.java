@@ -424,28 +424,30 @@ public class HarmonizeEncounterTypeController {
         session, notSwappableEncounterTypes, swappableEncounterTypes);
   }
 
-  @SuppressWarnings("unlikely-arg-type")
   private void addEncounterTypesToManualMappings(
       HttpSession session,
       List<EncounterType> notSwappableEncounterTypes,
       List<EncounterType> swappableEncounterTypes) {
 
+    HarmonizationData productionItemsToExport =
+        (HarmonizationData) session.getAttribute("productionItemsToExport");
+    List<HarmonizationItem> items = productionItemsToExport.getItems();
+    List<HarmonizationItem> itemsToRemove =
+        getData(DTOUtils.fromEncounterTypes(executedEncounterTypesManualMappingCache)).getItems();
+    items.removeAll(itemsToRemove);
+    productionItemsToExport.setItems(items);
+    swappableEncounterTypes.removeAll(executedEncounterTypesManualMappingCache);
+
+    encounterTypesNotProcessed.removeAll(executedEncounterTypesManualMappingCache);
     for (EncounterType encounterType : encounterTypesNotProcessed) {
       if (!swappableEncounterTypes.contains(encounterType)) {
         swappableEncounterTypes.add(encounterType);
       }
     }
-    swappableEncounterTypes.removeAll(executedEncounterTypesManualMappingCache);
 
-    HarmonizationData productionItemsToExport =
-        (HarmonizationData) session.getAttribute("productionItemsToExport");
     HarmonizationData newItemsToExport =
         getData(DTOUtils.fromEncounterTypes(encounterTypesNotProcessed));
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
-    productionItemsToExport
-        .getItems()
-        .removeAll(DTOUtils.fromEncounterTypes(executedEncounterTypesManualMappingCache));
-
     session.setAttribute("productionItemsToExport", productionItemsToExport);
     session.setAttribute(
         "swappableEncounterTypesClone", new ArrayList<EncounterType>(swappableEncounterTypes));
