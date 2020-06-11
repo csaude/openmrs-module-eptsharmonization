@@ -95,7 +95,7 @@ public class EncounterTypeHarmonizationCSVLog {
 
       try {
         printer.print(
-            "Metadata Harmonization Process Flow: Encounter Types deleted in Production Server");
+            "Metadata Harmonization Process Flow: Deleted Encounter Types in Production Server");
         printer.println();
         printer.print(
             "===============================================================================================================================");
@@ -169,7 +169,7 @@ public class EncounterTypeHarmonizationCSVLog {
 
       try {
         printer.print(
-            "Metadata Harmonization Process Flow: Encounter Types With different ID and equal UUID");
+            "Metadata Harmonization Process Flow: Updated Encounter Types With different ID and equal UUID");
         printer.println();
         printer.print(
             "===============================================================================================================================");
@@ -214,8 +214,8 @@ public class EncounterTypeHarmonizationCSVLog {
 
         for (Entry<EncounterType, EncounterType> entry : mapEncounterTypes.entrySet()) {
 
-          EncounterType mdsServer = entry.getKey();
-          EncounterType pdsServer = entry.getValue();
+          EncounterType pdsServer = entry.getKey();
+          EncounterType mdsServer = entry.getValue();
           try {
             printer.print(
                 String.format(

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,14 +16,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.EncounterType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
-import org.openmrs.module.eptsharmonization.api.DTOUtils;
-import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
 import org.openmrs.module.eptsharmonization.web.bean.EncounterTypeHarmonizationCSVLog;
 import org.openmrs.module.eptsharmonization.web.bean.EncounterTypeHarmonizationCSVLog.Builder;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
+import org.openmrs.module.eptsharmonization.web.delegate.HarmonizeEncounterTypeDelegate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,7 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
-@Controller // (EptsHarmonizationConstants.MODULE_ID + ".HarmonizeEncounterTypeController")
+@Controller
 @SessionAttributes({"differentIDsAndEqualUUID", "differentNameAndSameUUIDAndID"})
 public class HarmonizeEncounterTypeController {
 
@@ -69,20 +68,19 @@ public class HarmonizeEncounterTypeController {
   public static final String EXPORT_LOG =
       HarmonizeEncounterTypeController.CONTROLLER_PATH + "/harmonizeEncounterTypeListExportLog";
 
-  private static List<String> executedScenariosSummary = new ArrayList<>();
-  private static List<EncounterType> executedEncounterTypesManualMappingCache = new ArrayList<>();
+  public static boolean HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
 
-  private static boolean isUUIDsAndIDsHarmonized = false;
-  private static boolean isNamesHarmonized = false;
-  private static boolean hasAtLeastOneRowHarmonized = false;
+  public static boolean IS_IDS_AND_UUID_DIFFERENCES_HARMONIZED = false;
+  public static boolean IS_NAMES_DIFFERENCES_HARMONIZED = false;
 
-  private static List<EncounterType> encounterTypesNotProcessed = new ArrayList<>();
+  @Autowired private HarmonizeEncounterTypeDelegate delegate;
 
   @RequestMapping(value = ENCOUNTER_TYPES_LIST, method = RequestMethod.GET)
-  public void getHarmonizationDataToDashboard(
+  public ModelAndView getHarmonizationScenariousData(
       HttpSession session,
       Model model,
       @ModelAttribute("newMDSEncounterTypes") HarmonizationData newMDSEncounterTypes,
+      @ModelAttribute("productionItemsToDelete") List<EncounterTypeDTO> productionItemsToDelete,
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID,
       @ModelAttribute("differentNameAndSameUUIDAndID")
           HarmonizationData differentNameAndSameUUIDAndID,
@@ -94,59 +92,52 @@ public class HarmonizeEncounterTypeController {
       @RequestParam(required = false, value = "errorRequiredPDSValue")
           String errorRequiredPDSValue) {
 
-    HarmonizationEncounterTypeService encounterTypeService =
-        HarmonizationUtils.getHarmonizationEncounterTypeService();
+    // TODO: I did this fetch as a workaround to prevent having cached data
+    newMDSEncounterTypes = getNewMDSEncounterTypes();
+    differentIDsAndEqualUUID = this.getDifferentIDsAndEqualUUID();
+    differentNameAndSameUUIDAndID = this.getDifferentNameAndSameUUIDAndID();
+    HarmonizationData productionItemsToExport = getProductionItemsToExport();
 
-    List<EncounterTypeDTO> onlyProductionEncounterTypes =
-        encounterTypeService.findAllProductionEncountersNotContainedInMetadataServer();
-
-    List<EncounterTypeDTO> productionItemsToDelete = new ArrayList<>();
-    List<EncounterTypeDTO> productionItemsToExport = new ArrayList<>();
-
-    for (EncounterTypeDTO encounterTypeDTO : onlyProductionEncounterTypes) {
-      final int numberOfAffectedEncounters =
-          HarmonizationUtils.getHarmonizationEncounterTypeService()
-              .getNumberOfAffectedEncounters(encounterTypeDTO);
-      final int numberOfAffectedForms =
-          HarmonizationUtils.getHarmonizationEncounterTypeService()
-              .getNumberOfAffectedForms(encounterTypeDTO);
-      if (numberOfAffectedEncounters == 0 && numberOfAffectedForms == 0) {
-        productionItemsToDelete.add(encounterTypeDTO);
-      } else {
-        productionItemsToExport.add(encounterTypeDTO);
-      }
-    }
-
-    session.setAttribute("productionItemsToDelete", productionItemsToDelete);
-    session.setAttribute("productionItemsToExport", getData(productionItemsToExport));
-
-    session.setAttribute("harmonizedETSummary", executedScenariosSummary);
+    session.setAttribute(
+        "harmonizedETSummary", HarmonizeEncounterTypeDelegate.SUMMARY_EXECUTED_SCENARIOS);
     session.setAttribute("openmrs_msg", openmrs_msg);
     session.setAttribute("errorRequiredMdsValue", errorRequiredMdsValue);
     session.setAttribute("errorRequiredPDSValue", errorRequiredPDSValue);
 
-    this.setHarmonizationStatus(
+    delegate.setHarmonizationStatus(
         session,
         newMDSEncounterTypes,
+        productionItemsToDelete,
+        productionItemsToExport,
         differentIDsAndEqualUUID,
         differentNameAndSameUUIDAndID,
         notSwappableEncounterTypes,
         swappableEncounterTypes);
+
+    session.removeAttribute("productionItemsToExport");
+    session.setAttribute("productionItemsToExport", productionItemsToExport);
+
+    ModelAndView modelAndView = new ModelAndView();
+    model.addAttribute("newMDSEncounterTypes", newMDSEncounterTypes);
+    model.addAttribute("productionItemsToExport", productionItemsToExport);
+    model.addAttribute("differentIDsAndEqualUUID", differentIDsAndEqualUUID);
+    model.addAttribute("differentNameAndSameUUIDAndID", differentNameAndSameUUIDAndID);
+
+    return modelAndView;
   }
 
-  @SuppressWarnings("unchecked")
   @RequestMapping(value = PROCESS_HARMONIZATION_STEP1, method = RequestMethod.POST)
   public ModelAndView processHarmonizationStep1(
+      HttpSession session,
       @ModelAttribute("newMDSEncounterTypes") HarmonizationData newMDSEncounterTypes,
-      HttpSession session) {
+      @ModelAttribute("productionItemsToDelete") List<EncounterTypeDTO> productionItemsToDelete) {
 
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
 
-    this.processAddNewFromMetadataServer(newMDSEncounterTypes, logBuilder);
-    this.processDeleteFromProductionServer(
-        (List<EncounterTypeDTO>) session.getAttribute("productionItemsToDelete"), logBuilder);
+    delegate.processAddNewFromMetadataServer(newMDSEncounterTypes, logBuilder);
+    delegate.processDeleteFromProductionServer(productionItemsToDelete, logBuilder);
 
     logBuilder.build();
 
@@ -160,18 +151,19 @@ public class HarmonizeEncounterTypeController {
   public ModelAndView processHarmonizationStep2(
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID) {
 
-    hasAtLeastOneRowHarmonized = false;
+    HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
-    this.processEncounterTypesWithDiferrentIdsAndEqualUUID(differentIDsAndEqualUUID, logBuilder);
+    delegate.processEncounterTypesWithDiferrentIdsAndEqualUUID(
+        differentIDsAndEqualUUID, logBuilder);
     logBuilder.build();
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
-    if (hasAtLeastOneRowHarmonized) {
+    if (HAS_ATLEAST_ONE_ROW_HARMONIZED) {
       modelAndView.addObject("openmrs_msg", "eptsharmonization.encountertype.harmonized");
     }
-    isUUIDsAndIDsHarmonized = true;
+    IS_IDS_AND_UUID_DIFFERENCES_HARMONIZED = true;
     return modelAndView;
   }
 
@@ -180,18 +172,18 @@ public class HarmonizeEncounterTypeController {
       @ModelAttribute("differentNameAndSameUUIDAndID")
           HarmonizationData differentNameAndSameUUIDAndID) {
 
-    hasAtLeastOneRowHarmonized = false;
+    HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
-    this.processUpdateEncounterNames(differentNameAndSameUUIDAndID, logBuilder);
+    delegate.processUpdateEncounterNames(differentNameAndSameUUIDAndID, logBuilder);
     logBuilder.build();
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
-    if (hasAtLeastOneRowHarmonized) {
+    if (HAS_ATLEAST_ONE_ROW_HARMONIZED) {
       modelAndView.addObject("openmrs_msg", "eptsharmonization.encountertype.harmonized");
     }
-    isNamesHarmonized = true;
+    IS_NAMES_DIFFERENCES_HARMONIZED = true;
     return modelAndView;
   }
 
@@ -212,12 +204,14 @@ public class HarmonizeEncounterTypeController {
       logBuilder.appendNewMappedEncounterTypes(manualHarmonizeEtypes);
       logBuilder.build();
 
-      executedScenariosSummary.add("eptsharmonization.encounterType.newDefinedMapping");
+      HarmonizeEncounterTypeDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
+          "eptsharmonization.encounterType.newDefinedMapping");
     }
     ModelAndView modelAndView = getRedirectModelAndView();
     modelAndView.addObject("openmrs_msg", "eptsharmonization.encountertype.harmonized");
 
-    executedEncounterTypesManualMappingCache = new ArrayList<>(manualHarmonizeEtypes.values());
+    HarmonizeEncounterTypeDelegate.EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE =
+        new ArrayList<>(manualHarmonizeEtypes.keySet());
     session.removeAttribute("manualHarmonizeEtypes");
 
     return modelAndView;
@@ -235,19 +229,19 @@ public class HarmonizeEncounterTypeController {
     if (harmonizationItem.getKey() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
       modelAndView.addObject(
-          "errorRequiredMdsValue", "eptsharmonization.error.encounterForMapping.required");
+          "errorRequiredPDSValue", "eptsharmonization.error.encounterForMapping.required");
       return modelAndView;
     }
     if (harmonizationItem.getValue() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getValue()))) {
       modelAndView.addObject(
-          "errorRequiredPDSValue", "eptsharmonization.error.encounterForMapping.required");
+          "errorRequiredMdsValue", "eptsharmonization.error.encounterForMapping.required");
       return modelAndView;
     }
 
-    EncounterType mdsEncounterType =
-        Context.getEncounterService().getEncounterTypeByUuid((String) harmonizationItem.getKey());
     EncounterType pdsEncounterType =
+        Context.getEncounterService().getEncounterTypeByUuid((String) harmonizationItem.getKey());
+    EncounterType mdsEncounterType =
         Context.getEncounterService().getEncounterTypeByUuid((String) harmonizationItem.getValue());
 
     Map<EncounterType, EncounterType> manualHarmonizeEtypes =
@@ -256,9 +250,8 @@ public class HarmonizeEncounterTypeController {
     if (manualHarmonizeEtypes == null) {
       manualHarmonizeEtypes = new HashMap<>();
     }
-
     swappableEncounterTypes.remove(pdsEncounterType);
-    manualHarmonizeEtypes.put(mdsEncounterType, pdsEncounterType);
+    manualHarmonizeEtypes.put(pdsEncounterType, mdsEncounterType);
     session.setAttribute("manualHarmonizeEtypes", manualHarmonizeEtypes);
 
     return modelAndView;
@@ -270,18 +263,16 @@ public class HarmonizeEncounterTypeController {
       @ModelAttribute("swappableEncounterTypes") List<EncounterType> swappableEncounterTypes,
       HttpServletRequest request) {
 
-    EncounterType mdsEncounterType =
+    EncounterType productionEncounterType =
         Context.getEncounterService()
-            .getEncounterTypeByUuid(request.getParameter("metadataServerEncounterTypeUuID"));
+            .getEncounterTypeByUuid(request.getParameter("productionServerEncounterTypeUuID"));
 
     @SuppressWarnings("unchecked")
     Map<EncounterType, EncounterType> manualHarmonizeEtypes =
         (Map<EncounterType, EncounterType>) session.getAttribute("manualHarmonizeEtypes");
 
-    EncounterType pdsEncounterType = manualHarmonizeEtypes.get(mdsEncounterType);
-
-    manualHarmonizeEtypes.remove(mdsEncounterType);
-    swappableEncounterTypes.add(pdsEncounterType);
+    manualHarmonizeEtypes.remove(productionEncounterType);
+    swappableEncounterTypes.add(productionEncounterType);
 
     if (manualHarmonizeEtypes.isEmpty()) {
       session.removeAttribute("manualHarmonizeEtypes");
@@ -317,13 +308,13 @@ public class HarmonizeEncounterTypeController {
 
   @RequestMapping(value = EXPORT_ENCOUNTER_TYPES, method = RequestMethod.POST)
   public @ResponseBody byte[] exportEncounterTypes(
-      HttpSession session, HttpServletRequest request, HttpServletResponse response)
+      HttpSession session, HttpServletRequest request, HttpServletResponse response, Model model)
       throws FileNotFoundException {
 
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
     HarmonizationData productionItemsToExport =
         (HarmonizationData) session.getAttribute("productionItemsToExport");
+    String defaultLocationName =
+        Context.getAdministrationService().getGlobalProperty("default_location");
 
     List<EncounterTypeDTO> list = new ArrayList<>();
     for (HarmonizationItem item : productionItemsToExport.getItems()) {
@@ -342,6 +333,45 @@ public class HarmonizeEncounterTypeController {
     return outputStream.toByteArray();
   }
 
+  @ModelAttribute("productionItemsToDelete")
+  public List<EncounterTypeDTO> getProductionItemsToDelete() {
+    List<EncounterTypeDTO> productionItemsToDelete = new ArrayList<>();
+    List<EncounterTypeDTO> onlyProductionEncounterTypes =
+        HarmonizationUtils.getHarmonizationEncounterTypeService()
+            .findAllProductionEncountersNotContainedInMetadataServer();
+    for (EncounterTypeDTO encounterTypeDTO : onlyProductionEncounterTypes) {
+      final int numberOfAffectedEncounters =
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedEncounters(encounterTypeDTO);
+      final int numberOfAffectedForms =
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedForms(encounterTypeDTO);
+      if (numberOfAffectedEncounters == 0 && numberOfAffectedForms == 0) {
+        productionItemsToDelete.add(encounterTypeDTO);
+      }
+    }
+    return productionItemsToDelete;
+  }
+
+  public HarmonizationData getProductionItemsToExport() {
+    List<EncounterTypeDTO> onlyProductionEncounterTypes =
+        HarmonizationUtils.getHarmonizationEncounterTypeService()
+            .findAllProductionEncountersNotContainedInMetadataServer();
+    List<EncounterTypeDTO> productionItemsToExport = new ArrayList<>();
+    for (EncounterTypeDTO encounterTypeDTO : onlyProductionEncounterTypes) {
+      final int numberOfAffectedEncounters =
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedEncounters(encounterTypeDTO);
+      final int numberOfAffectedForms =
+          HarmonizationUtils.getHarmonizationEncounterTypeService()
+              .getNumberOfAffectedForms(encounterTypeDTO);
+      if (numberOfAffectedEncounters > 0 || numberOfAffectedForms > 0) {
+        productionItemsToExport.add(encounterTypeDTO);
+      }
+    }
+    return delegate.getConvertedData(productionItemsToExport);
+  }
+
   @ModelAttribute("harmonizationItem")
   HarmonizationItem formBackingObject() {
     return new HarmonizationItem();
@@ -352,7 +382,7 @@ public class HarmonizeEncounterTypeController {
     List<EncounterTypeDTO> data =
         HarmonizationUtils.getHarmonizationEncounterTypeService()
             .findAllMetadataEncounterNotContainedInProductionServer();
-    return getData(data);
+    return delegate.getConvertedData(data);
   }
 
   @ModelAttribute("differentIDsAndEqualUUID")
@@ -360,7 +390,7 @@ public class HarmonizeEncounterTypeController {
     Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentIDsSameUUIDs =
         HarmonizationUtils.getHarmonizationEncounterTypeService()
             .findAllEncounterTypesWithDifferentIDAndSameUUID();
-    return getData(encounterTypesWithDifferentIDsSameUUIDs);
+    return delegate.getConvertedData(encounterTypesWithDifferentIDsSameUUIDs);
   }
 
   @ModelAttribute("differentNameAndSameUUIDAndID")
@@ -368,7 +398,7 @@ public class HarmonizeEncounterTypeController {
     Map<String, List<EncounterTypeDTO>> encounterTypesWithDifferentNames =
         HarmonizationUtils.getHarmonizationEncounterTypeService()
             .findAllEncounterTypesWithDifferentNameAndSameUUIDAndID();
-    return getData(encounterTypesWithDifferentNames);
+    return delegate.getConvertedData(encounterTypesWithDifferentNames);
   }
 
   @ModelAttribute("swappableEncounterTypes")
@@ -383,192 +413,7 @@ public class HarmonizeEncounterTypeController {
         .findAllNotSwappableEncounterTypes();
   }
 
-  @SuppressWarnings("unchecked")
-  private void setHarmonizationStatus(
-      HttpSession session,
-      HarmonizationData newMDSEncounterTypes,
-      HarmonizationData differentIDsAndEqualUUID,
-      HarmonizationData differentNameAndSameUUIDAndID,
-      List<EncounterType> notSwappableEncounterTypes,
-      List<EncounterType> swappableEncounterTypes) {
-
-    List<EncounterTypeDTO> productionItemsToDelete =
-        (List<EncounterTypeDTO>) session.getAttribute("productionItemsToDelete");
-    HarmonizationData productionItemsToExport =
-        (HarmonizationData) session.getAttribute("productionItemsToExport");
-
-    boolean isFirstStepHarmonizationCompleted =
-        newMDSEncounterTypes.getItems().isEmpty() && productionItemsToDelete.isEmpty();
-
-    isUUIDsAndIDsHarmonized =
-        isUUIDsAndIDsHarmonized || differentIDsAndEqualUUID.getItems().isEmpty();
-    isNamesHarmonized = isNamesHarmonized || differentNameAndSameUUIDAndID.getItems().isEmpty();
-
-    if (!isFirstStepHarmonizationCompleted) {
-      isUUIDsAndIDsHarmonized = false;
-      isNamesHarmonized = false;
-    }
-
-    boolean hasSecondStepHarmonization =
-        isFirstStepHarmonizationCompleted
-            && isUUIDsAndIDsHarmonized
-            && isNamesHarmonized
-            && !productionItemsToExport.getItems().isEmpty();
-
-    session.setAttribute("isFirstStepHarmonizationCompleted", isFirstStepHarmonizationCompleted);
-    session.setAttribute("isUUIDsAndIDsHarmonized", isUUIDsAndIDsHarmonized);
-    session.setAttribute("isNamesHarmonized", isNamesHarmonized);
-    session.setAttribute("hasSecondStepHarmonization", hasSecondStepHarmonization);
-
-    this.addEncounterTypesToManualMappings(
-        session, notSwappableEncounterTypes, swappableEncounterTypes);
-  }
-
-  private void addEncounterTypesToManualMappings(
-      HttpSession session,
-      List<EncounterType> notSwappableEncounterTypes,
-      List<EncounterType> swappableEncounterTypes) {
-
-    HarmonizationData productionItemsToExport =
-        (HarmonizationData) session.getAttribute("productionItemsToExport");
-    List<HarmonizationItem> items = productionItemsToExport.getItems();
-    List<HarmonizationItem> itemsToRemove =
-        getData(DTOUtils.fromEncounterTypes(executedEncounterTypesManualMappingCache)).getItems();
-    items.removeAll(itemsToRemove);
-    productionItemsToExport.setItems(items);
-    swappableEncounterTypes.removeAll(executedEncounterTypesManualMappingCache);
-
-    encounterTypesNotProcessed.removeAll(executedEncounterTypesManualMappingCache);
-    for (EncounterType encounterType : encounterTypesNotProcessed) {
-      if (!swappableEncounterTypes.contains(encounterType)) {
-        swappableEncounterTypes.add(encounterType);
-      }
-    }
-
-    HarmonizationData newItemsToExport =
-        getData(DTOUtils.fromEncounterTypes(encounterTypesNotProcessed));
-    productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
-    session.setAttribute("productionItemsToExport", productionItemsToExport);
-    session.setAttribute(
-        "swappableEncounterTypesClone", new ArrayList<EncounterType>(swappableEncounterTypes));
-    session.setAttribute(
-        "notSwappableEncounterTypesClone",
-        new ArrayList<EncounterType>(notSwappableEncounterTypes));
-
-    this.removeAllChoosenToManualHarmonize(session, swappableEncounterTypes);
-  }
-
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + ENCOUNTER_TYPES_LIST + ".form");
-  }
-
-  @SuppressWarnings("unchecked")
-  private void removeAllChoosenToManualHarmonize(
-      HttpSession session, List<EncounterType> swappableEncounterTypes) {
-    Map<EncounterType, EncounterType> manualHarmonizeEtypes =
-        (Map<EncounterType, EncounterType>) session.getAttribute("manualHarmonizeEtypes");
-    if (manualHarmonizeEtypes != null) {
-      for (Entry<EncounterType, EncounterType> entry : manualHarmonizeEtypes.entrySet()) {
-        swappableEncounterTypes.remove(entry.getValue());
-      }
-    }
-  }
-
-  private void processAddNewFromMetadataServer(
-      HarmonizationData onlyMetadataEncounterTypes, Builder logBuilder) {
-    List<EncounterTypeDTO> list = new ArrayList<>();
-    for (HarmonizationItem item : onlyMetadataEncounterTypes.getItems()) {
-      list.add((EncounterTypeDTO) item.getValue());
-    }
-    if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService().saveNewEncounterTypesFromMDS(list);
-      executedScenariosSummary.add(
-          "eptsharmonization.summary.encountertype.harmonize.onlyOnMDServer");
-      logBuilder.appendLogForNewHarmonizedFromMDSEncounterTypes(list);
-    }
-  }
-
-  private void processDeleteFromProductionServer(List<EncounterTypeDTO> list, Builder logBuilder) {
-    if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService()
-          .deleteNewEncounterTypesFromPDS(list);
-      executedScenariosSummary.add(
-          "eptsharmonization.summary.encountertype.harmonize.onlyOnPServer.unused");
-      logBuilder.appendLogForDeleteFromProductionServer(list);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void processUpdateEncounterNames(HarmonizationData data, Builder logBuilder) {
-    Map<String, List<EncounterTypeDTO>> list = new HashMap<>();
-    for (HarmonizationItem item : data.getItems()) {
-      List<EncounterTypeDTO> value = (List<EncounterTypeDTO>) item.getValue();
-      if (item.isSelected()) {
-        list.put((String) item.getKey(), value);
-      } else {
-        encounterTypesNotProcessed.add(value.get(1).getEncounterType());
-      }
-    }
-    if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService()
-          .saveEncounterTypesWithDifferentNames(list);
-      executedScenariosSummary.add(
-          "eptsharmonization.summary.encountertype.harmonize.differentNamesAndSameUUIDAndID");
-      logBuilder.appendLogForUpdatedEncounterNames(list);
-      hasAtLeastOneRowHarmonized = true;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void processEncounterTypesWithDiferrentIdsAndEqualUUID(
-      HarmonizationData data, Builder logBuilder) {
-    Map<String, List<EncounterTypeDTO>> list = new HashMap<>();
-
-    for (HarmonizationItem item : data.getItems()) {
-      List<EncounterTypeDTO> value = (List<EncounterTypeDTO>) item.getValue();
-      if (item.isSelected()) {
-        list.put((String) item.getKey(), value);
-      } else {
-        encounterTypesNotProcessed.add(value.get(1).getEncounterType());
-      }
-    }
-    if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService()
-          .saveEncounterTypesWithDifferentIDAndEqualUUID(list);
-      executedScenariosSummary.add(
-          "eptsharmonization.summary.encountertype.harmonize.differentID.andEqualUUID");
-      logBuilder.appendLogForEncounterTypesWithDiferrentIdsAndEqualUUID(list);
-      hasAtLeastOneRowHarmonized = true;
-    }
-  }
-
-  private HarmonizationData getData(List<EncounterTypeDTO> encounterTypes) {
-    HarmonizationEncounterTypeService service =
-        HarmonizationUtils.getHarmonizationEncounterTypeService();
-    List<HarmonizationItem> items = new ArrayList<>();
-    for (EncounterTypeDTO encounterTypeDTO : encounterTypes) {
-      HarmonizationItem item =
-          new HarmonizationItem(encounterTypeDTO.getEncounterType().getUuid(), encounterTypeDTO);
-      item.setEncountersCount(service.getNumberOfAffectedEncounters(encounterTypeDTO));
-      item.setFormsCount(service.getNumberOfAffectedForms(encounterTypeDTO));
-      items.add(item);
-    }
-    return new HarmonizationData(items);
-  }
-
-  private HarmonizationData getData(Map<String, List<EncounterTypeDTO>> mapEncounterTypes) {
-    HarmonizationEncounterTypeService service =
-        HarmonizationUtils.getHarmonizationEncounterTypeService();
-    List<HarmonizationItem> items = new ArrayList<>();
-    for (String key : mapEncounterTypes.keySet()) {
-      List<EncounterTypeDTO> eTypes = mapEncounterTypes.get(key);
-      if (eTypes != null) {
-        HarmonizationItem item = new HarmonizationItem(key, eTypes);
-        item.setEncountersCount(service.getNumberOfAffectedEncounters(eTypes.get(1)));
-        item.setFormsCount(service.getNumberOfAffectedForms(eTypes.get(1)));
-        items.add(item);
-      }
-    }
-    return new HarmonizationData(items);
   }
 }

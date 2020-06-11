@@ -302,15 +302,18 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       this.dao.setDisabledCheckConstraints();
       for (Entry<EncounterType, EncounterType> entry : mapEncounterTypes.entrySet()) {
 
-        EncounterType mdsEncounterType = entry.getKey();
-        EncounterType pdSEncounterType = entry.getValue();
+        EncounterType pdSEncounterType = entry.getKey();
+        EncounterType mdsEncounterType = entry.getValue();
 
         EncounterType foundPDS =
             this.encounterTypeServiceDAO.getEncounterTypeById(pdSEncounterType.getId());
 
         if (mdsEncounterType.getUuid().equals(pdSEncounterType.getUuid())
             && mdsEncounterType.getId().equals(pdSEncounterType.getId())) {
-
+          if (mdsEncounterType.getId().equals(pdSEncounterType.getId())
+              && mdsEncounterType.getName().equals(pdSEncounterType.getName())) {
+            return;
+          }
           foundPDS.setName(mdsEncounterType.getName());
           foundPDS.setDescription(mdsEncounterType.getDescription());
           Context.getEncounterService().saveEncounterType(foundPDS);

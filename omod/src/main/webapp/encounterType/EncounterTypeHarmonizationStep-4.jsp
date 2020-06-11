@@ -56,7 +56,7 @@
 				<form method="post" action="addEncounterTypeMapping.form">
 					<tr>
 						<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
-								path="harmonizationItem.key">
+								path="harmonizationItem.value">
 								<select name="${status.expression}">
 									<option value="">Selecione</option>
 									<c:forEach items="${notSwappableEncounterTypes}" var="type">
@@ -71,7 +71,7 @@
 								</c:if>
 							</spring:bind></td>
 						<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
-								path="harmonizationItem.value">
+								path="harmonizationItem.key">
 								<select name="${status.expression}">
 									<option value="">Selecione</option>
 									<c:forEach items="${swappableEncounterTypes}" var="type">
@@ -122,16 +122,16 @@
 							<c:forEach var="item" items="${manualHarmonizeEtypes}"
 								varStatus="itemsRow">
 								<tr>
-									<td valign="top">${item.key.id}</td>
-									<td valign="top">${item.key.name}</td>
-									<td valign="top">${item.key.description}</td>
 									<td valign="top">${item.value.id}</td>
 									<td valign="top">${item.value.name}</td>
 									<td valign="top">${item.value.description}</td>
+									<td valign="top">${item.key.id}</td>
+									<td valign="top">${item.key.name}</td>
+									<td valign="top">${item.key.description}</td>
 									<td colspan="2">
 										<div class="submit-btn" align="left">
 											<input type="hidden" id="${item.key.uuid}"
-												name="metadataServerEncounterTypeUuID"
+												name="productionServerEncounterTypeUuID"
 												value="${item.key.uuid}" /> <input type="submit"
 												id="${item.key.uuid}"
 												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
