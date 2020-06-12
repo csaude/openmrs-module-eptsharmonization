@@ -68,7 +68,7 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("ALTER TABLE `person_attribute_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    HarmonizationUtils.onActivator();
+    HarmonizationUtils.onModuleActivator();
   }
 
   @Override

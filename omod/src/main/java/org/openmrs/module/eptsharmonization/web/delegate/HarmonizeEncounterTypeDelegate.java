@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.servlet.http.HttpSession;
 import org.openmrs.EncounterType;
-import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
@@ -17,46 +16,56 @@ import org.openmrs.module.eptsharmonization.web.bean.EncounterTypeHarmonizationC
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
 import org.openmrs.module.eptsharmonization.web.controller.HarmonizeEncounterTypeController;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class HarmonizeEncounterTypeDelegate {
+
+  private HarmonizationEncounterTypeService harmonizationEncounterTypeService;
+
+  @Autowired
+  public void setHarmonizationEncounterTypeService(
+      HarmonizationEncounterTypeService harmonizationEncounterTypeService) {
+    this.harmonizationEncounterTypeService = harmonizationEncounterTypeService;
+  }
 
   public static List<String> SUMMARY_EXECUTED_SCENARIOS = new ArrayList<>();
   public static List<EncounterType> EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE = new ArrayList<>();
   private static List<EncounterType> ENCOUNTERTYPES_NOT_PROCESSED = new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<EncounterTypeDTO> encounterTypes) {
-    HarmonizationEncounterTypeService service =
-        HarmonizationUtils.getHarmonizationEncounterTypeService();
+
     Set<HarmonizationItem> items = new TreeSet<>();
     for (EncounterTypeDTO encounterTypeDTO : encounterTypes) {
       HarmonizationItem item =
           new HarmonizationItem(encounterTypeDTO.getEncounterType().getUuid(), encounterTypeDTO);
-      item.setEncountersCount(service.getNumberOfAffectedEncounters(encounterTypeDTO));
-      item.setFormsCount(service.getNumberOfAffectedForms(encounterTypeDTO));
+      item.setEncountersCount(
+          this.harmonizationEncounterTypeService.getNumberOfAffectedEncounters(encounterTypeDTO));
+      item.setFormsCount(
+          this.harmonizationEncounterTypeService.getNumberOfAffectedForms(encounterTypeDTO));
       items.add(item);
     }
     return new HarmonizationData(items);
   }
 
   public HarmonizationData getConvertedData(Map<String, List<EncounterTypeDTO>> mapEncounterTypes) {
-    HarmonizationEncounterTypeService service =
-        HarmonizationUtils.getHarmonizationEncounterTypeService();
     Set<HarmonizationItem> items = new TreeSet<>();
     for (String key : mapEncounterTypes.keySet()) {
       List<EncounterTypeDTO> eTypes = mapEncounterTypes.get(key);
       if (eTypes != null) {
         HarmonizationItem item = new HarmonizationItem(key, eTypes);
-        item.setEncountersCount(service.getNumberOfAffectedEncounters(eTypes.get(1)));
-        item.setFormsCount(service.getNumberOfAffectedForms(eTypes.get(1)));
+        item.setEncountersCount(
+            this.harmonizationEncounterTypeService.getNumberOfAffectedEncounters(eTypes.get(1)));
+        item.setFormsCount(
+            this.harmonizationEncounterTypeService.getNumberOfAffectedForms(eTypes.get(1)));
         items.add(item);
       }
     }
     return new HarmonizationData(items);
   }
 
-  public void setHarmonizationStatus(
+  public void setHarmonizationStage(
       HttpSession session,
       HarmonizationData newMDSEncounterTypes,
       List<EncounterTypeDTO> productionItemsToDelete,
@@ -185,7 +194,7 @@ public class HarmonizeEncounterTypeDelegate {
       list.add((EncounterTypeDTO) item.getValue());
     }
     if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService().saveNewEncounterTypesFromMDS(list);
+      this.harmonizationEncounterTypeService.saveNewEncounterTypesFromMDS(list);
       SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.summary.encountertype.harmonize.onlyOnMDServer");
       logBuilder.appendLogForNewHarmonizedFromMDSEncounterTypes(list);
@@ -194,8 +203,7 @@ public class HarmonizeEncounterTypeDelegate {
 
   public void processDeleteFromProductionServer(List<EncounterTypeDTO> list, Builder logBuilder) {
     if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService()
-          .deleteNewEncounterTypesFromPDS(list);
+      this.harmonizationEncounterTypeService.deleteNewEncounterTypesFromPDS(list);
       SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.summary.encountertype.harmonize.onlyOnPServer.unused");
       logBuilder.appendLogForDeleteFromProductionServer(list);
@@ -214,8 +222,7 @@ public class HarmonizeEncounterTypeDelegate {
       }
     }
     if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService()
-          .saveEncounterTypesWithDifferentNames(list);
+      this.harmonizationEncounterTypeService.saveEncounterTypesWithDifferentNames(list);
       SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.summary.encountertype.harmonize.differentNamesAndSameUUIDAndID");
       logBuilder.appendLogForUpdatedEncounterNames(list);
@@ -237,8 +244,7 @@ public class HarmonizeEncounterTypeDelegate {
       }
     }
     if (!list.isEmpty()) {
-      HarmonizationUtils.getHarmonizationEncounterTypeService()
-          .saveEncounterTypesWithDifferentIDAndEqualUUID(list);
+      this.harmonizationEncounterTypeService.saveEncounterTypesWithDifferentIDAndEqualUUID(list);
       SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.summary.encountertype.harmonize.differentID.andEqualUUID");
       logBuilder.appendLogForEncounterTypesWithDiferrentIdsAndEqualUUID(list);

@@ -50,4 +50,6 @@ public interface HarmonizationEncounterTypeServiceDAO {
   public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException;
 
   public EncounterType updateToNextAvailableId(EncounterType encounterType) throws DAOException;
+
+  public void deleteEncounterType(EncounterType encounterType) throws DAOException;
 }

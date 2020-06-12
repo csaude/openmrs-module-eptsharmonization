@@ -20,4 +20,6 @@ public interface HarmonizationServiceDAO {
   public void setEnableCheckConstraints() throws DAOException, Exception;
 
   public void setDisabledCheckConstraints() throws DAOException, Exception;
+
+  public void evictCache();
 }
