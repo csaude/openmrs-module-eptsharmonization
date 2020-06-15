@@ -1,8 +1,10 @@
 package org.openmrs.module.eptsharmonization.web.bean;
 
 import java.io.Serializable;
+import org.openmrs.EncounterType;
+import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 
-public class HarmonizationItem implements Serializable {
+public class HarmonizationItem implements Serializable, Comparable<HarmonizationItem> {
 
   private static final long serialVersionUID = 3319508983151116282L;
   private Object key;
@@ -16,6 +18,8 @@ public class HarmonizationItem implements Serializable {
     this.key = key;
     this.value = value;
   }
+
+  public HarmonizationItem() {}
 
   public Object getKey() {
     return key;
@@ -55,5 +59,25 @@ public class HarmonizationItem implements Serializable {
 
   public void setFormsCount(int formsCount) {
     this.formsCount = formsCount;
+  }
+
+  @Override
+  public int compareTo(HarmonizationItem other) {
+
+    if ((this.key instanceof String) && other.getKey() instanceof String) {
+      return ((String) this.key).compareTo(((String) other.getKey()));
+    }
+
+    if ((this.key instanceof EncounterTypeDTO) && other.getKey() instanceof EncounterTypeDTO) {
+      return ((EncounterTypeDTO) this.key).compareTo(((EncounterTypeDTO) other.getKey()));
+    }
+
+    if ((this.key instanceof EncounterType) && other.getKey() instanceof EncounterType) {
+      return ((EncounterType) this.key)
+          .getUuid()
+          .compareTo(((EncounterType) other.getKey()).getUuid());
+    }
+
+    return -1;
   }
 }

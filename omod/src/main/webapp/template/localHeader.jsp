@@ -5,7 +5,7 @@
 				code="admin.title.short" /></a></li>
 	<li>
 		<a
-		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeEncounterTypeList.form"><spring:message
+		href="${pageContext.request.contextPath}/module/eptsharmonization/encounterType/harmonizeEncounterTypeList.form"><spring:message
 				code="eptsharmonization.harmonize.encountertype" /></a>
 	</li>
 	<li>

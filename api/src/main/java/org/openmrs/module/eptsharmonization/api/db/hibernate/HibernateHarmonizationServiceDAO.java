@@ -13,26 +13,21 @@ package org.openmrs.module.eptsharmonization.api.db.hibernate;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /** It is a default implementation of {@link HarmonizationServiceDAO}. */
+@Repository("eptsharmonization.hibernateHarmonizationServiceDAO")
 public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO {
-  protected final Log log = LogFactory.getLog(this.getClass());
 
   private SessionFactory sessionFactory;
 
-  /** @param sessionFactory the sessionFactory to set */
+  @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
     this.sessionFactory = sessionFactory;
-  }
-
-  /** @return the sessionFactory */
-  public SessionFactory getSessionFactory() {
-    return sessionFactory;
   }
 
   @Override
@@ -50,5 +45,11 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
     Statement stmt = connection.createStatement();
     stmt.addBatch("SET FOREIGN_KEY_CHECKS=0");
     stmt.executeBatch();
+  }
+
+  @Override
+  public void evictCache() {
+    Context.clearSession();
+    Context.flushSession();
   }
 }

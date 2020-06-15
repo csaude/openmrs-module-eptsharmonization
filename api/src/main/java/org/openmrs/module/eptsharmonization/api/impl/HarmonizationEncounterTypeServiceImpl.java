@@ -16,73 +16,88 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
-import org.openmrs.api.context.Context;
+import org.openmrs.api.EncounterService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationEncounterTypeServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** It is a default implementation of {@link HarmonizationEncounterTypeService}. */
+@Transactional
+@Service("eptsharmonization.harmonizationEncounterTypeService")
 public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     implements HarmonizationEncounterTypeService {
 
-  private HarmonizationServiceDAO dao;
+  private HarmonizationServiceDAO harmonizationDAO;
+  private EncounterService encounterService;
+  private HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO;
 
-  private HarmonizationEncounterTypeServiceDAO encounterTypeServiceDAO;
-
-  /** @param dao the dao to set */
-  public void setDao(HarmonizationServiceDAO dao) {
-    this.dao = dao;
+  @Autowired
+  public void setHarmonizationDAO(HarmonizationServiceDAO harmonizationDAO) {
+    this.harmonizationDAO = harmonizationDAO;
   }
 
-  /** @return the dao */
-  public HarmonizationServiceDAO getDao() {
-    return dao;
+  @Autowired
+  public void setHarmonizationEncounterTypeServiceDAO(
+      HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO) {
+    this.harmonizationEncounterTypeServiceDAO = harmonizationEncounterTypeServiceDAO;
   }
 
-  public HarmonizationEncounterTypeServiceDAO getEncounterTypeServiceDAO() {
-    return encounterTypeServiceDAO;
-  }
-
-  public void setEncounterTypeServiceDAO(
-      HarmonizationEncounterTypeServiceDAO encounterTypeServiceDAO) {
-    this.encounterTypeServiceDAO = encounterTypeServiceDAO;
+  @Autowired
+  public void setEncounterService(EncounterService encounterService) {
+    this.encounterService = encounterService;
   }
 
   @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
       throws APIException {
+    this.harmonizationDAO.evictCache();
     List<EncounterType> mdsEncounterTypes =
-        encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
+        harmonizationEncounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
     List<EncounterType> pdsEncounterTypes =
-        encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
+        harmonizationEncounterTypeServiceDAO.findAllProductionServerEncounterTypes();
     mdsEncounterTypes.removeAll(pdsEncounterTypes);
     return DTOUtils.fromEncounterTypes(mdsEncounterTypes);
   }
 
   @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException {
+    this.harmonizationDAO.evictCache();
     List<EncounterType> pdsEncounterTypes =
-        encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
+        harmonizationEncounterTypeServiceDAO.findAllProductionServerEncounterTypes();
     List<EncounterType> mdsEncounterTypes =
-        encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
+        harmonizationEncounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
     pdsEncounterTypes.removeAll(mdsEncounterTypes);
     return DTOUtils.fromEncounterTypes(pdsEncounterTypes);
   }
 
   @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllMetadataEncounterPartialEqualsToProductionServer()
       throws APIException {
-    List<EncounterType> allMDS = encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
-    List<EncounterType> allPDS = encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
+    this.harmonizationDAO.evictCache();
+    List<EncounterType> allMDS =
+        harmonizationEncounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
+    List<EncounterType> allPDS =
+        harmonizationEncounterTypeServiceDAO.findAllProductionServerEncounterTypes();
     List<EncounterType> mdsEncounterTypes =
         this.removeElementsWithDifferentIDsAndUUIDs(allMDS, allPDS);
     allMDS.removeAll(allPDS);
@@ -91,10 +106,15 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
   public List<EncounterTypeDTO> findAllProductionEncountersPartialEqualsToMetadataServer()
       throws APIException {
-    List<EncounterType> allPDS = encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
-    List<EncounterType> allMDS = encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
+    this.harmonizationDAO.evictCache();
+    List<EncounterType> allPDS =
+        harmonizationEncounterTypeServiceDAO.findAllProductionServerEncounterTypes();
+    List<EncounterType> allMDS =
+        harmonizationEncounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
     List<EncounterType> pdsEncounterTypes =
         this.removeElementsWithDifferentIDsAndUUIDs(allPDS, allMDS);
     allPDS.removeAll(allMDS);
@@ -103,8 +123,11 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
   public Map<String, List<EncounterTypeDTO>>
       findAllEncounterTypesWithDifferentNameAndSameUUIDAndID() throws APIException {
+    this.harmonizationDAO.evictCache();
     Map<String, List<EncounterTypeDTO>> result = new HashMap<>();
     Map<String, List<EncounterType>> map = findByWithDifferentNameAndSameUUIDAndID();
     for (String key : map.keySet()) {
@@ -114,14 +137,261 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
   public Map<String, List<EncounterTypeDTO>> findAllEncounterTypesWithDifferentIDAndSameUUID()
       throws APIException {
+    this.harmonizationDAO.evictCache();
     Map<String, List<EncounterTypeDTO>> result = new HashMap<>();
     Map<String, List<EncounterType>> map = findByWithDifferentIDAndSameUUID();
     for (String key : map.keySet()) {
       result.put(key, DTOUtils.fromEncounterTypes(map.get(key)));
     }
     return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public int getNumberOfAffectedEncounters(EncounterTypeDTO encounterTypeDTO) {
+    this.harmonizationDAO.evictCache();
+    return harmonizationEncounterTypeServiceDAO
+        .findEncontersByEncounterTypeId(encounterTypeDTO.getEncounterType().getEncounterTypeId())
+        .size();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public int getNumberOfAffectedForms(EncounterTypeDTO encounterTypeDTO) {
+    this.harmonizationDAO.evictCache();
+    return harmonizationEncounterTypeServiceDAO
+        .findFormsByEncounterTypeId(encounterTypeDTO.getEncounterType().getEncounterTypeId())
+        .size();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException {
+    this.harmonizationDAO.evictCache();
+    List<EncounterType> result =
+        harmonizationEncounterTypeServiceDAO.findPDSEncounterTypesNotExistsInMDServer();
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public List<EncounterType> findAllNotSwappableEncounterTypes() throws APIException {
+    this.harmonizationDAO.evictCache();
+    List<EncounterType> result = this.harmonizationEncounterTypeServiceDAO.findAllNotSwappable();
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public List<EncounterType> findAllSwappableEncounterTypes() throws APIException {
+    this.harmonizationDAO.evictCache();
+    List<EncounterType> findAllSwappable =
+        this.harmonizationEncounterTypeServiceDAO.findAllSwappable();
+    return findAllSwappable;
+  }
+
+  @Override
+  @Authorized({"Manage Encountery Types"})
+  public void saveEncounterTypesWithDifferentNames(
+      Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException {
+    this.harmonizationDAO.evictCache();
+    for (String key : encounterTypes.keySet()) {
+      List<EncounterTypeDTO> list = encounterTypes.get(key);
+      EncounterTypeDTO mdsEncounter = list.get(0);
+      EncounterTypeDTO pdsEncounter = list.get(1);
+      EncounterType encounterType =
+          this.encounterService.getEncounterType(pdsEncounter.getEncounterType().getId());
+      encounterType.setName(mdsEncounter.getEncounterType().getName());
+      encounterType.setDescription(mdsEncounter.getEncounterType().getDescription());
+      this.encounterService.saveEncounterType(encounterType);
+    }
+  }
+
+  @Override
+  @Authorized({"Manage Encountery Types"})
+  public void saveNewEncounterTypesFromMDS(List<EncounterTypeDTO> encounterTypes)
+      throws APIException {
+    this.harmonizationDAO.evictCache();
+    try {
+      this.harmonizationDAO.setDisabledCheckConstraints();
+      for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
+
+        EncounterType found =
+            this.harmonizationEncounterTypeServiceDAO.getEncounterTypeById(encounterType.getId());
+
+        if (found != null) {
+
+          if (!this.harmonizationEncounterTypeServiceDAO.isSwappable(found)) {
+
+            throw new APIException(
+                String.format(
+                    "Cannot Insert Encounter type with ID %s, UUID %s and NAME %s. This ID is being in use by another Enconter type from Metatada server with UUID %s and name %s ",
+                    encounterType.getId(),
+                    encounterType.getUuid(),
+                    encounterType.getName(),
+                    found.getUuid(),
+                    found.getName()));
+          }
+          List<Encounter> relatedEncounters =
+              this.harmonizationEncounterTypeServiceDAO.findEncontersByEncounterTypeId(
+                  found.getId());
+          List<Form> relatedForms =
+              this.harmonizationEncounterTypeServiceDAO.findFormsByEncounterTypeId(found.getId());
+          this.updateToNextAvailableID(found, relatedEncounters, relatedForms);
+        }
+        this.harmonizationEncounterTypeServiceDAO.saveNotSwappableEncounterType(encounterType);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  @Override
+  @Authorized({"Manage Encountery Types"})
+  public void saveEncounterTypesWithDifferentIDAndEqualUUID(
+      Map<String, List<EncounterTypeDTO>> mapEncounterTypes) throws APIException {
+    this.harmonizationDAO.evictCache();
+    try {
+
+      this.harmonizationDAO.setDisabledCheckConstraints();
+      for (String uuid : mapEncounterTypes.keySet()) {
+
+        List<EncounterTypeDTO> list = mapEncounterTypes.get(uuid);
+        EncounterType mdsEncounterType = list.get(0).getEncounterType();
+        EncounterType pdSEncounterType = list.get(1).getEncounterType();
+        Integer mdServerEncounterId = mdsEncounterType.getEncounterTypeId();
+
+        EncounterType foundMDS =
+            this.harmonizationEncounterTypeServiceDAO.getEncounterTypeById(
+                mdsEncounterType.getId());
+
+        if (foundMDS != null) {
+          if (!this.harmonizationEncounterTypeServiceDAO.isSwappable(foundMDS)) {
+            throw new APIException(
+                String.format(
+                    "Cannot update the Production Server Encounter type [ID = {%s}, UUID = {%s}, NAME = {%s}] with the ID {%s} this new ID is already referencing an Existing Encounter Type In Metadata Server",
+                    pdSEncounterType.getId(),
+                    pdSEncounterType.getUuid(),
+                    pdSEncounterType.getName(),
+                    mdServerEncounterId));
+          }
+          List<Encounter> relatedEncounters =
+              this.harmonizationEncounterTypeServiceDAO.findEncontersByEncounterTypeId(
+                  foundMDS.getId());
+          List<Form> relatedForms =
+              this.harmonizationEncounterTypeServiceDAO.findFormsByEncounterTypeId(
+                  foundMDS.getId());
+          this.updateToNextAvailableID(foundMDS, relatedEncounters, relatedForms);
+        }
+
+        EncounterType foundPDS =
+            this.harmonizationEncounterTypeServiceDAO.getEncounterTypeById(
+                pdSEncounterType.getId());
+        if (!this.harmonizationEncounterTypeServiceDAO.isSwappable(foundPDS)) {
+          throw new APIException(
+              String.format(
+                  "Cannot update the Production Server Encounter type with ID {%s}, UUID {%s} and NAME {%s}. This Encounter Type is a Reference from an Encounter Type of Metadata Server",
+                  foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
+        }
+        List<Encounter> relatedEncounters =
+            this.harmonizationEncounterTypeServiceDAO.findEncontersByEncounterTypeId(
+                foundPDS.getId());
+        List<Form> relatedForms =
+            this.harmonizationEncounterTypeServiceDAO.findFormsByEncounterTypeId(foundPDS.getId());
+        this.updateToGivenId(foundPDS, mdServerEncounterId, false, relatedEncounters, relatedForms);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  @Override
+  @Authorized({"Manage Encountery Types"})
+  public void deleteNewEncounterTypesFromPDS(List<EncounterTypeDTO> encounterTypes)
+      throws APIException {
+    this.harmonizationDAO.evictCache();
+    for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
+      this.harmonizationEncounterTypeServiceDAO.deleteEncounterType(encounterType);
+    }
+  }
+
+  @Override
+  @Authorized({"Manage Encountery Types"})
+  public void saveManualMapping(Map<EncounterType, EncounterType> mapEncounterTypes)
+      throws APIException {
+    this.harmonizationDAO.evictCache();
+    try {
+
+      this.harmonizationDAO.setDisabledCheckConstraints();
+      for (Entry<EncounterType, EncounterType> entry : mapEncounterTypes.entrySet()) {
+
+        EncounterType pdSEncounterType = entry.getKey();
+        EncounterType mdsEncounterType = entry.getValue();
+
+        EncounterType foundPDS =
+            this.harmonizationEncounterTypeServiceDAO.getEncounterTypeById(
+                pdSEncounterType.getId());
+
+        if (mdsEncounterType.getUuid().equals(pdSEncounterType.getUuid())
+            && mdsEncounterType.getId().equals(pdSEncounterType.getId())) {
+          if (mdsEncounterType.getId().equals(pdSEncounterType.getId())
+              && mdsEncounterType.getName().equals(pdSEncounterType.getName())) {
+            return;
+          }
+          foundPDS.setName(mdsEncounterType.getName());
+          foundPDS.setDescription(mdsEncounterType.getDescription());
+          this.encounterService.saveEncounterType(foundPDS);
+
+        } else {
+          List<Encounter> relatedEncounters =
+              this.harmonizationEncounterTypeServiceDAO.findEncontersByEncounterTypeId(
+                  foundPDS.getId());
+
+          List<Form> relatedForms =
+              this.harmonizationEncounterTypeServiceDAO.findFormsByEncounterTypeId(
+                  foundPDS.getId());
+
+          for (Form form : relatedForms) {
+            this.harmonizationEncounterTypeServiceDAO.updateForm(
+                form, mdsEncounterType.getEncounterTypeId());
+          }
+          for (Encounter encounter : relatedEncounters) {
+            this.harmonizationEncounterTypeServiceDAO.updateEncounter(
+                encounter, mdsEncounterType.getEncounterTypeId());
+          }
+          this.harmonizationEncounterTypeServiceDAO.deleteEncounterType(foundPDS);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   private List<EncounterType> removeElementsWithDifferentIDsAndUUIDs(
@@ -139,8 +409,10 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   private Map<String, List<EncounterType>> findByWithDifferentNameAndSameUUIDAndID() {
-    List<EncounterType> allMDS = encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
-    List<EncounterType> allPDS = encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
+    List<EncounterType> allMDS =
+        harmonizationEncounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
+    List<EncounterType> allPDS =
+        harmonizationEncounterTypeServiceDAO.findAllProductionServerEncounterTypes();
 
     Map<String, List<EncounterType>> map = new TreeMap<>();
     for (EncounterType mdsItem : allMDS) {
@@ -155,10 +427,11 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     return map;
   }
 
-  public Map<String, List<EncounterType>> findByWithDifferentIDAndSameUUID() {
-    List<EncounterType> allPDS = encounterTypeServiceDAO.findAllProductionServerEncounterTypes();
-    List<EncounterType> allMDS = encounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
-
+  private Map<String, List<EncounterType>> findByWithDifferentIDAndSameUUID() {
+    List<EncounterType> allPDS =
+        harmonizationEncounterTypeServiceDAO.findAllProductionServerEncounterTypes();
+    List<EncounterType> allMDS =
+        harmonizationEncounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
     Map<String, List<EncounterType>> map = new TreeMap<>();
     for (EncounterType mdsItem : allMDS) {
       for (EncounterType pdsItem : allPDS) {
@@ -170,163 +443,33 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     return map;
   }
 
-  @Override
-  public int getNumberOfAffectedEncounters(EncounterTypeDTO encounterTypeDTO) {
-    return encounterTypeServiceDAO
-        .findEncontersByEncounterTypeId(encounterTypeDTO.getEncounterType().getEncounterTypeId())
-        .size();
-  }
-
-  @Override
-  public int getNumberOfAffectedForms(EncounterTypeDTO encounterTypeDTO) {
-    return encounterTypeServiceDAO
-        .findFormsByEncounterTypeId(encounterTypeDTO.getEncounterType().getEncounterTypeId())
-        .size();
-  }
-
-  @Override
-  public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException {
-    return encounterTypeServiceDAO.findPDSEncounterTypesNotExistsInMDServer();
-  }
-
-  @Override
-  public void saveEncounterTypesWithDifferentNames(
-      Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException {
-    for (String key : encounterTypes.keySet()) {
-      List<EncounterTypeDTO> list = encounterTypes.get(key);
-      EncounterTypeDTO mdsEncounter = list.get(0);
-      EncounterTypeDTO pdsEncounter = list.get(1);
-      EncounterType encounterType =
-          Context.getEncounterService().getEncounterType(pdsEncounter.getEncounterType().getId());
-      encounterType.setName(mdsEncounter.getEncounterType().getName());
-      Context.getEncounterService().saveEncounterType(encounterType);
-    }
-  }
-
-  @Override
-  public void saveNewEncounterTypesFromMDS(List<EncounterTypeDTO> encounterTypes)
-      throws APIException {
-    try {
-      this.dao.setDisabledCheckConstraints();
-      for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
-
-        EncounterType found =
-            this.encounterTypeServiceDAO.getEncounterTypeById(encounterType.getId());
-
-        if (found != null) {
-
-          if (!this.encounterTypeServiceDAO.isSwappable(found)) {
-
-            throw new APIException(
-                String.format(
-                    "Cannot Insert Encounter type with ID %s, UUID %s and NAME %s. This ID is being in use by another Enconter type from Metatada server with UUID %s and name %s ",
-                    encounterType.getId(),
-                    encounterType.getUuid(),
-                    encounterType.getName(),
-                    found.getUuid(),
-                    found.getName()));
-          }
-          List<Encounter> relatedEncounters =
-              this.encounterTypeServiceDAO.findEncontersByEncounterTypeId(found.getId());
-          List<Form> relatedForms =
-              this.encounterTypeServiceDAO.findFormsByEncounterTypeId(found.getId());
-          Integer nextId = this.encounterTypeServiceDAO.getNextEncounterTypeId();
-          this.updateToGivenId(found, nextId, true, relatedEncounters, relatedForms);
-        }
-        this.encounterTypeServiceDAO.saveNotSwappableEncounterType(encounterType);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        this.dao.setEnableCheckConstraints();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  @Override
-  public void saveEncounterTypesWithDifferentIDAndEqualUUID(
-      Map<String, List<EncounterTypeDTO>> mapEncounterTypes) throws APIException {
-
-    try {
-
-      this.dao.setDisabledCheckConstraints();
-      for (String uuid : mapEncounterTypes.keySet()) {
-
-        List<EncounterTypeDTO> list = mapEncounterTypes.get(uuid);
-        EncounterType mdsEncounterType = list.get(0).getEncounterType();
-        EncounterType pdSEncounterType = list.get(1).getEncounterType();
-        Integer mdServerEncounterId = mdsEncounterType.getEncounterTypeId();
-
-        EncounterType foundMDS =
-            this.encounterTypeServiceDAO.getEncounterTypeById(mdsEncounterType.getId());
-
-        if (foundMDS != null) {
-          if (!this.encounterTypeServiceDAO.isSwappable(foundMDS)) {
-            throw new APIException(
-                String.format(
-                    "Cannot update the Production Server Encounter type [ID = {%s}, UUID = {%s}, NAME = {%s}] with the ID {%s} this new ID is already referencing an Existing Encounter Type In Metadata Server",
-                    pdSEncounterType.getId(),
-                    pdSEncounterType.getUuid(),
-                    pdSEncounterType.getName(),
-                    mdServerEncounterId));
-          }
-          List<Encounter> relatedEncounters =
-              this.encounterTypeServiceDAO.findEncontersByEncounterTypeId(foundMDS.getId());
-          List<Form> relatedForms =
-              this.encounterTypeServiceDAO.findFormsByEncounterTypeId(foundMDS.getId());
-          Integer nextId = this.encounterTypeServiceDAO.getNextEncounterTypeId();
-          this.updateToGivenId(foundMDS, nextId, true, relatedEncounters, relatedForms);
-        }
-
-        EncounterType foundPDS =
-            this.encounterTypeServiceDAO.getEncounterTypeById(pdSEncounterType.getId());
-        if (!this.encounterTypeServiceDAO.isSwappable(foundPDS)) {
-          throw new APIException(
-              String.format(
-                  "Cannot update the Production Server Encounter type with ID {%s}, UUID {%s} and NAME {%s}. This Encounter Type is a Reference from an Encounter Type of Metadata Server",
-                  foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
-        }
-        List<Encounter> relatedEncounters =
-            this.encounterTypeServiceDAO.findEncontersByEncounterTypeId(foundPDS.getId());
-        List<Form> relatedForms =
-            this.encounterTypeServiceDAO.findFormsByEncounterTypeId(foundPDS.getId());
-        this.updateToGivenId(foundPDS, mdServerEncounterId, true, relatedEncounters, relatedForms);
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        this.dao.setEnableCheckConstraints();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
   private void updateToGivenId(
       EncounterType encounterType,
       Integer encounterTypeId,
       boolean swappable,
       List<Encounter> relatedEncounters,
       List<Form> relatedForms) {
-    this.encounterTypeServiceDAO.updateEncounterType(encounterTypeId, encounterType, swappable);
+    this.harmonizationEncounterTypeServiceDAO.updateEncounterType(
+        encounterTypeId, encounterType, swappable);
+
     for (Form form : relatedForms) {
-      this.encounterTypeServiceDAO.updateForm(form, encounterTypeId);
+      this.harmonizationEncounterTypeServiceDAO.updateForm(form, encounterTypeId);
     }
     for (Encounter encounter : relatedEncounters) {
-      this.encounterTypeServiceDAO.updateEncounter(encounter, encounterTypeId);
+      this.harmonizationEncounterTypeServiceDAO.updateEncounter(encounter, encounterTypeId);
     }
   }
 
-  @Override
-  public void deleteNewEncounterTypesFromPDS(List<EncounterTypeDTO> encounterTypes)
-      throws APIException {
-    for (EncounterType encounterType : DTOUtils.fromEncounterTypeDTOs(encounterTypes)) {
-      Context.getEncounterService().purgeEncounterType(encounterType);
+  private void updateToNextAvailableID(
+      EncounterType encounterType, List<Encounter> relatedEncounters, List<Form> relatedForms) {
+    EncounterType updated =
+        this.harmonizationEncounterTypeServiceDAO.updateToNextAvailableId(encounterType);
+    for (Form form : relatedForms) {
+      this.harmonizationEncounterTypeServiceDAO.updateForm(form, updated.getEncounterTypeId());
+    }
+    for (Encounter encounter : relatedEncounters) {
+      this.harmonizationEncounterTypeServiceDAO.updateEncounter(
+          encounter, updated.getEncounterTypeId());
     }
   }
 }

@@ -21,42 +21,53 @@ import org.openmrs.EncounterType;
 import org.openmrs.Form;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
+import org.openmrs.api.db.EncounterDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationEncounterTypeServiceDAO;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /** It is a default implementation of {@link HarmonizationEncounterTypeServiceDAO}. */
+@Repository("eptsharmonization.hibernateHarmonizationEncounterTypeServiceDAO")
 public class HibernateHarmonizationEncounterTypeServiceDAO
     implements HarmonizationEncounterTypeServiceDAO {
 
   private SessionFactory sessionFactory;
+  private EncounterDAO encounterDAO;
+  private HarmonizationServiceDAO harmonizationServiceDAO;
 
-  /** @param sessionFactory the sessionFactory to set */
+  @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
     this.sessionFactory = sessionFactory;
   }
 
-  /** @return the sessionFactory */
-  public SessionFactory getSessionFactory() {
-    return sessionFactory;
+  @Autowired
+  public void setEncounterDAO(EncounterDAO encounterDAO) {
+    this.encounterDAO = encounterDAO;
+  }
+
+  @Autowired
+  public void setHarmonizationServiceDAO(HarmonizationServiceDAO harmonizationServiceDAO) {
+    this.harmonizationServiceDAO = harmonizationServiceDAO;
   }
 
   @Override
   public List<EncounterType> findAllMetadataServerEncounterTypes() throws DAOException {
-    // TODO: I had to do this to prevent cached data
-    this.evictCache();
+    this.harmonizationServiceDAO.evictCache();
     return this.findMDSEncounterTypes();
   }
 
   @Override
   public List<EncounterType> findAllProductionServerEncounterTypes() throws DAOException {
     // TODO: I had to do this to prevent cached data
-    this.evictCache();
-    return Context.getEncounterService().getAllEncounterTypes();
+    this.harmonizationServiceDAO.evictCache();
+    return this.encounterDAO.getAllEncounterTypes(true);
   }
 
   @SuppressWarnings("unchecked")
   public List<Encounter> findEncontersByEncounterTypeId(Integer encounterTypeId) {
     // TODO: I had to do this to prevent cached data
-    this.evictCache();
+    this.harmonizationServiceDAO.evictCache();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
@@ -69,7 +80,7 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
   @SuppressWarnings("unchecked")
   public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId) {
     // TODO: I had to do this to prevent cached data
-    this.evictCache();
+    this.harmonizationServiceDAO.evictCache();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
@@ -95,8 +106,8 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
   }
 
   public EncounterType getEncounterTypeById(Integer encounterTypeId) {
-    this.evictCache();
-    return Context.getEncounterService().getEncounterType(encounterTypeId);
+    this.harmonizationServiceDAO.evictCache();
+    return this.encounterDAO.getEncounterType(encounterTypeId);
   }
 
   public boolean isSwappable(EncounterType encounterType) {
@@ -110,7 +121,7 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
             .uniqueResult();
   }
 
-  public Integer getNextEncounterTypeId() {
+  private Integer getNextEncounterTypeId() {
     Integer maxId =
         (Integer)
             this.sessionFactory
@@ -118,6 +129,28 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
                 .createSQLQuery("select max(encounter_type_id) from encounter_type ")
                 .uniqueResult();
     return ++maxId;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<EncounterType> findAllSwappable() throws DAOException {
+    return this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format("select  encounter_type.* from encounter_type where swappable = true "))
+        .addEntity(EncounterType.class)
+        .list();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<EncounterType> findAllNotSwappable() throws DAOException {
+    return this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format("select  encounter_type.* from encounter_type where swappable = false "))
+        .addEntity(EncounterType.class)
+        .list();
   }
 
   @Override
@@ -137,6 +170,27 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
             .getCurrentSession()
             .createCriteria(EncounterType.class, "encounterType");
     searchCriteria.add(Restrictions.eq("encounterTypeId", nextId));
+    return (EncounterType) searchCriteria.uniqueResult();
+  }
+
+  @Override
+  public EncounterType updateToNextAvailableId(EncounterType encounterType) throws DAOException {
+
+    Integer nextAvailableEncounterTypeId = this.getNextEncounterTypeId();
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "update encounter_type set encounter_type_id =%s, swappable = true where encounter_type_id =%s ",
+                nextAvailableEncounterTypeId, encounterType.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+
+    final Criteria searchCriteria =
+        this.sessionFactory
+            .getCurrentSession()
+            .createCriteria(EncounterType.class, "encounterType");
+    searchCriteria.add(Restrictions.eq("encounterTypeId", nextAvailableEncounterTypeId));
     return (EncounterType) searchCriteria.uniqueResult();
   }
 
@@ -194,8 +248,15 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
     return query.list();
   }
 
-  private void evictCache() {
-    Context.clearSession();
-    Context.flushSession();
+  @Override
+  public void deleteEncounterType(EncounterType encounterType) throws DAOException {
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "delete from encounter_type where encounter_type_id =%s ",
+                encounterType.getEncounterTypeId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
   }
 }
