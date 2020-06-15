@@ -36,6 +36,10 @@
 		<description>Able to view Encountery Types</description>
 	</privilege>
 	<privilege>
+		<name>Manage Person Attribute Types</name>
+		<description>Able to add/edit/retire Person Attribute Types</description>
+	</privilege>
+	<privilege>
 		<name>View Person Attribute Types</name>
 		<description>Able to view Person Attribute Types</description>
 	</privilege>
