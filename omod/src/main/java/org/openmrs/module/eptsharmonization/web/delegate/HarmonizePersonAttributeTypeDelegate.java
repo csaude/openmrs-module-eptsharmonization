@@ -31,9 +31,9 @@ public class HarmonizePersonAttributeTypeDelegate {
   }
 
   public static List<String> SUMMARY_EXECUTED_SCENARIOS = new ArrayList<>();
-  public static List<PersonAttributeType> EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE =
+  public static List<PersonAttributeType> EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE =
       new ArrayList<>();
-  private static List<PersonAttributeType> PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED = new ArrayList<>();
+  public static List<PersonAttributeType> PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED = new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<PersonAttributeTypeDTO> personAttributeTypes) {
 
@@ -76,7 +76,7 @@ public class HarmonizePersonAttributeTypeDelegate {
       List<PersonAttributeType> notSwappablePersonAttributeTypes,
       List<PersonAttributeType> swappablePersonAttributeTypes) {
 
-    PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED.removeAll(EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE);
+    PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED.removeAll(EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE);
 
     this.updateProductionToExportList(productionItemsToExport);
     this.setSwappableDataClones(
@@ -154,7 +154,8 @@ public class HarmonizePersonAttributeTypeDelegate {
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
 
     Set<HarmonizationItem> itemsToRemove =
-        getConvertedData(DTOUtils.fromPersonAttributeTypes(EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE))
+        getConvertedData(
+                DTOUtils.fromPersonAttributeTypes(EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE))
             .getItems();
     productionItemsToExport.getItems().removeAll(itemsToRemove);
   }
@@ -164,7 +165,7 @@ public class HarmonizePersonAttributeTypeDelegate {
       List<PersonAttributeType> notSwappablePersonAttributeTypes,
       List<PersonAttributeType> swappablePersonAttributeTypes) {
 
-    swappablePersonAttributeTypes.removeAll(EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE);
+    swappablePersonAttributeTypes.removeAll(EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE);
 
     for (PersonAttributeType PersonAttributeType : PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED) {
       if (!swappablePersonAttributeTypes.contains(PersonAttributeType)) {

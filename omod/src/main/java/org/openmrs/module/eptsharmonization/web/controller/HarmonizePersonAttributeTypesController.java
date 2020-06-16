@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
@@ -116,7 +117,8 @@ public class HarmonizePersonAttributeTypesController {
     newMDSPersonAttributeTypes = getNewMDSPersonAttributeTypes();
     differentIDsAndEqualUUID = this.getDifferentIDsAndEqualUUID();
     differentNameAndSameUUIDAndID = this.getDifferentNameAndSameUUIDAndID();
-    HarmonizationData productionItemsToExport = getProductionItemsToExport();
+    HarmonizationData productionItemsToExport =
+        delegate.getConvertedData(getProductionItemToExport());
 
     session.setAttribute(
         "harmonizedPersonAttributeTypesSummary",
@@ -234,7 +236,7 @@ public class HarmonizePersonAttributeTypesController {
     ModelAndView modelAndView = getRedirectModelAndView();
     modelAndView.addObject("openmrs_msg", "eptsharmonization.personattributetype.harmonized");
 
-    HarmonizePersonAttributeTypeDelegate.EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE =
+    HarmonizePersonAttributeTypeDelegate.EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE =
         new ArrayList<>(manualHarmonizePersonAttributeTypes.keySet());
     session.removeAttribute("manualHarmonizePersonAttributeTypes");
 
@@ -387,7 +389,7 @@ public class HarmonizePersonAttributeTypesController {
     return productionItemsToDelete;
   }
 
-  public HarmonizationData getProductionItemsToExport() {
+  private List<PersonAttributeTypeDTO> getProductionItemToExport() {
     List<PersonAttributeTypeDTO> onlyProductionPersonAttributeTypes =
         this.harmonizationPersonAttributeTypeService
             .findAllProductionPersonAttributeTypesNotContainedInMetadataServer();
@@ -400,7 +402,7 @@ public class HarmonizePersonAttributeTypesController {
         productionItemsToExport.add(personAttributeTypeDTO);
       }
     }
-    return delegate.getConvertedData(productionItemsToExport);
+    return productionItemsToExport;
   }
 
   @ModelAttribute("harmonizationItem")
@@ -434,7 +436,19 @@ public class HarmonizePersonAttributeTypesController {
 
   @ModelAttribute("swappablePersonAttributeTypes")
   public List<PersonAttributeType> getSwappablePersonAttributeTypes() {
-    return this.harmonizationPersonAttributeTypeService.findAllSwappablePersonAttributeTypes();
+    List<PersonAttributeType> swappablePersonAttributeTypes = new ArrayList<>();
+    List<PersonAttributeType> productionItemsToExport =
+        DTOUtils.fromPersonAttributeTypesDTOs(getProductionItemToExport());
+    productionItemsToExport.addAll(
+        HarmonizePersonAttributeTypeDelegate.PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED);
+    final List<PersonAttributeType> personAttributeTypes =
+        this.harmonizationPersonAttributeTypeService.findAllSwappablePersonAttributeTypes();
+    for (PersonAttributeType personAttributeType : personAttributeTypes) {
+      if (productionItemsToExport.contains(personAttributeType)) {
+        swappablePersonAttributeTypes.add(personAttributeType);
+      }
+    }
+    return swappablePersonAttributeTypes;
   }
 
   @ModelAttribute("notSwappablePersonAttributeTypes")
