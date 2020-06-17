@@ -10,7 +10,7 @@
 	</li>
 	<li>
 		<a
-		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizePersonAttributeTypesList.form"><spring:message
+		href="${pageContext.request.contextPath}/module/eptsharmonization/personAttributeTypes/harmonizePersonAttributeTypesList.form"><spring:message
 				code="eptsharmonization.harmonize.personattributetypes" /></a>
 	</li>
 		
