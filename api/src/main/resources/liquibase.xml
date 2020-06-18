@@ -66,7 +66,6 @@
 				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
 		</modifySql>
 	</changeSet>
-	
 
 	<changeSet author="Hamilton" id="20200423-0840">
 		<preConditions onFail="MARK_RAN">
@@ -94,7 +93,8 @@
 			<column name="foreign_key" type="int">
 				<constraints nullable="true" />
 			</column>
-			<column defaultValueBoolean="false" name="searchable" type="BOOLEAN">
+			<column defaultValueBoolean="false" name="searchable"
+				type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column defaultValueNumeric="0" name="creator" type="int">
@@ -109,7 +109,8 @@
 			<column name="date_changed" type="DATETIME">
 				<constraints nullable="true" />
 			</column>
-			<column defaultValueBoolean="false" name="retired" type="BOOLEAN">
+			<column defaultValueBoolean="false" name="retired"
+				type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="retired_by" type="int" />
@@ -120,6 +121,55 @@
 				<constraints nullable="true" />
 			</column>
 			<column name="sort_weight" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet author="Hamilton" id="20200616-1620">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_program" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _program table
+		</comment>
+		<createTable tableName="_program">
+			<column autoIncrement="true" name="program_id" type="int">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="concept_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="changed_by" type="int">
+				<constraints nullable="true" />
+			</column>
+			<column name="date_changed" type="DATETIME">
+				<constraints nullable="true" />
+			</column>
+			<column defaultValueBoolean="false" name="retired"
+				type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="name" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="uuid" type="char(38)" />
+			<column name="outcomes_concept_id" type="int">
 				<constraints nullable="true" />
 			</column>
 		</createTable>
