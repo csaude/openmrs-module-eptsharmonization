@@ -14,8 +14,6 @@
 						<th><spring:message code="general.name" /></th>
 						<th><spring:message code="general.description" /></th>
 						<th><spring:message code="general.uuid" /></th>
-						<th><spring:message
-								code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
 					</tr>
 					<c:forEach var="item" items="${newMDSPersonAttributeTypes.items}">
 						<tr>
@@ -23,7 +21,6 @@
 							<td valign="top">${item.value.personAttributeType.name}</td>
 							<td valign="top">${item.value.personAttributeType.description}</td>
 							<td valign="top">${item.value.personAttributeType.uuid}</td>
-							<td style="text-align: right;">${item.encountersCount}</td>
 						</tr>
 					</c:forEach>
 				</table>
