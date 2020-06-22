@@ -74,6 +74,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     dataImporter.importData("visit-types.xml");
     log.info(" _visit_type metadata imported");
 
+    log.info("Importing _relationship_type metadata");
+    dataImporter.importData("relationship-types.xml");
+    log.info(" _relationship_type metadata imported");
+
     StringBuilder sb = new StringBuilder();
     sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -100,6 +104,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_visit_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_relationship_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     sb = new StringBuilder();
     sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -114,6 +124,16 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
 
     sb = new StringBuilder();
     sb.append("delete from liquibasechangelog where ID ='20200423-0840';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200526-1507';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200622-1547';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
