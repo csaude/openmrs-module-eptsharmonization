@@ -221,15 +221,10 @@ public class HarmonizePersonAttributeTypesController {
 
     if (manualHarmonizePersonAttributeTypes != null
         && !manualHarmonizePersonAttributeTypes.isEmpty()) {
-      this.harmonizationPersonAttributeTypeService.saveManualMapping(
-          manualHarmonizePersonAttributeTypes);
-
       String defaultLocationName =
           Context.getAdministrationService().getGlobalProperty("default_location");
       Builder logBuilder = new PersonAttributeTypesHarmonizationCSVLog.Builder(defaultLocationName);
-      logBuilder.appendNewMappedPersonAttributeTypes(manualHarmonizePersonAttributeTypes);
-      logBuilder.build();
-
+      delegate.processManualMapping(manualHarmonizePersonAttributeTypes, logBuilder);
       HarmonizePersonAttributeTypeDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.encounterType.newDefinedMapping");
     }
@@ -269,11 +264,11 @@ public class HarmonizePersonAttributeTypesController {
     }
 
     PersonAttributeType pdsPersonAttributeType =
-        Context.getPersonService()
-            .getPersonAttributeTypeByUuid((String) harmonizationItem.getKey());
+        this.harmonizationPersonAttributeTypeService.findProductionPersonAttributeTypeByUuid(
+            (String) harmonizationItem.getKey());
     PersonAttributeType mdsPersonAttributeType =
-        Context.getPersonService()
-            .getPersonAttributeTypeByUuid((String) harmonizationItem.getValue());
+        this.harmonizationPersonAttributeTypeService.findMetadataPersonAttributeTypeByUuid(
+            (String) harmonizationItem.getValue());
 
     Map<PersonAttributeType, PersonAttributeType> manualHarmonizePersonAttributeTypes =
         (Map<PersonAttributeType, PersonAttributeType>)
@@ -453,7 +448,7 @@ public class HarmonizePersonAttributeTypesController {
 
   @ModelAttribute("notSwappablePersonAttributeTypes")
   public List<PersonAttributeType> getNotSwappablePersonAttributeTypes() {
-    return this.harmonizationPersonAttributeTypeService.findAllNotSwappablePersonAttributeTypes();
+    return this.harmonizationPersonAttributeTypeService.findAllMetadataPersonAttributeTypes();
   }
 
   private ModelAndView getRedirectModelAndView() {

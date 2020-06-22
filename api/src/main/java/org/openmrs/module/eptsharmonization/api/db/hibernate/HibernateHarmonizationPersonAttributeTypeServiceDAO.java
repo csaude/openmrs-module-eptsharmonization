@@ -225,13 +225,34 @@ public class HibernateHarmonizationPersonAttributeTypeServiceDAO
   }
 
   @SuppressWarnings("unchecked")
-  private List<PersonAttributeType> findMDSPersonAttributeTypes() {
+  private List<PersonAttributeType> findMDSPersonAttributeTypes() throws DAOException {
     final Query query =
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery("select p.* from _person_attribute_type p")
             .addEntity(PersonAttributeType.class);
     return query.list();
+  }
+
+  public PersonAttributeType findPDSPersonAttributeTypeByUuid(String uuid) throws DAOException {
+    return (PersonAttributeType)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                String.format("select p.* from person_attribute_type p where p.uuid = '%s' ", uuid))
+            .addEntity(PersonAttributeType.class)
+            .uniqueResult();
+  }
+
+  public PersonAttributeType findMDSPersonAttributeTypeByUuid(String uuid) throws DAOException {
+    return (PersonAttributeType)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                String.format(
+                    "select p.* from _person_attribute_type p where p.uuid = '%s' ", uuid))
+            .addEntity(PersonAttributeType.class)
+            .uniqueResult();
   }
 
   @Override

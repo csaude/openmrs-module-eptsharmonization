@@ -1,6 +1,7 @@
 package org.openmrs.module.eptsharmonization.web.delegate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -258,6 +259,73 @@ public class HarmonizePersonAttributeTypeDelegate {
           "eptsharmonization.summary.personattributetype.harmonize.differentID.andEqualUUID");
       logBuilder.appendLogForPersonAttributeTypesWithDiferrentIdsAndEqualUUID(list);
       HarmonizePersonAttributeTypesController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
+    }
+  }
+
+  public void processManualMapping(
+      Map<PersonAttributeType, PersonAttributeType> manualHarmonizePersonAttributeTypes,
+      Builder logBuilder) {
+
+    Set<HarmonizationItem> differntNamesItems = new TreeSet<>();
+    Set<HarmonizationItem> differntIDsItems = new TreeSet<>();
+
+    Map<PersonAttributeType, PersonAttributeType> manualHarmonizeItens = new HashMap<>();
+
+    for (Entry<PersonAttributeType, PersonAttributeType> entry :
+        manualHarmonizePersonAttributeTypes.entrySet()) {
+      PersonAttributeType pdsPersonAttributeType = entry.getKey();
+      PersonAttributeType mdsPersonAttributeType = entry.getValue();
+
+      if (mdsPersonAttributeType.getUuid().equals(pdsPersonAttributeType.getUuid())) {
+
+        if (!mdsPersonAttributeType.getId().equals(pdsPersonAttributeType.getId())) {
+          HarmonizationItem item =
+              new HarmonizationItem(
+                  mdsPersonAttributeType.getUuid(),
+                  DTOUtils.fromPersonAttributeTypes(
+                      Arrays.asList(mdsPersonAttributeType, pdsPersonAttributeType)));
+          item.setEncountersCount(
+              this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
+                  DTOUtils.fromPersonAttributeType(pdsPersonAttributeType)));
+          item.setSelected(Boolean.TRUE);
+          differntIDsItems.add(item);
+        } else {
+          if (!mdsPersonAttributeType.getName().equals(pdsPersonAttributeType.getName())) {
+            HarmonizationItem item =
+                new HarmonizationItem(
+                    mdsPersonAttributeType.getUuid(),
+                    DTOUtils.fromPersonAttributeTypes(
+                        Arrays.asList(mdsPersonAttributeType, pdsPersonAttributeType)));
+            item.setEncountersCount(
+                this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
+                    DTOUtils.fromPersonAttributeType(pdsPersonAttributeType)));
+            item.setSelected(Boolean.TRUE);
+            differntNamesItems.add(item);
+          }
+        }
+
+      } else {
+        manualHarmonizeItens.put(pdsPersonAttributeType, mdsPersonAttributeType);
+      }
+    }
+
+    if (!manualHarmonizeItens.isEmpty()) {
+      this.harmonizationPersonAttributeTypeService.saveManualMapping(
+          manualHarmonizePersonAttributeTypes);
+      logBuilder.appendNewMappedPersonAttributeTypes(manualHarmonizePersonAttributeTypes);
+      logBuilder.build();
+    }
+    if (!differntIDsItems.isEmpty()) {
+      HarmonizationData harmonizationData = new HarmonizationData(differntIDsItems);
+      processPersonAttributeTypesWithDiferrentIdsAndEqualUUID(harmonizationData, logBuilder);
+      logBuilder.build();
+      HarmonizePersonAttributeTypesController.IS_IDS_AND_UUID_DIFFERENCES_HARMONIZED = true;
+    }
+    if (!differntNamesItems.isEmpty()) {
+      HarmonizationData harmonizationData = new HarmonizationData(differntNamesItems);
+      processUpdatePersonAttributeTypesNames(harmonizationData, logBuilder);
+      logBuilder.build();
+      HarmonizePersonAttributeTypesController.IS_NAMES_DIFFERENCES_HARMONIZED = true;
     }
   }
 }

@@ -184,6 +184,16 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View Person Attribute Types"})
+  public List<PersonAttributeType> findAllMetadataPersonAttributeTypes() throws APIException {
+    this.harmonizationDAO.evictCache();
+    List<PersonAttributeType> result =
+        this.harmonizationPersonAttributeTypeServiceDAO.findAllMetadataServerPersonAttributeTypes();
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Person Attribute Types"})
   public List<PersonAttributeType> findAllSwappablePersonAttributeTypes() throws APIException {
     this.harmonizationDAO.evictCache();
     List<PersonAttributeType> findAllSwappable =
@@ -453,5 +463,27 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
       this.harmonizationPersonAttributeTypeServiceDAO.updatePersonAttribute(
           encounter, updated.getPersonAttributeTypeId());
     }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Person Attribute Types"})
+  public PersonAttributeType findProductionPersonAttributeTypeByUuid(String uuid)
+      throws APIException {
+    this.harmonizationDAO.evictCache();
+    PersonAttributeType result =
+        this.harmonizationPersonAttributeTypeServiceDAO.findPDSPersonAttributeTypeByUuid(uuid);
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Person Attribute Types"})
+  public PersonAttributeType findMetadataPersonAttributeTypeByUuid(String uuid)
+      throws APIException {
+    this.harmonizationDAO.evictCache();
+    PersonAttributeType result =
+        this.harmonizationPersonAttributeTypeServiceDAO.findMDSPersonAttributeTypeByUuid(uuid);
+    return result;
   }
 }
