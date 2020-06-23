@@ -14,10 +14,6 @@
 						<th><spring:message code="general.name" /></th>
 						<th><spring:message code="general.description" /></th>
 						<th><spring:message code="general.uuid" /></th>
-						<th><spring:message
-								code="eptsharmonization.program.harmonize.patientPrograms" /></th>
-						<th><spring:message
-								code="eptsharmonization.program.harmonize.programWorkflows" /></th>
 					</tr>
 					<c:forEach var="item" items="${newMDSPrograms.items}">
 						<tr>
@@ -25,8 +21,6 @@
 							<td valign="top">${item.value.program.name}</td>
 							<td valign="top">${item.value.program.description}</td>
 							<td valign="top">${item.value.program.uuid}</td>
-							<td style="text-align: right;">${item.encountersCount}</td>
-							<td style="text-align: right;">${item.formsCount}</td>
 						</tr>
 					</c:forEach>
 				</table>
