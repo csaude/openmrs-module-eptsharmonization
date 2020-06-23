@@ -70,4 +70,10 @@ public interface HarmonizationProgramService extends OpenmrsService {
   public void saveManualMapping(Map<Program, Program> programs) throws APIException;
 
   public void deleteNewProgramsFromPDS(List<ProgramDTO> programs) throws APIException;
+
+  public Program findMetadataProgramByUuid(String uuid) throws APIException;
+
+  public Program findProductionProgramByUuid(String uuid) throws APIException;
+
+  public List<Program> findAllMetadataPrograms() throws APIException;
 }

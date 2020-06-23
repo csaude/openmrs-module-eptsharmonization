@@ -264,4 +264,26 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
+
+  @Override
+  public Program findMDSPProgramByUuid(String uuid) throws DAOException {
+    return (Program)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(String.format("select * from _program where uuid=:uuidValue "))
+            .addEntity(Program.class)
+            .setString("uuidValue", uuid)
+            .uniqueResult();
+  }
+
+  @Override
+  public Program findPDSPProgramByUuid(String uuid) throws DAOException {
+    return (Program)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(String.format("select * from program where uuid=:uuidValue "))
+            .addEntity(Program.class)
+            .setString("uuidValue", uuid)
+            .uniqueResult();
+  }
 }

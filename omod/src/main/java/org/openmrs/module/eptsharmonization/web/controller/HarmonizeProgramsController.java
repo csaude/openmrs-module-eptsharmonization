@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Program;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
@@ -108,7 +109,8 @@ public class HarmonizeProgramsController {
     newMDSPrograms = getNewMDSPrograms();
     differentIDsAndEqualUUID = this.getDifferentIDsAndEqualUUID();
     differentNameAndSameUUIDAndID = this.getDifferentNameAndSameUUIDAndID();
-    HarmonizationData productionItemsToExport = getProductionItemsToExport();
+    HarmonizationData productionItemsToExport =
+        delegate.getConvertedData(getProductionItemsToExport());
 
     session.setAttribute(
         "harmonizedProgramsSummary", HarmonizeProgramsDelegate.SUMMARY_EXECUTED_SCENARIOS);
@@ -187,7 +189,7 @@ public class HarmonizeProgramsController {
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(defaultLocationName);
-    delegate.processUpdateEncounterNames(differentNameAndSameUUIDAndID, logBuilder);
+    delegate.processUpdateProgramsNames(differentNameAndSameUUIDAndID, logBuilder);
     logBuilder.build();
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
@@ -206,14 +208,10 @@ public class HarmonizeProgramsController {
         (Map<Program, Program>) session.getAttribute("manualHarmonizePrograms");
 
     if (manualHarmonizePrograms != null && !manualHarmonizePrograms.isEmpty()) {
-      this.harmonizationProgramService.saveManualMapping(manualHarmonizePrograms);
-
       String defaultLocationName =
           Context.getAdministrationService().getGlobalProperty("default_location");
       Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(defaultLocationName);
-      logBuilder.appendNewMappedPrograms(manualHarmonizePrograms);
-      logBuilder.build();
-
+      delegate.processManualMapping(manualHarmonizePrograms, logBuilder);
       HarmonizeProgramsDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.encounterType.newDefinedMapping");
     }
@@ -250,9 +248,11 @@ public class HarmonizeProgramsController {
     }
 
     Program pdsProgram =
-        Context.getProgramWorkflowService().getProgramByUuid((String) harmonizationItem.getKey());
+        this.harmonizationProgramService.findProductionProgramByUuid(
+            (String) harmonizationItem.getKey());
     Program mdsProgram =
-        Context.getProgramWorkflowService().getProgramByUuid((String) harmonizationItem.getValue());
+        this.harmonizationProgramService.findMetadataProgramByUuid(
+            (String) harmonizationItem.getValue());
 
     Map<Program, Program> manualHarmonizePrograms =
         (Map<Program, Program>) session.getAttribute("manualHarmonizePrograms");
@@ -358,7 +358,7 @@ public class HarmonizeProgramsController {
     return productionItemsToDelete;
   }
 
-  public HarmonizationData getProductionItemsToExport() {
+  public List<ProgramDTO> getProductionItemsToExport() {
     List<ProgramDTO> onlyProductionPrograms =
         this.harmonizationProgramService.findAllProductionProgramsNotContainedInMetadataServer();
     List<ProgramDTO> productionItemsToExport = new ArrayList<>();
@@ -371,7 +371,7 @@ public class HarmonizeProgramsController {
         productionItemsToExport.add(programDTO);
       }
     }
-    return delegate.getConvertedData(productionItemsToExport);
+    return productionItemsToExport;
   }
 
   @ModelAttribute("harmonizationItem")
@@ -402,12 +402,22 @@ public class HarmonizeProgramsController {
 
   @ModelAttribute("swappablePrograms")
   public List<Program> getSwappablePrograms() {
-    return this.harmonizationProgramService.findAllSwappablePrograms();
+
+    List<Program> swappablePrograms = new ArrayList<>();
+    List<Program> productionItemsToExport = DTOUtils.fromProgramDTOs(getProductionItemsToExport());
+    productionItemsToExport.addAll(HarmonizeProgramsDelegate.PROGRAMS_NOT_PROCESSED);
+    final List<Program> programs = this.harmonizationProgramService.findAllSwappablePrograms();
+    for (Program program : programs) {
+      if (productionItemsToExport.contains(program)) {
+        swappablePrograms.add(program);
+      }
+    }
+    return swappablePrograms;
   }
 
   @ModelAttribute("notSwappablePrograms")
   public List<Program> getNotSwappablePrograms() {
-    return this.harmonizationProgramService.findAllNotSwappablePrograms();
+    return this.harmonizationProgramService.findAllMetadataPrograms();
   }
 
   private ModelAndView getRedirectModelAndView() {

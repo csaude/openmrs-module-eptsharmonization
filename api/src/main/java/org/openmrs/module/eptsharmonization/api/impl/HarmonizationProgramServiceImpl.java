@@ -439,4 +439,19 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
       this.harmonizationProgramServiceDAO.updatePatientProgram(encounter, updated.getProgramId());
     }
   }
+
+  @Override
+  public Program findMetadataProgramByUuid(String uuid) throws APIException {
+    return harmonizationProgramServiceDAO.findMDSPProgramByUuid(uuid);
+  }
+
+  @Override
+  public Program findProductionProgramByUuid(String uuid) throws APIException {
+    return harmonizationProgramServiceDAO.findPDSPProgramByUuid(uuid);
+  }
+
+  @Override
+  public List<Program> findAllMetadataPrograms() throws APIException {
+    return this.harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
+  }
 }

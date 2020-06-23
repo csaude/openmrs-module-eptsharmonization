@@ -1,6 +1,7 @@
 package org.openmrs.module.eptsharmonization.web.delegate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class HarmonizeProgramsDelegate {
 
   public static List<String> SUMMARY_EXECUTED_SCENARIOS = new ArrayList<>();
   public static List<Program> EXECUTED_PROGRAMS_MANUALLY_CACHE = new ArrayList<>();
-  private static List<Program> PROGRAMS_NOT_PROCESSED = new ArrayList<>();
+  public static List<Program> PROGRAMS_NOT_PROCESSED = new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<ProgramDTO> programs) {
 
@@ -203,7 +204,7 @@ public class HarmonizeProgramsDelegate {
   }
 
   @SuppressWarnings("unchecked")
-  public void processUpdateEncounterNames(HarmonizationData data, Builder logBuilder) {
+  public void processUpdateProgramsNames(HarmonizationData data, Builder logBuilder) {
     Map<String, List<ProgramDTO>> list = new HashMap<>();
     for (HarmonizationItem item : data.getItems()) {
       List<ProgramDTO> value = (List<ProgramDTO>) item.getValue();
@@ -241,6 +242,74 @@ public class HarmonizeProgramsDelegate {
           "eptsharmonization.summary.program.harmonize.differentID.andEqualUUID");
       logBuilder.appendLogForProgramsWithDiferrentIdsAndEqualUUID(list);
       HarmonizeProgramsController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
+    }
+  }
+
+  public void processManualMapping(
+      Map<Program, Program> manualHarmonizePrograms, Builder logBuilder) {
+
+    Set<HarmonizationItem> differntNamesItems = new TreeSet<>();
+    Set<HarmonizationItem> differntIDsItems = new TreeSet<>();
+
+    Map<Program, Program> manualHarmonizeItens = new HashMap<>();
+
+    for (Entry<Program, Program> entry : manualHarmonizePrograms.entrySet()) {
+      Program pdsProgram = entry.getKey();
+      Program mdsProgram = entry.getValue();
+
+      if (mdsProgram.getUuid().equals(pdsProgram.getUuid())) {
+
+        if (!mdsProgram.getId().equals(pdsProgram.getId())) {
+          HarmonizationItem item =
+              new HarmonizationItem(
+                  mdsProgram.getUuid(),
+                  DTOUtils.fromPrograms(Arrays.asList(mdsProgram, pdsProgram)));
+          item.setEncountersCount(
+              this.harmonizationProgramService.getNumberOfAffectedPatientPrograms(
+                  DTOUtils.fromProgram(pdsProgram)));
+          item.setFormsCount(
+              this.harmonizationProgramService.getNumberOfAffectedProgramWorkflow(
+                  DTOUtils.fromProgram(pdsProgram)));
+          item.setSelected(Boolean.TRUE);
+          differntIDsItems.add(item);
+        } else {
+          if (!mdsProgram.getName().equals(pdsProgram.getName())) {
+            HarmonizationItem item =
+                new HarmonizationItem(
+                    mdsProgram.getUuid(),
+                    DTOUtils.fromPrograms(Arrays.asList(mdsProgram, pdsProgram)));
+            item.setEncountersCount(
+                this.harmonizationProgramService.getNumberOfAffectedPatientPrograms(
+                    DTOUtils.fromProgram(pdsProgram)));
+            item.setFormsCount(
+                this.harmonizationProgramService.getNumberOfAffectedProgramWorkflow(
+                    DTOUtils.fromProgram(pdsProgram)));
+            item.setSelected(Boolean.TRUE);
+            differntNamesItems.add(item);
+          }
+        }
+
+      } else {
+        manualHarmonizeItens.put(pdsProgram, mdsProgram);
+      }
+    }
+
+    if (!manualHarmonizeItens.isEmpty()) {
+      this.harmonizationProgramService.saveManualMapping(manualHarmonizePrograms);
+      logBuilder.appendNewMappedPrograms(manualHarmonizePrograms);
+      logBuilder.build();
+    }
+    if (!differntIDsItems.isEmpty()) {
+      HarmonizationData harmonizationData = new HarmonizationData(differntIDsItems);
+      processProgramsWithDiferrentIdsAndEqualUUID(harmonizationData, logBuilder);
+      logBuilder.build();
+      HarmonizeProgramsController.IS_IDS_AND_UUID_DIFFERENCES_HARMONIZED = true;
+    }
+    if (!differntNamesItems.isEmpty()) {
+      HarmonizationData harmonizationData = new HarmonizationData(differntNamesItems);
+      processUpdateProgramsNames(harmonizationData, logBuilder);
+      logBuilder.build();
+      HarmonizeProgramsController.IS_NAMES_DIFFERENCES_HARMONIZED = true;
     }
   }
 }

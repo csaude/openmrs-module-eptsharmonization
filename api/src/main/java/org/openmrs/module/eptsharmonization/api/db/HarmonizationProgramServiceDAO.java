@@ -54,4 +54,8 @@ public interface HarmonizationProgramServiceDAO {
   public Program updateToNextAvailableId(Program program) throws DAOException;
 
   public void deleteProgram(Program program) throws DAOException;
+
+  public Program findMDSPProgramByUuid(String uuid) throws DAOException;
+
+  public Program findPDSPProgramByUuid(String uuid) throws DAOException;
 }
