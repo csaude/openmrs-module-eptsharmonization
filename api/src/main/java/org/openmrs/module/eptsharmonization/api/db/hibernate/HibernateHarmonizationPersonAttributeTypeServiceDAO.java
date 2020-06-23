@@ -238,9 +238,9 @@ public class HibernateHarmonizationPersonAttributeTypeServiceDAO
     return (PersonAttributeType)
         this.sessionFactory
             .getCurrentSession()
-            .createSQLQuery(
-                String.format("select p.* from person_attribute_type p where p.uuid = '%s' ", uuid))
+            .createSQLQuery("select * from person_attribute_type where uuid=:uuidValue")
             .addEntity(PersonAttributeType.class)
+            .setString("uuidValue", uuid)
             .uniqueResult();
   }
 
@@ -248,10 +248,9 @@ public class HibernateHarmonizationPersonAttributeTypeServiceDAO
     return (PersonAttributeType)
         this.sessionFactory
             .getCurrentSession()
-            .createSQLQuery(
-                String.format(
-                    "select p.* from _person_attribute_type p where p.uuid = '%s' ", uuid))
+            .createSQLQuery("select * from _person_attribute_type where uuid=:uuidValue")
             .addEntity(PersonAttributeType.class)
+            .setString("uuidValue", uuid)
             .uniqueResult();
   }
 
