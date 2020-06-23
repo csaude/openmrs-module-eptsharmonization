@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.OpenmrsMetadata;
+import org.openmrs.RelationshipType;
 import org.openmrs.api.context.Context;
 
 public class HarmonizationUtils {
@@ -60,6 +61,23 @@ public class HarmonizationUtils {
             && ele1.getUuid().contentEquals(ele2.getUuid())
             && !ele1.getName().equalsIgnoreCase(ele2.getName())) {
           results.put(ele1.getUuid(), Arrays.asList(ele1, ele2));
+        }
+      }
+    }
+    return results;
+  }
+
+  public static Map<String, List<RelationshipType>>
+      findRelationshipTypeWithDifferentTypesAndSameUUIDAndID(
+          final List<RelationshipType> list1, final List<RelationshipType> list2) {
+    final Map<String, List<RelationshipType>> results = new HashMap<>();
+    for (RelationshipType type1 : list1) {
+      for (RelationshipType type2 : list2) {
+        if (type1.getRelationshipTypeId().equals(type2.getRelationshipTypeId())
+            && type1.getUuid().contentEquals(type2.getUuid())
+            && (!type1.getaIsToB().equalsIgnoreCase(type2.getaIsToB())
+                || !type1.getbIsToA().equalsIgnoreCase(type2.getbIsToA()))) {
+          results.put(type1.getUuid(), Arrays.asList(type1, type2));
         }
       }
     }
