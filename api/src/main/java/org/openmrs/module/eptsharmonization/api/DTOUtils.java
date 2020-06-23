@@ -5,9 +5,13 @@ import java.util.List;
 import org.openmrs.EncounterType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.Program;
+import org.openmrs.RelationshipType;
+import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
+import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 
 public class DTOUtils {
 
@@ -77,5 +81,39 @@ public class DTOUtils {
 
   public static ProgramDTO fromProgram(Program program) {
     return new ProgramDTO(program);
+  }
+
+  public static List<VisitTypeDTO> fromVisitTypes(final List<VisitType> visitTypes) {
+    List<VisitTypeDTO> visitTypeDTOList = new ArrayList<>();
+    for (VisitType visitType : visitTypes) {
+      visitTypeDTOList.add(new VisitTypeDTO(visitType));
+    }
+    return visitTypeDTOList;
+  }
+
+  public static List<VisitType> fromVisitTypeDTOs(List<VisitTypeDTO> visitTypeDTOs) {
+    List<VisitType> result = new ArrayList<>();
+    for (VisitTypeDTO visitTypeDTO : visitTypeDTOs) {
+      result.add(visitTypeDTO.getVisitType());
+    }
+    return result;
+  }
+
+  public static List<RelationshipTypeDTO> fromRelationshipTypes(
+      final List<RelationshipType> relationshipTypes) {
+    List<RelationshipTypeDTO> relationshipTypeDTOList = new ArrayList<>();
+    for (RelationshipType relationshipType : relationshipTypes) {
+      relationshipTypeDTOList.add(new RelationshipTypeDTO(relationshipType));
+    }
+    return relationshipTypeDTOList;
+  }
+
+  public static List<RelationshipType> fromRelationshipTypeDTOs(
+      List<RelationshipTypeDTO> relationshipTypeDTOs) {
+    List<RelationshipType> result = new ArrayList<>();
+    for (RelationshipTypeDTO relationshipTypeDTO : relationshipTypeDTOs) {
+      result.add(relationshipTypeDTO.getRelationshipType());
+    }
+    return result;
   }
 }

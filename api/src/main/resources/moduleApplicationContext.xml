@@ -23,5 +23,4 @@
   		    	<!-- Add here beans related to the API context -->
   		    	
 	<context:component-scan base-package="org.openmrs.module.eptsharmonization" />
-	
 </beans>

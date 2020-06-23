@@ -11,6 +11,10 @@
  */
 package org.openmrs.module.eptsharmonization;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
@@ -36,6 +40,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
 
   @Override
   public void willStart() {
+    log.debug("Creating Epts Harmnonization data directory");
+    try {
+      createLogFilesDirectory();
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe);
+    }
     log.debug("Starting Epts Harmonization Module");
   }
 
@@ -63,6 +73,14 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     log.info("Importing _program Metadata");
     dataImporter.importData("program.xml");
     log.info(" _program Metadata imported");
+
+    log.info("Importing _visit_type metadata");
+    dataImporter.importData("visit-types.xml");
+    log.info(" _visit_type metadata imported");
+
+    log.info("Importing _relationship_type metadata");
+    dataImporter.importData("relationship-types.xml");
+    log.info(" _relationship_type metadata imported");
 
     StringBuilder sb = new StringBuilder();
     sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
@@ -94,6 +112,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_visit_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_relationship_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     sb = new StringBuilder();
     sb.append("DROP TABLE IF EXISTS `_program`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -121,5 +145,22 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb = new StringBuilder();
     sb.append("delete from liquibasechangelog where ID ='20200616-1620';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200526-1507';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200622-1547';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+  }
+
+  private void createLogFilesDirectory() throws IOException {
+    Path dataDirectoryPath = Paths.get(EptsHarmonizationConstants.MODULE_DATA_DIRECTORY);
+
+    if (!Files.exists(dataDirectoryPath)) {
+      Files.createDirectories(dataDirectoryPath);
+    }
   }
 }

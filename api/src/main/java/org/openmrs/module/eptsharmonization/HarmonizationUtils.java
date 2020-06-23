@@ -1,5 +1,14 @@
 package org.openmrs.module.eptsharmonization;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.openmrs.OpenmrsMetadata;
+import org.openmrs.RelationshipType;
 import org.openmrs.api.context.Context;
 
 public class HarmonizationUtils {
@@ -35,5 +44,99 @@ public class HarmonizationUtils {
             + "  where _program.program_id = program.program_id    "
             + "  and _program.uuid = program.uuid)) as a)                            ");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
+  }
+
+  public static <T extends OpenmrsMetadata>
+      List<T> findElementsInList1WithSameUuidsButDifferentIdsFromList2(
+          final List<T> list1, final List<T> list2) {
+    List<T> results = new ArrayList<>();
+    for (T ele1 : list1) {
+      for (T ele2 : list2) {
+        if (ele1.getId().compareTo(ele2.getId()) != 0
+            && ele1.getUuid().contentEquals(ele2.getUuid())) {
+          results.add(ele1);
+        }
+      }
+    }
+    return results;
+  }
+
+  public static <T extends OpenmrsMetadata>
+      Map<String, List<T>> findElementsWithDifferentNamesSameUuidsAndIds(
+          final List<T> list1, final List<T> list2) {
+    final Map<String, List<T>> results = new HashMap<>();
+    for (T ele1 : list1) {
+      for (T ele2 : list2) {
+        if (ele1.getId().equals(ele2.getId())
+            && ele1.getUuid().contentEquals(ele2.getUuid())
+            && !ele1.getName().equalsIgnoreCase(ele2.getName())) {
+          results.put(ele1.getUuid(), Arrays.asList(ele1, ele2));
+        }
+      }
+    }
+    return results;
+  }
+
+  public static Map<String, List<RelationshipType>>
+      findRelationshipTypeWithDifferentTypesAndSameUUIDAndID(
+          final List<RelationshipType> list1, final List<RelationshipType> list2) {
+    final Map<String, List<RelationshipType>> results = new HashMap<>();
+    for (RelationshipType type1 : list1) {
+      for (RelationshipType type2 : list2) {
+        if (type1.getRelationshipTypeId().equals(type2.getRelationshipTypeId())
+            && type1.getUuid().contentEquals(type2.getUuid())
+            && (!type1.getaIsToB().equalsIgnoreCase(type2.getaIsToB())
+                || !type1.getbIsToA().equalsIgnoreCase(type2.getbIsToA()))) {
+          results.put(type1.getUuid(), Arrays.asList(type1, type2));
+        }
+      }
+    }
+    return results;
+  }
+
+  public static <T extends OpenmrsMetadata>
+      Map<String, List<T>> findElementsWithDifferentIdsSameUuids(
+          final List<T> list1, final List<T> list2) {
+    final Map<String, List<T>> results = new HashMap<>();
+    for (T ele1 : list1) {
+      for (T ele2 : list2) {
+        if (!ele1.getId().equals(ele2.getId()) && ele1.getUuid().contentEquals(ele2.getUuid())) {
+          results.put(ele1.getUuid(), Arrays.asList(ele1, ele2));
+        }
+      }
+    }
+    return results;
+  }
+
+  public static <T extends OpenmrsMetadata> boolean isThePairHarmonized(T metadata1, T metadata2) {
+    if (metadata1 == null || metadata2 == null) return false;
+    if (metadata1.getId() == null
+        || metadata2.getId() == null
+        || metadata1.getName() == null
+        || metadata2.getName() == null
+        || metadata1.getUuid() == null
+        || metadata2.getUuid() == null) {
+      return false;
+    }
+
+    return (metadata1.getId().equals(metadata2.getId())
+        && metadata1.getName().equalsIgnoreCase(metadata2.getName())
+        && metadata1.getUuid().equals(metadata2.getUuid()));
+  }
+
+  public static <T extends OpenmrsMetadata> void removeAllHarmonizedElements(
+      Collection<T> collection1, Collection<T> collection2) {
+    Iterator<T> iterator1 = collection1.iterator();
+    while (iterator1.hasNext()) {
+      T element1 = iterator1.next();
+      Iterator<T> iterator2 = collection2.iterator();
+      while (iterator2.hasNext()) {
+        T element2 = iterator2.next();
+        if (isThePairHarmonized(element1, element2)) {
+          iterator1.remove();
+          break;
+        }
+      }
+    }
   }
 }

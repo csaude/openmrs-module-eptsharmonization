@@ -37,7 +37,7 @@
 						<artifactId>slf4j-api</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>	
-	</dependencies>
+			</dependency>
+    </dependencies>
 	
 </project>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <_visit_type visit_type_id="1" name="SEGUIMENTO PTV" description="Visita de seguimento no serviço de PTV" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="056a9354-320f-4b12-9db3-187e12e20b76"/>
+    <_visit_type visit_type_id="2" name="ABERTURA DE PROCESSO TB" description="Visita de abertura de processo no serviço de TB" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="26690ee5-b451-4850-b41e-41a7c87b31e9"/>
+    <_visit_type visit_type_id="3" name="SEGUIMENTO SEGUINTE S. TARV" description="Visita seguinte de seguimento" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="3866891d-09c5-4d98-98de-6ae7916110fa"/>
+    <_visit_type visit_type_id="4" name="SEGUIMENTO CCR" description="Visita de seguimento no serviço de CCR" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="396c0cd8-0b77-425c-a4b9-bb4da976ebcb"/>
+    <_visit_type visit_type_id="5" name="PRIMEIRO SEGUIMENTO S.TARV" description="Primeira visita de seguimento no servico TARV" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="64a510a1-fbf4-465f-acd2-cd37bc321cee"/>
+    <_visit_type visit_type_id="6" name="INTERNAMENTO" description="Visita na qual o paciente internado na unidade sanitaria" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="744ebe99-c086-4b2c-bfbb-a68ed4741e49"/>
+    <_visit_type visit_type_id="7" name="LABORATORIO" description="Visita de laboratorio" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="b3114b6e-7c8e-4c2d-89d5-d45b368d0625"/>
+    <_visit_type visit_type_id="8" name="LEVANTAMENTO DE ARV" description="Visita para levantamento de ARV" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="b5e7993c-7429-4c63-bb82-a66cd15553b0"/>
+    <_visit_type visit_type_id="9" name="ABERTURA PROCESSO PTV" description="Visita de abertura do processo no servico de PTV" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="c066031d-338c-4573-9f3a-2f774caebd52"/>
+    <_visit_type visit_type_id="10" name="ACONSELHAMENTO" description="Visita de aconselhamento" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="c607f451-92a9-45bf-b418-5288645a335d"/>
+    <_visit_type visit_type_id="11" name="ABERTURA DE PROCESSO CCR" description="Visita de abertura de processo no servico de CCR" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="cbcb03a4-b90a-4351-93ee-4b118ed4f6c3"/>
+    <_visit_type visit_type_id="12" name="ABERTURA PROCESSO S. TARV" description="Visita inicial de abertura de processo clinico no servico TARV" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="ceae3031-b8a7-47dc-9d4a-700d73dda335"/>
+    <_visit_type visit_type_id="13" name="SEGUIMENTO TB" description="Visita de seguimento no servico de TB" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="d9911494-b231-4b3c-9246-1fe5f269476c"/>
+    <_visit_type visit_type_id="14" name="LIVRO DE REGISTO TARV" description="Livro de registo TARV e PRE-TARV" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="1cfb7589-c648-45d3-b524-3e8bff50a3c1"/>
+    <_visit_type visit_type_id="15" name="VISITA DOMICILIARIA" description="Visita domiciliaria" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="85b891bf-4ef9-4c08-9c1e-b92c5bd441b0"/>
+    <_visit_type visit_type_id="16" name="CHAMADA TELEFONICA" description="Para registo de chamadas telefonicas aos pacientes" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="7fefe3bb-de47-41e1-8993-c9bfcdaf3f37"/>
+    <_visit_type visit_type_id="17" name="MASTER CARD" description="Tipo de visita referente as fichas master card" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="16e8e70e-71a9-4ba7-9138-dfaae88a6969"/>
+</dataset>
