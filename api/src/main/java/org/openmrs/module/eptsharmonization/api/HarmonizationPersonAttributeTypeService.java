@@ -41,6 +41,8 @@ public interface HarmonizationPersonAttributeTypeService {
 
   public List<PersonAttributeType> findAllSwappablePersonAttributeTypes() throws APIException;
 
+  public List<PersonAttributeType> findAllMetadataPersonAttributeTypes() throws APIException;
+
   public int getNumberOfAffectedPersonAttributes(PersonAttributeTypeDTO personAttributeTypeDTO);
 
   public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
@@ -60,4 +62,9 @@ public interface HarmonizationPersonAttributeTypeService {
 
   public void deleteNewPersonAttributeTypesFromPDS(
       List<PersonAttributeTypeDTO> personAttributeTypes) throws APIException;
+
+  public PersonAttributeType findProductionPersonAttributeTypeByUuid(String uuid)
+      throws APIException;
+
+  public PersonAttributeType findMetadataPersonAttributeTypeByUuid(String uuid) throws APIException;
 }

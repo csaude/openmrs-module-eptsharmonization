@@ -55,4 +55,8 @@ public interface HarmonizationPersonAttributeTypeServiceDAO {
 
   public void deletePersonAttributeType(PersonAttributeType personAttributeType)
       throws DAOException;
+
+  public PersonAttributeType findPDSPersonAttributeTypeByUuid(String uuid) throws DAOException;
+
+  public PersonAttributeType findMDSPersonAttributeTypeByUuid(String uuid) throws DAOException;
 }
