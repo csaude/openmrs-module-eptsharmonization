@@ -275,15 +275,4 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
             .setString("uuidValue", uuid)
             .uniqueResult();
   }
-
-  @Override
-  public Program findPDSPProgramByUuid(String uuid) throws DAOException {
-    return (Program)
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(String.format("select * from program where uuid=:uuidValue "))
-            .addEntity(Program.class)
-            .setString("uuidValue", uuid)
-            .uniqueResult();
-  }
 }

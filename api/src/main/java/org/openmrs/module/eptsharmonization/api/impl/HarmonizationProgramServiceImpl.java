@@ -447,11 +447,13 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
 
   @Override
   public Program findProductionProgramByUuid(String uuid) throws APIException {
-    return harmonizationProgramServiceDAO.findPDSPProgramByUuid(uuid);
+    this.harmonizationDAO.evictCache();
+    return programWorkflowService.getProgramByUuid(uuid);
   }
 
   @Override
   public List<Program> findAllMetadataPrograms() throws APIException {
+    this.harmonizationDAO.evictCache();
     return this.harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
   }
 }

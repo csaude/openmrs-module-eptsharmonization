@@ -237,13 +237,13 @@ public class HarmonizeProgramsController {
     if (harmonizationItem.getKey() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
       modelAndView.addObject(
-          "errorRequiredPDSValue", "eptsharmonization.error.encounterForMapping.required");
+          "errorRequiredPDSValue", "eptsharmonization.error.programForMapping.required");
       return modelAndView;
     }
     if (harmonizationItem.getValue() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getValue()))) {
       modelAndView.addObject(
-          "errorRequiredMdsValue", "eptsharmonization.error.encounterForMapping.required");
+          "errorRequiredMdsValue", "eptsharmonization.error.programForMapping.required");
       return modelAndView;
     }
 
@@ -274,8 +274,8 @@ public class HarmonizeProgramsController {
       HttpServletRequest request) {
 
     Program productionProgram =
-        Context.getProgramWorkflowService()
-            .getProgramByUuid(request.getParameter("productionServerProgramUuID"));
+        this.harmonizationProgramService.findProductionProgramByUuid(
+            request.getParameter("productionServerProgramUuID"));
 
     @SuppressWarnings("unchecked")
     Map<Program, Program> manualHarmonizePrograms =
