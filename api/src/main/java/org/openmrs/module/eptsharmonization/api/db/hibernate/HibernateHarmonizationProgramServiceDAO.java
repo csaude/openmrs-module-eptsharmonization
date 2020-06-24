@@ -161,9 +161,10 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
-            String.format(
-                "update program set program_id =%s, swappable =%s where program_id =%s ",
-                nextId, swappable, program.getId()))
+            "update program set program_id =:newProgramId, swappable =:swappable where program_id =:programId ")
+        .setInteger("newProgramId", nextId)
+        .setBoolean("swappable", swappable)
+        .setInteger("programId", program.getId())
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
 
@@ -180,9 +181,9 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
-            String.format(
-                "update program set program_id =%s, swappable = true where program_id =%s ",
-                nextAvailableProgramId, program.getId()))
+            "update program set program_id =:newProgramId, swappable = true where program_id =:programId ")
+        .setInteger("programId", program.getId())
+        .setInteger("newProgramId", nextAvailableProgramId)
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
 
@@ -195,23 +196,20 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
   @Override
   public void saveNotSwappableProgram(Program program) throws DAOException {
     String insert =
-        String.format(
-            "insert into program (program_id, concept_id, creator, date_created, retired, name, description, uuid, outcomes_concept_id, swappable) "
-                + " values (%s, %s, %s, '%s', %s, '%s', '%s', '%s', %s, %s)",
-            program.getId(),
-            getProgramConceptId(program),
-            Context.getAuthenticatedUser().getId(),
-            program.getDateCreated(),
-            program.getRetired(),
-            program.getName(),
-            program.getDescription(),
-            program.getUuid(),
-            program.getOutcomesConcept() == null
-                ? program.getOutcomesConcept()
-                : program.getOutcomesConcept().getId(),
-            false);
+        "insert into program (program_id, concept_id, creator, date_created, retired, name, description, uuid, swappable) "
+            + " values (:programId, :conceptId, :creator, :dateCreated, :retired, :name, :description, :uuid, :swappable)";
 
     Query query = sessionFactory.getCurrentSession().createSQLQuery(insert);
+    query
+        .setInteger("programId", program.getId())
+        .setInteger("conceptId", getProgramConceptId(program))
+        .setInteger("creator", Context.getAuthenticatedUser().getId())
+        .setDate("dateCreated", program.getDateCreated())
+        .setBoolean("retired", program.getRetired())
+        .setString("name", program.getName())
+        .setString("description", program.getDescription())
+        .setString("uuid", program.getUuid())
+        .setBoolean("swappable", false);
     query.executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
@@ -222,9 +220,9 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
-            String.format(
-                "update patient_program set program_id =%s where patient_program_id =%s ",
-                programId, patientProgram.getId()))
+            "update patient_program set program_id =:programId where patient_program_id =:patientProgramId ")
+        .setInteger("programId", programId)
+        .setInteger("patientProgramId", patientProgram.getId())
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
@@ -235,9 +233,9 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
-            String.format(
-                "update program_workflow set program_id =%s where program_workflow_id =%s ",
-                programId, programWorkflow.getId()))
+            "update program_workflow set program_id =:programId where program_workflow_id =:programWorkflowId ")
+        .setInteger("programId", programId)
+        .setInteger("programWorkflowId", programWorkflow.getId())
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
@@ -267,7 +265,7 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
     return (Program)
         this.sessionFactory
             .getCurrentSession()
-            .createSQLQuery(String.format("select * from _program where uuid=:uuidValue "))
+            .createSQLQuery("select * from _program where uuid=:uuidValue ")
             .addEntity(Program.class)
             .setString("uuidValue", uuid)
             .uniqueResult();
