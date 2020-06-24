@@ -58,33 +58,32 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
 
   @Override
   public List<Program> findAllProductionServerPrograms() throws DAOException {
-    // TODO: I had to do this to prevent cached data
     this.harmonizationServiceDAO.evictCache();
     return this.programWorkflowDAO.getAllPrograms(true);
   }
 
   @SuppressWarnings("unchecked")
   public List<PatientProgram> findPatientProgramsByProgramId(Integer programId) {
-    // TODO: I had to do this to prevent cached data
     this.harmonizationServiceDAO.evictCache();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
-            .createSQLQuery("select p.* from patient_program p where p.program_id=" + programId)
-            .addEntity(PatientProgram.class);
+            .createSQLQuery("select p.* from patient_program p where p.program_id=:programId")
+            .addEntity(PatientProgram.class)
+            .setInteger("programId", programId);
 
     return query.list();
   }
 
   @SuppressWarnings("unchecked")
   public List<ProgramWorkflow> findProgramWorkflowsByProgramId(Integer programId) {
-    // TODO: I had to do this to prevent cached data
     this.harmonizationServiceDAO.evictCache();
     final Query query =
         this.sessionFactory
             .getCurrentSession()
-            .createSQLQuery("select p.* from program_workflow p where p.program_id=" + programId)
-            .addEntity(ProgramWorkflow.class);
+            .createSQLQuery("select p.* from program_workflow p where p.program_id=:programId")
+            .addEntity(ProgramWorkflow.class)
+            .setInteger("programId", programId);
 
     return query.list();
   }
@@ -113,9 +112,8 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
     return (boolean)
         this.sessionFactory
             .getCurrentSession()
-            .createSQLQuery(
-                String.format(
-                    "select swappable from program where program_id = %s ", program.getId()))
+            .createSQLQuery("select swappable from program where program_id = :programId ")
+            .setInteger("programId", program.getId())
             .uniqueResult();
   }
 
@@ -133,9 +131,8 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
     return (Integer)
         this.sessionFactory
             .getCurrentSession()
-            .createSQLQuery(
-                String.format(
-                    "select concept_id from _program where program_id = %s ", program.getId()))
+            .createSQLQuery("select concept_id from _program where program_id = :programId ")
+            .setInteger("programId", program.getId())
             .uniqueResult();
   }
 
@@ -144,7 +141,7 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
   public List<Program> findAllSwappable() throws DAOException {
     return this.sessionFactory
         .getCurrentSession()
-        .createSQLQuery(String.format("select program.* from program where swappable = true "))
+        .createSQLQuery("select program.* from program where swappable = true ")
         .addEntity(Program.class)
         .list();
   }
@@ -154,7 +151,7 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
   public List<Program> findAllNotSwappable() throws DAOException {
     return this.sessionFactory
         .getCurrentSession()
-        .createSQLQuery(String.format("select program.* from program where swappable = false "))
+        .createSQLQuery("select program.* from program where swappable = false ")
         .addEntity(Program.class)
         .list();
   }
@@ -259,8 +256,8 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
   public void deleteProgram(Program program) throws DAOException {
     this.sessionFactory
         .getCurrentSession()
-        .createSQLQuery(
-            String.format("delete from program where program_id =%s ", program.getProgramId()))
+        .createSQLQuery("delete from program where program_id =:programId ")
+        .setInteger("programId", program.getProgramId())
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }

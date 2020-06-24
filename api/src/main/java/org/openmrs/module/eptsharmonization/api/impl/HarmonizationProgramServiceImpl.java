@@ -92,7 +92,7 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
     this.harmonizationDAO.evictCache();
     List<Program> allMDS = harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
     List<Program> allPDS = harmonizationProgramServiceDAO.findAllProductionServerPrograms();
-    List<Program> mdsPrograms = this.removeElementsWithDifferentIDsAndUUIDs(allMDS, allPDS);
+    List<Program> mdsPrograms = this.removeElementsWithDifferentIDsAndSameUUIDs(allMDS, allPDS);
     allMDS.removeAll(allPDS);
     mdsPrograms.removeAll(allMDS);
     return DTOUtils.fromPrograms(mdsPrograms);
@@ -106,7 +106,7 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
     this.harmonizationDAO.evictCache();
     List<Program> allPDS = harmonizationProgramServiceDAO.findAllProductionServerPrograms();
     List<Program> allMDS = harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
-    List<Program> pdsPrograms = this.removeElementsWithDifferentIDsAndUUIDs(allPDS, allMDS);
+    List<Program> pdsPrograms = this.removeElementsWithDifferentIDsAndSameUUIDs(allPDS, allMDS);
     allPDS.removeAll(allMDS);
     pdsPrograms.removeAll(allPDS);
     return DTOUtils.fromPrograms(pdsPrograms);
@@ -366,7 +366,7 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
     }
   }
 
-  private List<Program> removeElementsWithDifferentIDsAndUUIDs(
+  private List<Program> removeElementsWithDifferentIDsAndSameUUIDs(
       List<Program> mdsPrograms, List<Program> pdsPrograms) {
     List<Program> auxMDS = new ArrayList<>();
     for (Program mdsProgram : mdsPrograms) {
@@ -388,7 +388,7 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
     for (Program mdsItem : allMDS) {
       for (Program pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
-            && mdsItem.getId() == pdsItem.getId()
+            && mdsItem.getId().equals(pdsItem.getId())
             && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
@@ -403,7 +403,8 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
     Map<String, List<Program>> map = new TreeMap<>();
     for (Program mdsItem : allMDS) {
       for (Program pdsItem : allPDS) {
-        if (mdsItem.getUuid().equals(pdsItem.getUuid()) && mdsItem.getId() != pdsItem.getId()) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid())
+            && !mdsItem.getId().equals(pdsItem.getId())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }
@@ -429,14 +430,16 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
 
   private void updateToNextAvailableID(
       Program program,
-      List<PatientProgram> relatedEncounters,
+      List<PatientProgram> relatedPatientPrograms,
       List<ProgramWorkflow> relatedProgramWorkflow) {
     Program updated = this.harmonizationProgramServiceDAO.updateToNextAvailableId(program);
-    for (ProgramWorkflow form : relatedProgramWorkflow) {
-      this.harmonizationProgramServiceDAO.updateProgramWorkflow(form, updated.getProgramId());
+    for (ProgramWorkflow programWorkflow : relatedProgramWorkflow) {
+      this.harmonizationProgramServiceDAO.updateProgramWorkflow(
+          programWorkflow, updated.getProgramId());
     }
-    for (PatientProgram encounter : relatedEncounters) {
-      this.harmonizationProgramServiceDAO.updatePatientProgram(encounter, updated.getProgramId());
+    for (PatientProgram patientProgram : relatedPatientPrograms) {
+      this.harmonizationProgramServiceDAO.updatePatientProgram(
+          patientProgram, updated.getProgramId());
     }
   }
 
