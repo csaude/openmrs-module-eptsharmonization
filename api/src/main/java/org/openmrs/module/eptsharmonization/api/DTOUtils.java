@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.EncounterType;
 import org.openmrs.PersonAttributeType;
+import org.openmrs.Program;
 import org.openmrs.RelationshipType;
 import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 
@@ -35,10 +37,9 @@ public class DTOUtils {
     return new EncounterTypeDTO(encounterType);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public static List<PersonAttributeTypeDTO> fromPersonAttributeTypes(
       List<PersonAttributeType> personAttributeTypes) {
-    List<PersonAttributeTypeDTO> result = new ArrayList();
+    List<PersonAttributeTypeDTO> result = new ArrayList<>();
 
     for (PersonAttributeType personAttributeType : personAttributeTypes) {
       result.add(new PersonAttributeTypeDTO(personAttributeType));
@@ -59,6 +60,27 @@ public class DTOUtils {
   public static PersonAttributeTypeDTO fromPersonAttributeType(
       PersonAttributeType personAttributeType) {
     return new PersonAttributeTypeDTO(personAttributeType);
+  }
+
+  public static List<ProgramDTO> fromPrograms(List<Program> programs) {
+    List<ProgramDTO> result = new ArrayList<>();
+
+    for (Program program : programs) {
+      result.add(new ProgramDTO(program));
+    }
+    return result;
+  }
+
+  public static List<Program> fromProgramDTOs(List<ProgramDTO> programDTOs) {
+    List<Program> result = new ArrayList<>();
+    for (ProgramDTO programDTO : programDTOs) {
+      result.add(programDTO.getProgram());
+    }
+    return result;
+  }
+
+  public static ProgramDTO fromProgram(Program program) {
+    return new ProgramDTO(program);
   }
 
   public static List<VisitTypeDTO> fromVisitTypes(final List<VisitType> visitTypes) {

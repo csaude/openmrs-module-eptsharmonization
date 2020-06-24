@@ -34,6 +34,16 @@ public class HarmonizationUtils {
             + "  where _person_attribute_type.person_attribute_type_id = person_attribute_type.person_attribute_type_id    "
             + "  and _person_attribute_type.uuid = person_attribute_type.uuid)) as a)                            ");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append(
+        "update program set swappable = true                      "
+            + "  where program_id in(  select a.* from(                  "
+            + "   select program.program_id from program  "
+            + "   where NOT EXISTS (select * from _program "
+            + "  where _program.program_id = program.program_id    "
+            + "  and _program.uuid = program.uuid)) as a)                            ");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
   public static <T extends OpenmrsMetadata>

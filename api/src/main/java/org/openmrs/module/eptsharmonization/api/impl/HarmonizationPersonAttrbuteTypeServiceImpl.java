@@ -471,9 +471,7 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
   public PersonAttributeType findProductionPersonAttributeTypeByUuid(String uuid)
       throws APIException {
     this.harmonizationDAO.evictCache();
-    PersonAttributeType result =
-        this.harmonizationPersonAttributeTypeServiceDAO.findPDSPersonAttributeTypeByUuid(uuid);
-    return result;
+    return personService.getPersonAttributeTypeByUuid(uuid);
   }
 
   @Override

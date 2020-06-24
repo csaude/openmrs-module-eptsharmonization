@@ -43,7 +43,14 @@
 		<name>View Person Attribute Types</name>
 		<description>Able to view Person Attribute Types</description>
 	</privilege>
-
+	<privilege>
+		<name>Manage Program</name>
+		<description>Able to add/edit/retire Program</description>
+	</privilege>
+	<privilege>
+		<name>View Program</name>
+		<description>Able to view Program</description>
+	</privilege>
 
 	<!-- Required Global Properties <globalProperty> <property>@MODULE_ID@.someProperty</property> 
 		<defaultValue></defaultValue> <description> A description of the global property 
