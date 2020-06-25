@@ -23,6 +23,10 @@
 				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeRelationshipType.form"><spring:message
 				code="eptsharmonization.relationshiptype.harmonize" /></a>
 	</li>
+	<li><a
+		href="${pageContext.request.contextPath}/module/eptsharmonization/programWorkflows/harmonizeProgramWorkflowsList.form"><spring:message
+				code="eptsharmonization.harmonize.programworkflows" /></a></li>
+	</li>
 		
 	<!-- Add further links here -->
 </ul>
