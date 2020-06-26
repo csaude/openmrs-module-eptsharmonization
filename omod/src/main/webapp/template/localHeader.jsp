@@ -28,6 +28,10 @@
 				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationAttributeType.form"><spring:message
 				code="eptsharmonization.locationattributetype.harmonize" /></a>
 	</li>
+	<li>
+		<a		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationTag.form"><spring:message
+				code="eptsharmonization.locationtag.harmonize" /></a>
+	</li>
 		
 	<!-- Add further links here -->
 </ul>

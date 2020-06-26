@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.EncounterType;
 import org.openmrs.LocationAttributeType;
+import org.openmrs.LocationTag;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.Program;
 import org.openmrs.RelationshipType;
 import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
@@ -133,6 +135,22 @@ public class DTOUtils {
     List<LocationAttributeType> result = new ArrayList<>();
     for (LocationAttributeTypeDTO locationAttributeTypeDTO : locationAttributeTypeDTOs) {
       result.add(locationAttributeTypeDTO.getLocationAttributeType());
+    }
+    return result;
+  }
+
+  public static List<LocationTagDTO> fromLocationTags(final List<LocationTag> relationshipTypes) {
+    List<LocationTagDTO> locationTagDTOList = new ArrayList<>();
+    for (LocationTag relationshipType : relationshipTypes) {
+      locationTagDTOList.add(new LocationTagDTO(relationshipType));
+    }
+    return locationTagDTOList;
+  }
+
+  public static List<LocationTag> fromLocationTagDTOs(List<LocationTagDTO> relationshipTypeDTOs) {
+    List<LocationTag> result = new ArrayList<>();
+    for (LocationTagDTO relationshipTypeDTO : relationshipTypeDTOs) {
+      result.add(relationshipTypeDTO.getLocationTag());
     }
     return result;
   }
