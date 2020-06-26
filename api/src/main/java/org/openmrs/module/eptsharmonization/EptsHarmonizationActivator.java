@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.dataexchange.DataImporter;
+import org.openmrs.util.DatabaseUpdater;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
@@ -82,6 +83,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     dataImporter.importData("relationship-types.xml");
     log.info(" _relationship_type metadata imported");
 
+    log.info("Importing _location_attribute_type metadata");
+    dataImporter.importData("location-attribute-types.xml");
+    log.info(" _location_attribute_type metadata imported");
+
     StringBuilder sb = new StringBuilder();
     sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -122,13 +127,20 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("DROP TABLE IF EXISTS `_program`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_location_attribute_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `person_attribute_type` DROP `swappable`");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
+    if (columnExists("encounter_type", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+
+    if (columnExists("person_attribute_type", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `person_attribute_type` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
 
     sb = new StringBuilder();
     sb.append("ALTER TABLE `program` DROP `swappable`");
@@ -153,6 +165,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb =
         new StringBuilder(
             "delete from liquibasechangelog where ID ='eptsharmonization_20200622-1547';");
+
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200624-1242';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
@@ -161,6 +179,17 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
 
     if (!Files.exists(dataDirectoryPath)) {
       Files.createDirectories(dataDirectoryPath);
+    }
+  }
+
+  private boolean columnExists(String table, String column) {
+    try {
+      return DatabaseUpdater.getConnection()
+          .getMetaData()
+          .getColumns(null, null, table, column)
+          .next();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }
