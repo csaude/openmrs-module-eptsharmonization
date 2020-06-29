@@ -3,15 +3,15 @@
 	<li class="first"><a
 		href="${pageContext.request.contextPath}/admin"><spring:message
 				code="admin.title.short" /></a></li>
-	<li>
-		<a
+	<li><a
 		href="${pageContext.request.contextPath}/module/eptsharmonization/encounterType/harmonizeEncounterTypeList.form"><spring:message
-				code="eptsharmonization.harmonize.encountertype" /></a>
-	</li>
-	<li>
-		<a
+				code="eptsharmonization.harmonize.encountertype" /></a></li>
+	<li><a
 		href="${pageContext.request.contextPath}/module/eptsharmonization/personAttributeTypes/harmonizePersonAttributeTypesList.form"><spring:message
-				code="eptsharmonization.harmonize.personattributetypes" /></a>
+				code="eptsharmonization.harmonize.personattributetypes" /></a></li>
+	<li><a
+		href="${pageContext.request.contextPath}/module/eptsharmonization/programs/harmonizeProgramsList.form"><spring:message
+				code="eptsharmonization.harmonize.programs" /></a></li>
 	</li>
 	<li>
 		<a
@@ -22,6 +22,11 @@
 		<a
 				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeRelationshipType.form"><spring:message
 				code="eptsharmonization.relationshiptype.harmonize" /></a>
+	</li>
+	<li>
+		<a
+				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationAttributeType.form"><spring:message
+				code="eptsharmonization.locationattributetype.harmonize" /></a>
 	</li>
 		
 	<!-- Add further links here -->

@@ -66,7 +66,6 @@
 				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
 		</modifySql>
 	</changeSet>
-	
 
 	<changeSet author="Hamilton" id="20200423-0840">
 		<preConditions onFail="MARK_RAN">
@@ -94,7 +93,8 @@
 			<column name="foreign_key" type="int">
 				<constraints nullable="true" />
 			</column>
-			<column defaultValueBoolean="false" name="searchable" type="BOOLEAN">
+			<column defaultValueBoolean="false" name="searchable"
+				type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column defaultValueNumeric="0" name="creator" type="int">
@@ -109,7 +109,8 @@
 			<column name="date_changed" type="DATETIME">
 				<constraints nullable="true" />
 			</column>
-			<column defaultValueBoolean="false" name="retired" type="BOOLEAN">
+			<column defaultValueBoolean="false" name="retired"
+				type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="retired_by" type="int" />
@@ -120,6 +121,55 @@
 				<constraints nullable="true" />
 			</column>
 			<column name="sort_weight" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet author="Hamilton" id="20200616-1620">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_program" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _program table
+		</comment>
+		<createTable tableName="_program">
+			<column autoIncrement="true" name="program_id" type="int">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="concept_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="changed_by" type="int">
+				<constraints nullable="true" />
+			</column>
+			<column name="date_changed" type="DATETIME">
+				<constraints nullable="true" />
+			</column>
+			<column defaultValueBoolean="false" name="retired"
+				type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="name" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="uuid" type="char(38)" />
+			<column name="outcomes_concept_id" type="int">
 				<constraints nullable="true" />
 			</column>
 		</createTable>
@@ -197,6 +247,46 @@
 		</createTable>
 		<modifySql dbms="mssql">
 			<replace replace="CHAR(38)" with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet id="eptsharmonization_20200624-1242" author="Willa Mhawila">
+		<createTable tableName="_location_attribute_type">
+			<column name="location_attribute_type_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="varchar(1024)" />
+			<column name="datatype" type="varchar(255)" />
+			<column name="datatype_config" type="text" />
+			<column name="preferred_handler" type="varchar(255)" />
+			<column name="handler_config" type="text" />
+			<column name="min_occurs" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="max_occurs" type="int"></column>
+			<column name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="changed_by" type="int" />
+			<column name="date_changed" type="datetime" />
+			<column name="retired" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="retired_by" type="int" />
+			<column name="date_retired" type="datetime" />
+			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true" />
+			</column>
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)" with="UNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()"/>
 		</modifySql>
 	</changeSet>
 </databaseChangeLog>

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <_location_attribute_type location_attribute_type_id="1" name="SISMA Code" description="Unique facility code allocated by the Ministry of Health"
+                              datatype="org.openmrs.customdatatype.datatype.RegexValidatedTextDatatype" datatype_config="\d{5,10}"
+                              preferred_handler="" handler_config="" min_occurs="0" max_occurs="1" creator="1" date_created="2018-06-11 01:07:00"
+                              retired="false" uuid="132895aa-1c88-11e8-b6fd-7395830b63f3"/>
+    <_location_attribute_type location_attribute_type_id="2" name="DATIM Code" description="Code of Health Facility In Datim"
+                              datatype="org.openmrs.customdatatype.datatype.FreeTextDatatype" datatype_config=""
+                              preferred_handler="" handler_config="" min_occurs="0" max_occurs="1" creator="1" date_created="2020-06-23 11:40:24"
+                              retired="false" uuid="d2ee1c07-4bfb-476e-b60f-96d902fcca79"/>
+    <_location_attribute_type location_attribute_type_id="3" name="DevResult Code" description="Code of Health Facility in DevResult System"
+                              datatype="org.openmrs.customdatatype.datatype.FreeTextDatatype" datatype_config="" preferred_handler=""
+                              handler_config="" min_occurs="0" max_occurs="1" creator="1" date_created="2020-06-23 11:41:54"
+                              retired="false" uuid="97c43323-1928-4749-bf29-a5517a337a24"/>
+</dataset>

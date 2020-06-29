@@ -293,9 +293,8 @@ public class HarmonizePersonAttributeTypesController {
       HttpServletRequest request) {
 
     PersonAttributeType productionPersonAttributeType =
-        Context.getPersonService()
-            .getPersonAttributeTypeByUuid(
-                request.getParameter("productionServerPersonAttributeTypeUuID"));
+        this.harmonizationPersonAttributeTypeService.findMetadataPersonAttributeTypeByUuid(
+            request.getParameter("productionServerPersonAttributeTypeUuID"));
 
     @SuppressWarnings("unchecked")
     Map<PersonAttributeType, PersonAttributeType> manualHarmonizePersonAttributeTypes =

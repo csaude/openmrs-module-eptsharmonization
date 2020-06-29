@@ -3,11 +3,15 @@ package org.openmrs.module.eptsharmonization.api;
 import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.EncounterType;
+import org.openmrs.LocationAttributeType;
 import org.openmrs.PersonAttributeType;
+import org.openmrs.Program;
 import org.openmrs.RelationshipType;
 import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 
@@ -35,10 +39,9 @@ public class DTOUtils {
     return new EncounterTypeDTO(encounterType);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public static List<PersonAttributeTypeDTO> fromPersonAttributeTypes(
       List<PersonAttributeType> personAttributeTypes) {
-    List<PersonAttributeTypeDTO> result = new ArrayList();
+    List<PersonAttributeTypeDTO> result = new ArrayList<>();
 
     for (PersonAttributeType personAttributeType : personAttributeTypes) {
       result.add(new PersonAttributeTypeDTO(personAttributeType));
@@ -59,6 +62,27 @@ public class DTOUtils {
   public static PersonAttributeTypeDTO fromPersonAttributeType(
       PersonAttributeType personAttributeType) {
     return new PersonAttributeTypeDTO(personAttributeType);
+  }
+
+  public static List<ProgramDTO> fromPrograms(List<Program> programs) {
+    List<ProgramDTO> result = new ArrayList<>();
+
+    for (Program program : programs) {
+      result.add(new ProgramDTO(program));
+    }
+    return result;
+  }
+
+  public static List<Program> fromProgramDTOs(List<ProgramDTO> programDTOs) {
+    List<Program> result = new ArrayList<>();
+    for (ProgramDTO programDTO : programDTOs) {
+      result.add(programDTO.getProgram());
+    }
+    return result;
+  }
+
+  public static ProgramDTO fromProgram(Program program) {
+    return new ProgramDTO(program);
   }
 
   public static List<VisitTypeDTO> fromVisitTypes(final List<VisitType> visitTypes) {
@@ -91,6 +115,24 @@ public class DTOUtils {
     List<RelationshipType> result = new ArrayList<>();
     for (RelationshipTypeDTO relationshipTypeDTO : relationshipTypeDTOs) {
       result.add(relationshipTypeDTO.getRelationshipType());
+    }
+    return result;
+  }
+
+  public static List<LocationAttributeTypeDTO> fromLocationAttributeTypes(
+      final List<LocationAttributeType> locationAttributeTypes) {
+    List<LocationAttributeTypeDTO> locationAttributeTypeDTOList = new ArrayList<>();
+    for (LocationAttributeType locationAttributeType : locationAttributeTypes) {
+      locationAttributeTypeDTOList.add(new LocationAttributeTypeDTO(locationAttributeType));
+    }
+    return locationAttributeTypeDTOList;
+  }
+
+  public static List<LocationAttributeType> fromLocationAttributeTypeDTOs(
+      List<LocationAttributeTypeDTO> locationAttributeTypeDTOs) {
+    List<LocationAttributeType> result = new ArrayList<>();
+    for (LocationAttributeTypeDTO locationAttributeTypeDTO : locationAttributeTypeDTOs) {
+      result.add(locationAttributeTypeDTO.getLocationAttributeType());
     }
     return result;
   }
