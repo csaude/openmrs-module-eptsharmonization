@@ -1,13 +1,14 @@
 package org.openmrs.module.eptsharmonization.web.delegate;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.openmrs.EncounterType;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
@@ -33,10 +34,12 @@ public class HarmonizeEncounterTypeDelegate {
   public static List<String> SUMMARY_EXECUTED_SCENARIOS = new ArrayList<>();
   public static List<EncounterType> EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE = new ArrayList<>();
   private static List<EncounterType> ENCOUNTERTYPES_NOT_PROCESSED = new ArrayList<>();
+  private static List<EncounterType> MDS_ENCOUNTERTYPES_NOT_PROCESSED = new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<EncounterTypeDTO> encounterTypes) {
 
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
+
     for (EncounterTypeDTO encounterTypeDTO : encounterTypes) {
       HarmonizationItem item =
           new HarmonizationItem(encounterTypeDTO.getEncounterType().getUuid(), encounterTypeDTO);
@@ -44,13 +47,16 @@ public class HarmonizeEncounterTypeDelegate {
           this.harmonizationEncounterTypeService.getNumberOfAffectedEncounters(encounterTypeDTO));
       item.setFormsCount(
           this.harmonizationEncounterTypeService.getNumberOfAffectedForms(encounterTypeDTO));
-      items.add(item);
+      if (!items.contains(item)) {
+        items.add(item);
+      }
     }
     return new HarmonizationData(items);
   }
 
   public HarmonizationData getConvertedData(Map<String, List<EncounterTypeDTO>> mapEncounterTypes) {
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
+
     for (String key : mapEncounterTypes.keySet()) {
       List<EncounterTypeDTO> eTypes = mapEncounterTypes.get(key);
       if (eTypes != null) {
@@ -59,7 +65,9 @@ public class HarmonizeEncounterTypeDelegate {
             this.harmonizationEncounterTypeService.getNumberOfAffectedEncounters(eTypes.get(1)));
         item.setFormsCount(
             this.harmonizationEncounterTypeService.getNumberOfAffectedForms(eTypes.get(1)));
-        items.add(item);
+        if (!items.contains(item)) {
+          items.add(item);
+        }
       }
     }
     return new HarmonizationData(items);
@@ -144,16 +152,23 @@ public class HarmonizeEncounterTypeDelegate {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void updateProductionToExportList(HarmonizationData productionItemsToExport) {
 
     HarmonizationData newItemsToExport =
         getConvertedData(DTOUtils.fromEncounterTypes(ENCOUNTERTYPES_NOT_PROCESSED));
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
 
-    Set<HarmonizationItem> itemsToRemove =
+    List<HarmonizationItem> itemsToRemove =
         getConvertedData(DTOUtils.fromEncounterTypes(EXECUTED_ENCOUNTERTYPES_MANUALLY_CACHE))
             .getItems();
     productionItemsToExport.getItems().removeAll(itemsToRemove);
+
+    List<HarmonizationItem> items = productionItemsToExport.getItems();
+
+    BeanComparator comparator = new BeanComparator("value.encounterType.name");
+    Collections.sort(items, comparator);
+    productionItemsToExport.setItems(items);
   }
 
   private void setSwappableDataClones(
@@ -218,6 +233,7 @@ public class HarmonizeEncounterTypeDelegate {
       if (item.isSelected()) {
         list.put((String) item.getKey(), value);
       } else {
+        MDS_ENCOUNTERTYPES_NOT_PROCESSED.add(value.get(0).getEncounterType());
         ENCOUNTERTYPES_NOT_PROCESSED.add(value.get(1).getEncounterType());
       }
     }
@@ -240,6 +256,7 @@ public class HarmonizeEncounterTypeDelegate {
       if (item.isSelected()) {
         list.put((String) item.getKey(), value);
       } else {
+        MDS_ENCOUNTERTYPES_NOT_PROCESSED.add(value.get(0).getEncounterType());
         ENCOUNTERTYPES_NOT_PROCESSED.add(value.get(1).getEncounterType());
       }
     }
@@ -250,5 +267,12 @@ public class HarmonizeEncounterTypeDelegate {
       logBuilder.appendLogForEncounterTypesWithDiferrentIdsAndEqualUUID(list);
       HarmonizeEncounterTypeController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<EncounterType> getMDSNotHarmonizedYet() {
+    Comparator<EncounterType> comp = new BeanComparator("encounterTypeId");
+    Collections.sort(MDS_ENCOUNTERTYPES_NOT_PROCESSED, comp);
+    return MDS_ENCOUNTERTYPES_NOT_PROCESSED;
   }
 }

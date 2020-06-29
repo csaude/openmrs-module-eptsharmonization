@@ -288,7 +288,9 @@ public class EncounterTypeHarmonizationCSVLog {
   }
 
   public static ByteArrayOutputStream exportEncounterTypeLogs(
-      String defaultLocationName, List<EncounterTypeDTO> data) {
+      String defaultLocationName,
+      List<EncounterTypeDTO> data,
+      List<EncounterType> metadataServerEncounterTypes) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -334,6 +336,32 @@ public class EncounterTypeHarmonizationCSVLog {
           throw new APIException("Unable to write record to CSV: " + e.getMessage());
         }
       }
+
+      printer.println();
+      printer.println();
+      printer.print("Encounter Types From Metadata Server ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+
+      for (EncounterType encounterType : metadataServerEncounterTypes) {
+
+        try {
+          printer.print(
+              String.format(
+                  "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
+                  encounterType.getId(),
+                  encounterType.getName(),
+                  encounterType.getDescription(),
+                  encounterType.getUuid()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+
       printer.flush();
     } catch (Exception e) {
       e.printStackTrace();

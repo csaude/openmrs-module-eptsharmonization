@@ -12,6 +12,7 @@
 package org.openmrs.module.eptsharmonization.api.db.hibernate;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import org.hibernate.SessionFactory;
 import org.openmrs.api.context.Context;
@@ -31,7 +32,7 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
   }
 
   @Override
-  public void setEnableCheckConstraints() throws Exception {
+  public void setEnableCheckConstraints() throws SQLException {
     Connection connection = sessionFactory.getCurrentSession().connection();
     Statement stmt = connection.createStatement();
     stmt.addBatch("SET FOREIGN_KEY_CHECKS=1");
@@ -40,7 +41,7 @@ public class HibernateHarmonizationServiceDAO implements HarmonizationServiceDAO
   }
 
   @Override
-  public void setDisabledCheckConstraints() throws Exception {
+  public void setDisabledCheckConstraints() throws SQLException {
     Connection connection = sessionFactory.getCurrentSession().connection();
     Statement stmt = connection.createStatement();
     stmt.addBatch("SET FOREIGN_KEY_CHECKS=0");
