@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.servlet.http.HttpSession;
 import org.openmrs.Program;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
@@ -37,7 +35,7 @@ public class HarmonizeProgramsDelegate {
 
   public HarmonizationData getConvertedData(List<ProgramDTO> programs) {
 
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
     for (ProgramDTO programDTO : programs) {
       HarmonizationItem item = new HarmonizationItem(programDTO.getProgram().getUuid(), programDTO);
       item.setEncountersCount(
@@ -50,7 +48,7 @@ public class HarmonizeProgramsDelegate {
   }
 
   public HarmonizationData getConvertedData(Map<String, List<ProgramDTO>> mapPrograms) {
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
     for (String key : mapPrograms.keySet()) {
       List<ProgramDTO> programs = mapPrograms.get(key);
       if (programs != null) {
@@ -150,7 +148,7 @@ public class HarmonizeProgramsDelegate {
         getConvertedData(DTOUtils.fromPrograms(PROGRAMS_NOT_PROCESSED));
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
 
-    Set<HarmonizationItem> itemsToRemove =
+    List<HarmonizationItem> itemsToRemove =
         getConvertedData(DTOUtils.fromPrograms(EXECUTED_PROGRAMS_MANUALLY_CACHE)).getItems();
     productionItemsToExport.getItems().removeAll(itemsToRemove);
   }
@@ -248,8 +246,8 @@ public class HarmonizeProgramsDelegate {
   public void processManualMapping(
       Map<Program, Program> manualHarmonizePrograms, Builder logBuilder) {
 
-    Set<HarmonizationItem> differntNamesItems = new TreeSet<>();
-    Set<HarmonizationItem> differntIDsItems = new TreeSet<>();
+    List<HarmonizationItem> differntNamesItems = new ArrayList<>();
+    List<HarmonizationItem> differntIDsItems = new ArrayList<>();
 
     Map<Program, Program> manualHarmonizeItens = new HashMap<>();
 

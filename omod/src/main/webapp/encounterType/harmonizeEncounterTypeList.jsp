@@ -16,6 +16,12 @@
 	<span> <spring:message
 			code="eptsharmonization.confirmAllHarmonization" /></span> <br />
 </div>
+
+<c:if test="${not empty errorProcessingManualMapping}">
+	<div id="error_msg">
+		<span>${errorProcessingManualMapping}</span>
+	</div>
+</c:if>
 <c:if test="${not empty harmonizedETSummary}">
 	<div id="openmrs_msg">
 		<b> <spring:message
@@ -30,7 +36,7 @@
 		<form method="post" action="harmonizeEncounterTypeListExportLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
-					style="width: 8.6em; padding: 6px; font-size: 6pt;"
+					style="width: 14.10em; padding: 1px; font-size: 8pt;"
 					value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
 					name="harmonizeAllEncounterTypes" />
 			</div>

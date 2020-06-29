@@ -148,37 +148,52 @@ public class HarmonizationUtils {
     final Map<String, List<AttributeType>> results = new HashMap<>();
     for (AttributeType ele1 : list1) {
       for (AttributeType ele2 : list2) {
-        String ele1DatatypeClassname = org.springframework.util.StringUtils.trimWhitespace(ele1.getDatatypeClassname());
-        String ele2DatatypeClassname = org.springframework.util.StringUtils.trimWhitespace(ele2.getDatatypeClassname());
-        boolean differentDatatypeClassname = ((org.springframework.util.StringUtils.isEmpty(ele1DatatypeClassname)
-                && !org.springframework.util.StringUtils.isEmpty(ele2DatatypeClassname))
+        String ele1DatatypeClassname =
+            org.springframework.util.StringUtils.trimWhitespace(ele1.getDatatypeClassname());
+        String ele2DatatypeClassname =
+            org.springframework.util.StringUtils.trimWhitespace(ele2.getDatatypeClassname());
+        boolean differentDatatypeClassname =
+            ((org.springframework.util.StringUtils.isEmpty(ele1DatatypeClassname)
+                    && !org.springframework.util.StringUtils.isEmpty(ele2DatatypeClassname))
                 || (!org.springframework.util.StringUtils.isEmpty(ele1DatatypeClassname)
-                && org.springframework.util.StringUtils.isEmpty(ele2DatatypeClassname))
+                    && org.springframework.util.StringUtils.isEmpty(ele2DatatypeClassname))
                 || !StringUtils.equals(ele1DatatypeClassname, ele2DatatypeClassname));
 
-        String ele1DatatypeConfig = org.springframework.util.StringUtils.trimWhitespace(ele1.getDatatypeConfig());
-        String ele2DatatypeConfig = org.springframework.util.StringUtils.trimWhitespace(ele2.getDatatypeConfig());
-        boolean differentDatatypeConfig = ((org.springframework.util.StringUtils.isEmpty(ele1DatatypeConfig)
-                && !org.springframework.util.StringUtils.isEmpty(ele2DatatypeConfig))
+        String ele1DatatypeConfig =
+            org.springframework.util.StringUtils.trimWhitespace(ele1.getDatatypeConfig());
+        String ele2DatatypeConfig =
+            org.springframework.util.StringUtils.trimWhitespace(ele2.getDatatypeConfig());
+        boolean differentDatatypeConfig =
+            ((org.springframework.util.StringUtils.isEmpty(ele1DatatypeConfig)
+                    && !org.springframework.util.StringUtils.isEmpty(ele2DatatypeConfig))
                 || (!org.springframework.util.StringUtils.isEmpty(ele1DatatypeConfig)
-                && org.springframework.util.StringUtils.isEmpty(ele2DatatypeConfig))
+                    && org.springframework.util.StringUtils.isEmpty(ele2DatatypeConfig))
                 || !StringUtils.equals(ele1DatatypeConfig, ele2DatatypeConfig));
 
-        String ele1HandlerConfig = org.springframework.util.StringUtils.trimWhitespace(ele1.getHandlerConfig());
-        String ele2HandlerConfig = org.springframework.util.StringUtils.trimWhitespace(ele2.getHandlerConfig());
-        boolean differentHandlerConfig = ((org.springframework.util.StringUtils.isEmpty(ele1HandlerConfig)
-                && !org.springframework.util.StringUtils.isEmpty(ele2HandlerConfig))
+        String ele1HandlerConfig =
+            org.springframework.util.StringUtils.trimWhitespace(ele1.getHandlerConfig());
+        String ele2HandlerConfig =
+            org.springframework.util.StringUtils.trimWhitespace(ele2.getHandlerConfig());
+        boolean differentHandlerConfig =
+            ((org.springframework.util.StringUtils.isEmpty(ele1HandlerConfig)
+                    && !org.springframework.util.StringUtils.isEmpty(ele2HandlerConfig))
                 || (!org.springframework.util.StringUtils.isEmpty(ele1HandlerConfig)
-                && org.springframework.util.StringUtils.isEmpty(ele2HandlerConfig))
+                    && org.springframework.util.StringUtils.isEmpty(ele2HandlerConfig))
                 || !StringUtils.equals(ele1HandlerConfig, ele2HandlerConfig));
 
-        String ele1PreferredHandlerClassname = org.springframework.util.StringUtils.trimWhitespace(ele1.getPreferredHandlerClassname());
-        String ele2PreferredHandlerClassname = org.springframework.util.StringUtils.trimWhitespace(ele2.getPreferredHandlerClassname());
-        boolean differentPreferredHandlerClassname = ((org.springframework.util.StringUtils.isEmpty(ele1PreferredHandlerClassname)
-                && !org.springframework.util.StringUtils.isEmpty(ele2PreferredHandlerClassname))
+        String ele1PreferredHandlerClassname =
+            org.springframework.util.StringUtils.trimWhitespace(
+                ele1.getPreferredHandlerClassname());
+        String ele2PreferredHandlerClassname =
+            org.springframework.util.StringUtils.trimWhitespace(
+                ele2.getPreferredHandlerClassname());
+        boolean differentPreferredHandlerClassname =
+            ((org.springframework.util.StringUtils.isEmpty(ele1PreferredHandlerClassname)
+                    && !org.springframework.util.StringUtils.isEmpty(ele2PreferredHandlerClassname))
                 || (!org.springframework.util.StringUtils.isEmpty(ele1PreferredHandlerClassname)
-                && org.springframework.util.StringUtils.isEmpty(ele2PreferredHandlerClassname))
-                || !StringUtils.equals(ele1PreferredHandlerClassname, ele2PreferredHandlerClassname));
+                    && org.springframework.util.StringUtils.isEmpty(ele2PreferredHandlerClassname))
+                || !StringUtils.equals(
+                    ele1PreferredHandlerClassname, ele2PreferredHandlerClassname));
 
         boolean differentConfigs =
             (!StringUtils.equalsIgnoreCase(ele1.getName(), ele2.getName())

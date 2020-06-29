@@ -1,23 +1,23 @@
 package org.openmrs.module.eptsharmonization.web.bean;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 public class HarmonizationData implements Serializable {
 
   private static final long serialVersionUID = 1178645170662134449L;
 
-  private Set<HarmonizationItem> items;
+  private List<HarmonizationItem> items;
 
-  public HarmonizationData(Set<HarmonizationItem> items) {
+  public HarmonizationData(List<HarmonizationItem> items) {
     this.items = items;
   }
 
-  public Set<HarmonizationItem> getItems() {
+  public List<HarmonizationItem> getItems() {
     return items;
   }
 
-  public void setItems(Set<HarmonizationItem> items) {
+  public void setItems(List<HarmonizationItem> items) {
     this.items = items;
   }
 }
