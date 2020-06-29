@@ -46,6 +46,16 @@ public class HarmonizationUtils {
             + "  where _program.program_id = program.program_id    "
             + "  and _program.uuid = program.uuid)) as a)                            ");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
+    
+    sb = new StringBuilder();
+    sb.append(
+        "update form set swappable = true                          "
+            + "  where form_id in(  select a.* from(                  "
+            + "   select form.form_id from form                     "
+            + "   where NOT EXISTS (select * from _form             "
+            + "  where _form.form_id = form.form_id                "
+            + "  and _form.uuid = form.uuid)) as a)                            ");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
   public static <T extends OpenmrsMetadata>

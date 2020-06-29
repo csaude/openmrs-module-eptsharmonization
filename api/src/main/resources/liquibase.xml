@@ -289,4 +289,56 @@
 			<replace replace="CHAR(38)" with="UNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()"/>
 		</modifySql>
 	</changeSet>
+		<changeSet author="Guimino" id="20200601-1000">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_form" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _form table
+		</comment>
+		
+		<createTable tableName="_form">
+			<column autoIncrement="true" name="form_id"
+				type="int">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue=""  name="version" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="build" type="int" />
+			<column name="published" type="tinyint" defaultValueNumeric="0">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="text" />
+			<column name="encounter_type" type="int" />
+			<column name="template" type="mediumtext" />
+			<column name="xslt" type="mediumtext" />
+			<column defaultValueNumeric="0" name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column name="changed_by" type="int" />
+			<column name="date_changed" type="datetime" />
+			<column defaultValueBoolean="false" name="retired"
+				type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="retired_by" type="int" />
+			<column name="date_retired" type="DATETIME" />
+			<column name="retire_reason" type="varchar(255)" />
+			<column name="uuid" type="char(38)" />
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
+	
 </databaseChangeLog>
