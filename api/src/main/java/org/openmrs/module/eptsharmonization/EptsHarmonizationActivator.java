@@ -142,9 +142,11 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `program` DROP `swappable`");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
+    if (columnExists("program", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `program` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
 
     sb = new StringBuilder();
     sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
