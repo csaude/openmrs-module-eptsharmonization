@@ -91,6 +91,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     dataImporter.importData("location-tags.xml");
     log.info(" _location_tag metadata imported");
 
+    log.info("Importing _concept metadata");
+    dataImporter.importData("concepts.xml");
+    log.info("_concept metadata imported");
+
     StringBuilder sb = new StringBuilder();
     sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -128,6 +132,9 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_location_tag`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_concept`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder();
@@ -184,6 +191,11 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb =
         new StringBuilder(
             "delete from liquibasechangelog where ID ='eptsharmonization_20200626-1520';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200701-1657';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 

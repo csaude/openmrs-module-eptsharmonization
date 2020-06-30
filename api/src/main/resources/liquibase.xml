@@ -180,6 +180,14 @@
 	</changeSet>
 
 	<changeSet id="eptsharmonization_20200526-1507" author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_visit_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _visit_type table
+		</comment>
 		<createTable tableName="_visit_type">
 			<column name="visit_type_id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
@@ -212,6 +220,14 @@
 	</changeSet>
 
 	<changeSet id="eptsharmonization_20200622-1547" author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_relationship_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _relationship_type table
+		</comment>
 		<createTable tableName="_relationship_type">
 			<column autoIncrement="true" name="relationship_type_id" type="int">
 				<constraints nullable="false" primaryKey="true"/>
@@ -251,6 +267,14 @@
 	</changeSet>
 
 	<changeSet id="eptsharmonization_20200624-1242" author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_location_attribute_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _location_attribute_type table
+		</comment>
 		<createTable tableName="_location_attribute_type">
 			<column name="location_attribute_type_id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false" />
@@ -291,6 +315,14 @@
 	</changeSet>
 
 	<changeSet author="Willa Mhawila" id="eptsharmonization_20200626-1520">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_location_tag" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _location_tag table
+		</comment>
 		<createTable tableName="_location_tag">
 			<column name="location_tag_id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
@@ -311,6 +343,53 @@
 			<column name="retired_by" type="int" />
 			<column name="date_retired" type="datetime" />
 			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+			<column name="uuid" type="char(38)" />
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)" with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
+
+	<changeSet author="Willa aka Baba Wawili" id="eptsharmonization_20200701-1657">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_concept" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _concept table
+		</comment>
+		<createTable tableName="_concept">
+			<column autoIncrement="true" name="concept_id" type="int">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column defaultValueBoolean="false" name="retired" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
+			<column name="short_name" type="varchar(255)"/>
+			<column name="description" type="text"/>
+			<column name="form_text" type="text"/>
+			<column defaultValueNumeric="0" name="datatype_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column defaultValueNumeric="0" name="class_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column defaultValueBoolean="false" name="is_set" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
+			<column defaultValueNumeric="0" name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
+			<column name="version" type="varchar(50)"/>
+			<column name="changed_by" type="int"/>
+			<column name="date_changed" type="DATETIME"/>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="DATETIME"/>
+			<column name="retire_reason" type="varchar(255)"/>
 			<column name="uuid" type="char(38)" />
 		</createTable>
 		<modifySql dbms="mssql">
