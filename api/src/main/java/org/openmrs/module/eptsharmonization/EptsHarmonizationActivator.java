@@ -87,6 +87,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     dataImporter.importData("location-attribute-types.xml");
     log.info(" _location_attribute_type metadata imported");
 
+    log.info("Importing _location_tag metadata");
+    dataImporter.importData("location-tags.xml");
+    log.info(" _location_tag metadata imported");
+
     StringBuilder sb = new StringBuilder();
     sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -123,6 +127,9 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb = new StringBuilder("DROP TABLE IF EXISTS `_relationship_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_location_tag`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     sb = new StringBuilder();
     sb.append("DROP TABLE IF EXISTS `_program`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -142,9 +149,11 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `program` DROP `swappable`");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
+    if (columnExists("program", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `program` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
 
     sb = new StringBuilder();
     sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
@@ -165,12 +174,16 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb =
         new StringBuilder(
             "delete from liquibasechangelog where ID ='eptsharmonization_20200622-1547';");
-
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =
         new StringBuilder(
             "delete from liquibasechangelog where ID ='eptsharmonization_20200624-1242';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200626-1520';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
