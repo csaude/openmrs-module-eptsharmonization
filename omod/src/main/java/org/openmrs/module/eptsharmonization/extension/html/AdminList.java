@@ -54,6 +54,9 @@ public class AdminList extends AdministrationSectionExt {
     map.put(
         "module/eptsharmonization/harmonizeLocationAttributeType.form",
         "eptsharmonization.locationattributetype.harmonize");
+    map.put(
+        "module/eptsharmonization/harmonizeLocationTag.form",
+        "eptsharmonization.locationtag.harmonize");
     return map;
   }
 }
