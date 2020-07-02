@@ -306,6 +306,11 @@
 	</changeSet>
 
 	<changeSet author="Willa Mhawila" id="eptsharmonization_20200626-1520">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_location_tag" />
+			</not>
+		</preConditions>
 		<createTable tableName="_location_tag">
 			<column name="location_tag_id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
