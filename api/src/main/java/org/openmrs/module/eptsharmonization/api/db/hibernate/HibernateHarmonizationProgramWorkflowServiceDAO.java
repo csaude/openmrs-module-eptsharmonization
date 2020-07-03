@@ -17,6 +17,7 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.ConceptStateConversion;
+import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
 import org.openmrs.api.context.Context;
@@ -44,10 +45,16 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
     this.harmonizationServiceDAO = harmonizationServiceDAO;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<ProgramWorkflow> findAllMetadataServerProgramWorkflows() throws DAOException {
     this.harmonizationServiceDAO.evictCache();
-    return this.findMDSProgramWorkflows();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select p.* from _program_workflow p")
+            .addEntity(ProgramWorkflow.class);
+    return query.list();
   }
 
   @SuppressWarnings("unchecked")
@@ -92,21 +99,6 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
     return query.list();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<ProgramWorkflow> findPDSProgramWorkflowsNotExistsInMDServer() throws DAOException {
-    final Query query =
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select program_workflow.* from program_workflow "
-                    + "   where NOT EXISTS (select * from _program_workflow "
-                    + "        where _program_workflow.program_workflow_id = program_workflow.program_workflow_id "
-                    + "         and _program_workflow.uuid = program_workflow.uuid)")
-            .addEntity(ProgramWorkflow.class);
-    return query.list();
-  }
-
   public ProgramWorkflow getProgramWorkflowById(Integer programWorkflowId) {
     this.harmonizationServiceDAO.evictCache();
     final Query query =
@@ -139,7 +131,7 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
     return ++maxId;
   }
 
-  private Integer getProgramWorkflowProgramId(ProgramWorkflow programWorkflow) {
+  private Integer getProgramWorkflowProgramId(ProgramWorkflow programWorkflow) throws DAOException {
     return (Integer)
         this.sessionFactory
             .getCurrentSession()
@@ -149,36 +141,46 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
             .uniqueResult();
   }
 
-  private Integer getProgramWorkflowConceptId(ProgramWorkflow programWorkflow) {
-    return (Integer)
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select concept_id from _program_workflow where program_workflow_id = :programWorkflowId ")
-            .setInteger("programWorkflowId", programWorkflow.getId())
-            .uniqueResult();
+  public Integer getProgramWorkflowConceptId(
+      ProgramWorkflow programWorkflow, boolean isFromMetadata) throws DAOException {
+    return isFromMetadata
+        ? (Integer)
+            this.sessionFactory
+                .getCurrentSession()
+                .createSQLQuery(
+                    "select concept_id from _program_workflow where program_workflow_id = :programWorkflowId ")
+                .setInteger("programWorkflowId", programWorkflow.getId())
+                .uniqueResult()
+        : Context.getProgramWorkflowService()
+            .getWorkflowByUuid(programWorkflow.getUuid())
+            .getConcept()
+            .getId();
   }
 
   @Override
-  public String getProgramWorkflowProgramName(ProgramWorkflow programWorkflow) throws DAOException {
+  public Program getProgramWorkflowProgram(ProgramWorkflow programWorkflow, boolean isFromMetadata)
+      throws DAOException {
+    final Integer programId =
+        isFromMetadata
+            ? getProgramWorkflowProgramId(programWorkflow)
+            : Context.getProgramWorkflowService()
+                .getWorkflowByUuid(programWorkflow.getUuid())
+                .getProgram()
+                .getId();
+    return Context.getProgramWorkflowService().getProgram(programId);
+  }
+
+  @Override
+  public String getProgramWorkflowConceptName(
+      ProgramWorkflow programWorkflow, boolean isFromMetadata) throws DAOException {
     return (String)
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery(
-                "select p.name from program p inner join program_workflow pw on pw.program_id=p.program_id and pw.program_workflow_id=:programWorkflowId ")
-            .setInteger("programWorkflowId", programWorkflow.getId())
-            .uniqueResult();
-  }
-
-  @Override
-  public String getProgramWorkflowConceptName(ProgramWorkflow programWorkflow) throws DAOException {
-    return (String)
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select c.name from concept_name c inner join program_workflow pw on pw.concept_id=c.concept_id and pw.program_workflow_id=:programWorkflowId where c.locale='pt' and c.locale_preferred=1 ")
-            .setInteger("programWorkflowId", programWorkflow.getId())
-            .uniqueResult();
+                "select c.name from concept_name c where c.concept_id=:conceptId and c.locale='pt' ")
+            .setInteger("conceptId", getProgramWorkflowConceptId(programWorkflow, isFromMetadata))
+            .list()
+            .get(0);
   }
 
   @SuppressWarnings("unchecked")
@@ -218,7 +220,26 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
 
     final Criteria searchCriteria =
         this.sessionFactory.getCurrentSession().createCriteria(ProgramWorkflow.class, "program");
-    searchCriteria.add(Restrictions.eq("programId", nextId));
+    searchCriteria.add(Restrictions.eq("programWorkflowId", nextId));
+    return (ProgramWorkflow) searchCriteria.uniqueResult();
+  }
+
+  @Override
+  public ProgramWorkflow updateProgramWorkflow(ProgramWorkflow programWorkflow)
+      throws DAOException {
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            "update program_workflow set program_id =:programId, concept_id =:conceptId where program_workflow_id =:programWorkflowId ")
+        .setInteger("programId", programWorkflow.getProgram().getId())
+        .setInteger("conceptId", programWorkflow.getConcept().getId())
+        .setInteger("programWorkflowId", programWorkflow.getId())
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+
+    final Criteria searchCriteria =
+        this.sessionFactory.getCurrentSession().createCriteria(ProgramWorkflow.class, "program");
+    searchCriteria.add(Restrictions.eq("programWorkflowId", programWorkflow.getId()));
     return (ProgramWorkflow) searchCriteria.uniqueResult();
   }
 
@@ -231,7 +252,7 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
         .createSQLQuery(
             "update program_workflow set program_workflow_id =:newProgramWorkflowId, swappable = true where program_workflow_id =:programWorkflowId ")
         .setInteger("programWorkflowId", programWorkflow.getId())
-        .setInteger("newProgramId", nextAvailableProgramWorkflowId)
+        .setInteger("newProgramWorkflowId", nextAvailableProgramWorkflowId)
         .executeUpdate();
 
     final Criteria searchCriteria =
@@ -252,7 +273,7 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
     query
         .setInteger("programWorkflowId", programWorkflow.getId())
         .setInteger("programId", getProgramWorkflowProgramId(programWorkflow))
-        .setInteger("conceptId", getProgramWorkflowConceptId(programWorkflow))
+        .setInteger("conceptId", getProgramWorkflowConceptId(programWorkflow, true))
         .setInteger("creator", Context.getAuthenticatedUser().getId())
         .setDate("dateCreated", programWorkflow.getDateCreated())
         .setBoolean("retired", programWorkflow.getRetired())
@@ -287,16 +308,6 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
         .setInteger("conceptStateConversionId", conceptStateConversion.getId())
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
-  }
-
-  @SuppressWarnings("unchecked")
-  private List<ProgramWorkflow> findMDSProgramWorkflows() {
-    final Query query =
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery("select p.* from _program_workflow p")
-            .addEntity(ProgramWorkflow.class);
-    return query.list();
   }
 
   @Override

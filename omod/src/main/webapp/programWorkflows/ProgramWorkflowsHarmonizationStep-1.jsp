@@ -11,8 +11,8 @@
 					style="width: 100%">
 					<tr>
 						<th><spring:message code="general.id" /></th>
-						<th><spring:message code="general.program" /></th>
-						<th><spring:message code="general.concept" /></th>
+						<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
+						<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 						<th><spring:message code="general.uuid" /></th>
 					</tr>
 					<c:forEach var="item" items="${newMDSProgramWorkflows.items}">
@@ -36,8 +36,8 @@
 				<table cellspacing="0" border="0" style="width: 100%">
 					<tr>
 						<th><spring:message code="general.id" /></th>
-						<th><spring:message code="general.program" /></th>
-						<th><spring:message code="general.concept" /></th>
+						<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
+						<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 						<th><spring:message code="general.uuid" /></th>
 					</tr>
 					<c:forEach var="item" items="${productionItemsToDelete}">

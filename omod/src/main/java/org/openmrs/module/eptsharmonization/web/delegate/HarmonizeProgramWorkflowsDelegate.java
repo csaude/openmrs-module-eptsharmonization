@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.servlet.http.HttpSession;
+import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowService;
@@ -32,12 +33,12 @@ public class HarmonizeProgramWorkflowsDelegate {
   }
 
   public static List<String> SUMMARY_EXECUTED_SCENARIOS = new ArrayList<>();
-  public static List<ProgramWorkflow> EXECUTED_PROGRAMS_MANUALLY_CACHE = new ArrayList<>();
-  public static List<ProgramWorkflow> PROGRAMS_NOT_PROCESSED = new ArrayList<>();
+  public static List<ProgramWorkflowDTO> EXECUTED_PROGRAM_WORKFLOWS_MANUALLY_CACHE =
+      new ArrayList<>();
+  public static List<ProgramWorkflowDTO> PROGRAM_WORKFLOWS_NOT_PROCESSED = new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<ProgramWorkflowDTO> programWorkflows) {
 
-    this.harmonizationProgramWorkflowService.setProgramAndConceptNames(programWorkflows);
     Set<HarmonizationItem> items = new TreeSet<>();
     for (ProgramWorkflowDTO programWorkflowDTO : programWorkflows) {
       HarmonizationItem item =
@@ -60,7 +61,6 @@ public class HarmonizeProgramWorkflowsDelegate {
     for (String key : mapProgramWorkflows.keySet()) {
       List<ProgramWorkflowDTO> programWorkflows = mapProgramWorkflows.get(key);
       if (programWorkflows != null) {
-        this.harmonizationProgramWorkflowService.setProgramAndConceptNames(programWorkflows);
         HarmonizationItem item = new HarmonizationItem(key, programWorkflows);
         item.setEncountersCount(
             this.harmonizationProgramWorkflowService.getNumberOfAffectedConceptStateConversions(
@@ -81,14 +81,15 @@ public class HarmonizeProgramWorkflowsDelegate {
       HarmonizationData productionItemsToExport,
       HarmonizationData differentIDsAndEqualUUID,
       HarmonizationData differentNameAndSameUUIDAndID,
-      List<ProgramWorkflow> notSwappableProgramWorkflows,
-      List<ProgramWorkflow> swappableProgramWorkflows) {
+      List<ProgramWorkflowDTO> notSwappableProgramWorkflows,
+      List<ProgramWorkflowDTO> swappableProgramWorkflows) {
 
-    PROGRAMS_NOT_PROCESSED.removeAll(EXECUTED_PROGRAMS_MANUALLY_CACHE);
+    PROGRAM_WORKFLOWS_NOT_PROCESSED.removeAll(EXECUTED_PROGRAM_WORKFLOWS_MANUALLY_CACHE);
 
     this.updateProductionToExportList(productionItemsToExport);
     this.setSwappableDataClones(session, notSwappableProgramWorkflows, swappableProgramWorkflows);
-    this.removeAllChoosenToManualHarmonize(session, swappableProgramWorkflows);
+    this.removeAllChoosenToManualHarmonize(
+        session, DTOUtils.fromProgramWorkflowDTOs(swappableProgramWorkflows));
 
     boolean isFirstStepHarmonizationCompleted =
         newMDSProgramWorkflows.getItems().isEmpty() && productionItemsToDelete.isEmpty();
@@ -155,34 +156,28 @@ public class HarmonizeProgramWorkflowsDelegate {
 
   private void updateProductionToExportList(HarmonizationData productionItemsToExport) {
 
-    HarmonizationData newItemsToExport =
-        getConvertedData(DTOUtils.fromProgramWorkflows(PROGRAMS_NOT_PROCESSED));
+    HarmonizationData newItemsToExport = getConvertedData(PROGRAM_WORKFLOWS_NOT_PROCESSED);
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
 
     Set<HarmonizationItem> itemsToRemove =
-        getConvertedData(DTOUtils.fromProgramWorkflows(EXECUTED_PROGRAMS_MANUALLY_CACHE))
-            .getItems();
+        getConvertedData(EXECUTED_PROGRAM_WORKFLOWS_MANUALLY_CACHE).getItems();
     productionItemsToExport.getItems().removeAll(itemsToRemove);
   }
 
   private void setSwappableDataClones(
       HttpSession session,
-      List<ProgramWorkflow> notSwappableProgramWorkflows,
-      List<ProgramWorkflow> swappableProgramWorkflows) {
+      List<ProgramWorkflowDTO> notSwappableProgramWorkflows,
+      List<ProgramWorkflowDTO> swappableProgramWorkflows) {
 
-    swappableProgramWorkflows.removeAll(EXECUTED_PROGRAMS_MANUALLY_CACHE);
+    swappableProgramWorkflows.removeAll(EXECUTED_PROGRAM_WORKFLOWS_MANUALLY_CACHE);
 
-    for (ProgramWorkflow programWorkflow : PROGRAMS_NOT_PROCESSED) {
+    for (ProgramWorkflowDTO programWorkflow : PROGRAM_WORKFLOWS_NOT_PROCESSED) {
       if (!swappableProgramWorkflows.contains(programWorkflow)) {
         swappableProgramWorkflows.add(programWorkflow);
       }
     }
-    session.setAttribute(
-        "swappableProgramWorkflowsClone",
-        new ArrayList<ProgramWorkflow>(swappableProgramWorkflows));
-    session.setAttribute(
-        "notSwappableProgramWorkflowsClone",
-        new ArrayList<ProgramWorkflow>(notSwappableProgramWorkflows));
+    session.setAttribute("swappableProgramWorkflowsClone", swappableProgramWorkflows);
+    session.setAttribute("notSwappableProgramWorkflowsClone", notSwappableProgramWorkflows);
   }
 
   @SuppressWarnings("unchecked")
@@ -223,22 +218,23 @@ public class HarmonizeProgramWorkflowsDelegate {
   }
 
   @SuppressWarnings("unchecked")
-  public void processUpdateProgramWorkflowsNames(HarmonizationData data, Builder logBuilder) {
+  public void processUpdateProgramWorkflowsProgramsAndConcepts(
+      HarmonizationData data, Builder logBuilder) {
     Map<String, List<ProgramWorkflowDTO>> list = new HashMap<>();
     for (HarmonizationItem item : data.getItems()) {
       List<ProgramWorkflowDTO> value = (List<ProgramWorkflowDTO>) item.getValue();
       if (item.isSelected()) {
         list.put((String) item.getKey(), value);
       } else {
-        PROGRAMS_NOT_PROCESSED.add(value.get(1).getProgramWorkflow());
+        PROGRAM_WORKFLOWS_NOT_PROCESSED.add(value.get(1));
       }
     }
     if (!list.isEmpty()) {
-      this.harmonizationProgramWorkflowService.UpdateProgramWorkflowsWithDifferentProgramsOrConcept(
+      this.harmonizationProgramWorkflowService.updateProgramWorkflowsWithDifferentProgramsOrConcept(
           list);
       SUMMARY_EXECUTED_SCENARIOS.add(
-          "eptsharmonization.summary.programworkflow.harmonize.differentNamesAndSameUUIDAndID");
-      logBuilder.appendLogForUpdatedEncounterNames(list);
+          "eptsharmonization.summary.programworkflow.harmonize.differentProgramsOrConceptsAndSameUUIDAndID");
+      logBuilder.appendLogForUpdatedProgramsAndConcepts(list);
       HarmonizeProgramWorkflowsController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
     }
   }
@@ -253,7 +249,7 @@ public class HarmonizeProgramWorkflowsDelegate {
       if (item.isSelected()) {
         list.put((String) item.getKey(), value);
       } else {
-        PROGRAMS_NOT_PROCESSED.add(value.get(1).getProgramWorkflow());
+        PROGRAM_WORKFLOWS_NOT_PROCESSED.add(value.get(1));
       }
     }
     if (!list.isEmpty()) {
@@ -267,17 +263,20 @@ public class HarmonizeProgramWorkflowsDelegate {
   }
 
   public void processManualMapping(
-      Map<ProgramWorkflow, ProgramWorkflow> manualHarmonizeProgramWorkflows, Builder logBuilder) {
+      Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows,
+      Builder logBuilder) {
 
-    Set<HarmonizationItem> differntNamesItems = new TreeSet<>();
+    Set<HarmonizationItem> differntProgramsOrConceptsItems = new TreeSet<>();
     Set<HarmonizationItem> differntIDsItems = new TreeSet<>();
 
-    Map<ProgramWorkflow, ProgramWorkflow> manualHarmonizeItens = new HashMap<>();
+    Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeItens = new HashMap<>();
 
-    for (Entry<ProgramWorkflow, ProgramWorkflow> entry :
+    for (Entry<ProgramWorkflowDTO, ProgramWorkflowDTO> entry :
         manualHarmonizeProgramWorkflows.entrySet()) {
-      ProgramWorkflow pdsProgramWorkflow = entry.getKey();
-      ProgramWorkflow mdsProgramWorkflow = entry.getValue();
+      ProgramWorkflowDTO pdsProgramWorkflowDTO = entry.getKey();
+      ProgramWorkflowDTO mdsProgramWorkflowDTO = entry.getValue();
+      ProgramWorkflow pdsProgramWorkflow = pdsProgramWorkflowDTO.getProgramWorkflow();
+      ProgramWorkflow mdsProgramWorkflow = mdsProgramWorkflowDTO.getProgramWorkflow();
 
       if (mdsProgramWorkflow.getUuid().equals(pdsProgramWorkflow.getUuid())) {
 
@@ -296,31 +295,42 @@ public class HarmonizeProgramWorkflowsDelegate {
           item.setSelected(Boolean.TRUE);
           differntIDsItems.add(item);
         } else {
-          if (!mdsProgramWorkflow.getName().equals(pdsProgramWorkflow.getName())) {
+          final Program mdsProgram =
+              harmonizationProgramWorkflowService.getProgramWorkflowProgram(
+                  mdsProgramWorkflow, true);
+          final Integer mdsConceptId =
+              harmonizationProgramWorkflowService.getProgramWorkflowConceptId(
+                  mdsProgramWorkflow, true);
+          final Program pdsProgram =
+              harmonizationProgramWorkflowService.getProgramWorkflowProgram(
+                  pdsProgramWorkflow, false);
+          final Integer pdsConceptId =
+              harmonizationProgramWorkflowService.getProgramWorkflowConceptId(
+                  pdsProgramWorkflow, false);
+          if (!(mdsProgram.equals(pdsProgram) && mdsConceptId.equals(pdsConceptId))) {
             HarmonizationItem item =
                 new HarmonizationItem(
                     mdsProgramWorkflow.getUuid(),
-                    DTOUtils.fromProgramWorkflows(
-                        Arrays.asList(mdsProgramWorkflow, pdsProgramWorkflow)));
+                    Arrays.asList(mdsProgramWorkflowDTO, pdsProgramWorkflowDTO));
             item.setEncountersCount(
                 this.harmonizationProgramWorkflowService.getNumberOfAffectedConceptStateConversions(
-                    DTOUtils.fromProgramWorkflow(pdsProgramWorkflow)));
+                    pdsProgramWorkflowDTO));
             item.setFormsCount(
                 this.harmonizationProgramWorkflowService.getNumberOfAffectedProgramWorkflowStates(
-                    DTOUtils.fromProgramWorkflow(pdsProgramWorkflow)));
+                    pdsProgramWorkflowDTO));
             item.setSelected(Boolean.TRUE);
-            differntNamesItems.add(item);
+            differntProgramsOrConceptsItems.add(item);
           }
         }
 
       } else {
-        manualHarmonizeItens.put(pdsProgramWorkflow, mdsProgramWorkflow);
+        manualHarmonizeItens.put(pdsProgramWorkflowDTO, mdsProgramWorkflowDTO);
       }
     }
 
     if (!manualHarmonizeItens.isEmpty()) {
-      this.harmonizationProgramWorkflowService.saveManualMapping(manualHarmonizeProgramWorkflows);
-      logBuilder.appendNewMappedProgramWorkflows(manualHarmonizeProgramWorkflows);
+      this.harmonizationProgramWorkflowService.saveManualMapping(manualHarmonizeItens);
+      logBuilder.appendNewMappedProgramWorkflows(manualHarmonizeItens);
       logBuilder.build();
     }
     if (!differntIDsItems.isEmpty()) {
@@ -329,9 +339,9 @@ public class HarmonizeProgramWorkflowsDelegate {
       logBuilder.build();
       HarmonizeProgramWorkflowsController.IS_IDS_AND_UUID_DIFFERENCES_HARMONIZED = true;
     }
-    if (!differntNamesItems.isEmpty()) {
-      HarmonizationData harmonizationData = new HarmonizationData(differntNamesItems);
-      processUpdateProgramWorkflowsNames(harmonizationData, logBuilder);
+    if (!differntProgramsOrConceptsItems.isEmpty()) {
+      HarmonizationData harmonizationData = new HarmonizationData(differntProgramsOrConceptsItems);
+      processUpdateProgramWorkflowsProgramsAndConcepts(harmonizationData, logBuilder);
       logBuilder.build();
       HarmonizeProgramWorkflowsController.IS_NAMES_DIFFERENCES_HARMONIZED = true;
     }

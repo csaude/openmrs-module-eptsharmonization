@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVStrategy;
-import org.openmrs.ProgramWorkflow;
 import org.openmrs.api.APIException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
 
@@ -70,11 +69,11 @@ public class ProgramWorkflowsHarmonizationCSVLog {
           try {
             printer.print(
                 String.format(
-                    "ProgramWorkflow ID:{%s}, UUID:%s, NAME:'%s', DESCRIPTION:'%s'",
+                    "ProgramWorkflow ID:{%s}, UUID:%s, PROGRAM:'%s', CONCEPT:'%s'",
                     item.getProgramWorkflow().getId(),
                     item.getProgramWorkflow().getUuid(),
-                    item.getProgramWorkflow().getName(),
-                    item.getProgramWorkflow().getDescription()));
+                    item.getProgram(),
+                    item.getConcept()));
             printer.println();
           } catch (Exception e) {
             e.printStackTrace();
@@ -105,11 +104,11 @@ public class ProgramWorkflowsHarmonizationCSVLog {
           try {
             printer.print(
                 String.format(
-                    "ProgramWorkflow ID:{%s}, UUID:%s, NAME:'%s', DESCRIPTION:'%s'",
+                    "ProgramWorkflow ID:{%s}, UUID:%s, PROGRAMA:'%s', CONCEITO:'%s'",
                     item.getProgramWorkflow().getId(),
                     item.getProgramWorkflow().getUuid(),
-                    item.getProgramWorkflow().getName(),
-                    item.getProgramWorkflow().getDescription()));
+                    item.getProgram(),
+                    item.getConcept()));
             printer.println();
           } catch (Exception e) {
             e.printStackTrace();
@@ -126,10 +125,12 @@ public class ProgramWorkflowsHarmonizationCSVLog {
       return this;
     }
 
-    public Builder appendLogForUpdatedEncounterNames(Map<String, List<ProgramWorkflowDTO>> data) {
+    public Builder appendLogForUpdatedProgramsAndConcepts(
+        Map<String, List<ProgramWorkflowDTO>> data) {
 
       try {
-        printer.print("Metadata Harmonization Process Flow: Updated ProgramWorkflow Names");
+        printer.print(
+            "Metadata Harmonization Process Flow: Updated ProgramWorkflow Programs and Concepts");
         printer.println();
         printer.print(
             "===============================================================================================================================");
@@ -137,18 +138,18 @@ public class ProgramWorkflowsHarmonizationCSVLog {
 
         for (String key : data.keySet()) {
           List<ProgramWorkflowDTO> dtos = data.get(key);
-          ProgramWorkflow mdServerProgramWorkflow = dtos.get(0).getProgramWorkflow();
-          ProgramWorkflow pdServerPeogram = dtos.get(1).getProgramWorkflow();
+          ProgramWorkflowDTO mdServerProgramWorkflow = dtos.get(0);
+          ProgramWorkflowDTO pdServerPeogram = dtos.get(1);
           try {
             printer.print(
                 String.format(
-                    "ID:{%s}, UUID:%s, updated NAME from '%s' to '%s', and DESCRIPTION from '%s' to '%s'",
+                    "ID:{%s}, UUID:%s, updated PROGRAM from '%s' to '%s', and CONCEPT from '%s' to '%s'",
                     mdServerProgramWorkflow.getId(),
                     mdServerProgramWorkflow.getUuid(),
-                    pdServerPeogram.getName(),
-                    mdServerProgramWorkflow.getName(),
-                    pdServerPeogram.getDescription(),
-                    mdServerProgramWorkflow.getDescription()));
+                    pdServerPeogram.getProgram(),
+                    mdServerProgramWorkflow.getProgram(),
+                    pdServerPeogram.getConcept(),
+                    mdServerProgramWorkflow.getConcept()));
             printer.println();
           } catch (Exception e) {
             e.printStackTrace();
@@ -177,13 +178,14 @@ public class ProgramWorkflowsHarmonizationCSVLog {
 
         for (String key : data.keySet()) {
           List<ProgramWorkflowDTO> dtos = data.get(key);
-          ProgramWorkflow mdServerProgramWorkflow = dtos.get(0).getProgramWorkflow();
-          ProgramWorkflow pdServerProgramWorkflow = dtos.get(1).getProgramWorkflow();
+          ProgramWorkflowDTO mdServerProgramWorkflow = dtos.get(0);
+          ProgramWorkflowDTO pdServerProgramWorkflow = dtos.get(1);
           try {
             printer.print(
                 String.format(
-                    "ProductionServer with ProgramWorkflow NAME:'%s' and UUID:%s updated ID from {%s} to {%s}",
-                    pdServerProgramWorkflow.getName(),
+                    "ProductionServer with ProgramWorkflow PROGRAM:'%s', CONCEPT:'%s' and UUID:%s updated ID from {%s} to {%s}",
+                    pdServerProgramWorkflow.getProgram(),
+                    pdServerProgramWorkflow.getConcept(),
                     pdServerProgramWorkflow.getUuid(),
                     pdServerProgramWorkflow.getId(),
                     mdServerProgramWorkflow.getId()));
@@ -203,7 +205,7 @@ public class ProgramWorkflowsHarmonizationCSVLog {
     }
 
     public Builder appendNewMappedProgramWorkflows(
-        Map<ProgramWorkflow, ProgramWorkflow> mapProgramWorkflows) {
+        Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows) {
 
       try {
         printer.print("Metadata Harmonization Process Flow: Added new ProgramWorkflow Mappings ");
@@ -212,21 +214,22 @@ public class ProgramWorkflowsHarmonizationCSVLog {
             "===============================================================================================================================");
         printer.println();
 
-        for (Entry<ProgramWorkflow, ProgramWorkflow> entry : mapProgramWorkflows.entrySet()) {
+        for (Entry<ProgramWorkflowDTO, ProgramWorkflowDTO> entry :
+            manualHarmonizeProgramWorkflows.entrySet()) {
 
-          ProgramWorkflow pdsServer = entry.getKey();
-          ProgramWorkflow mdsServer = entry.getValue();
+          ProgramWorkflowDTO pdsServer = entry.getKey();
+          ProgramWorkflowDTO mdsServer = entry.getValue();
           try {
             printer.print(
                 String.format(
-                    "ProgramWorkflow ID:{%s},NAME:'%s',DESCRIPTION:'%s',UUID:%s  Updated to ProgramWorkflow ID:{%s},NAME:'%s',DESCRIPTION:'%s',UUID:%s ",
+                    "ProgramWorkflow ID:{%s}, PROGRAM:'%s', CONCEPT:'%s', UUID:%s  Updated to ProgramWorkflow ID:{%s}, PROGRAM:'%s', CONCEPT:'%s', UUID:%s ",
                     pdsServer.getId(),
-                    pdsServer.getName(),
-                    pdsServer.getDescription(),
+                    pdsServer.getProgram(),
+                    pdsServer.getConcept(),
                     pdsServer.getUuid(),
                     mdsServer.getId(),
-                    mdsServer.getName(),
-                    mdsServer.getDescription(),
+                    mdsServer.getProgram(),
+                    mdsServer.getConcept(),
                     mdsServer.getUuid()));
             printer.println();
           } catch (Exception e) {
@@ -287,7 +290,7 @@ public class ProgramWorkflowsHarmonizationCSVLog {
     return outputStream;
   }
 
-  public static ByteArrayOutputStream exportProgramWorkflowLogs(
+  public static ByteArrayOutputStream exportProgramWorkflowsLogs(
       String defaultLocationName, List<ProgramWorkflowDTO> data) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -317,16 +320,15 @@ public class ProgramWorkflowsHarmonizationCSVLog {
       printer.println();
       printer.println();
 
-      for (ProgramWorkflowDTO dto : data) {
+      for (ProgramWorkflowDTO programWorkflow : data) {
 
-        ProgramWorkflow programWorkflow = dto.getProgramWorkflow();
         try {
           printer.print(
               String.format(
-                  "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
+                  "ID:%s, PROGRAM:'%s', CONCEPT:'%s', UUID:%s",
                   programWorkflow.getId(),
-                  programWorkflow.getName(),
-                  programWorkflow.getDescription(),
+                  programWorkflow.getProgram(),
+                  programWorkflow.getConcept(),
                   programWorkflow.getUuid()));
           printer.println();
         } catch (Exception e) {

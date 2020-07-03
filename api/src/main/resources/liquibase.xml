@@ -180,6 +180,11 @@
 	</changeSet>
 
 	<changeSet id="eptsharmonization_20200526-1507" author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_visit_type" />
+			</not>
+		</preConditions>
 		<createTable tableName="_visit_type">
 			<column name="visit_type_id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
@@ -212,6 +217,11 @@
 	</changeSet>
 
 	<changeSet id="eptsharmonization_20200622-1547" author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_relationship_type" />
+			</not>
+		</preConditions>
 		<createTable tableName="_relationship_type">
 			<column autoIncrement="true" name="relationship_type_id" type="int">
 				<constraints nullable="false" primaryKey="true"/>

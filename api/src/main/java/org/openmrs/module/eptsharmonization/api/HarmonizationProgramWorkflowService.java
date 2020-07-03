@@ -13,6 +13,7 @@ package org.openmrs.module.eptsharmonization.api;
 
 import java.util.List;
 import java.util.Map;
+import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
@@ -44,7 +45,7 @@ public interface HarmonizationProgramWorkflowService extends OpenmrsService {
       throws APIException;
 
   public Map<String, List<ProgramWorkflowDTO>>
-      findAllProgramWorkflowsWithDifferentNameAndSameUUIDAndID() throws APIException;
+      findAllProgramWorkflowsWithDifferentProgramOrConceptAndSameUUIDAndID() throws APIException;
 
   public Map<String, List<ProgramWorkflowDTO>> findAllProgramWorkflowsWithDifferentIDAndSameUUID()
       throws APIException;
@@ -57,9 +58,7 @@ public interface HarmonizationProgramWorkflowService extends OpenmrsService {
 
   public int getNumberOfAffectedProgramWorkflowStates(ProgramWorkflowDTO programWorkflowDTO);
 
-  public List<ProgramWorkflow> findPDSProgramWorkflowsNotExistsInMDServer() throws APIException;
-
-  public void UpdateProgramWorkflowsWithDifferentProgramsOrConcept(
+  public void updateProgramWorkflowsWithDifferentProgramsOrConcept(
       Map<String, List<ProgramWorkflowDTO>> programWorkflows) throws APIException;
 
   public void saveNewProgramWorkflowsFromMDS(List<ProgramWorkflowDTO> programWorkflows)
@@ -68,7 +67,8 @@ public interface HarmonizationProgramWorkflowService extends OpenmrsService {
   public void saveProgramWorkflowsWithDifferentIDAndEqualUUID(
       Map<String, List<ProgramWorkflowDTO>> programWorkflows) throws APIException;
 
-  public void saveManualMapping(Map<ProgramWorkflow, ProgramWorkflow> programWorkflows)
+  public void saveManualMapping(
+      Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows)
       throws APIException;
 
   public void deleteNewProgramWorkflowsFromPDS(List<ProgramWorkflowDTO> programWorkflows)
@@ -80,6 +80,12 @@ public interface HarmonizationProgramWorkflowService extends OpenmrsService {
 
   public List<ProgramWorkflow> findAllMetadataProgramWorkflows() throws APIException;
 
-  public void setProgramAndConceptNames(List<ProgramWorkflowDTO> programWorkflowDTO)
+  public void setProgramAndConceptNames(
+      List<ProgramWorkflowDTO> programWorkflowDTO, boolean isFromMetadata) throws APIException;
+
+  public Program getProgramWorkflowProgram(ProgramWorkflow programWorkflow, boolean isFromMetadata)
       throws APIException;
+
+  public Integer getProgramWorkflowConceptId(
+      ProgramWorkflow programWorkflow, boolean isFromMetadata) throws APIException;
 }

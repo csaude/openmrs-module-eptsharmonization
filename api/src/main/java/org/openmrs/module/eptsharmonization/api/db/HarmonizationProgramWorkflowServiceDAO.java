@@ -13,6 +13,7 @@ package org.openmrs.module.eptsharmonization.api.db;
 
 import java.util.List;
 import org.openmrs.ConceptStateConversion;
+import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
 import org.openmrs.api.db.DAOException;
@@ -31,8 +32,6 @@ public interface HarmonizationProgramWorkflowServiceDAO {
   public List<ConceptStateConversion> findConceptStateConversionsByProgramWorkflowId(
       Integer programWorkflowId) throws DAOException;
 
-  public List<ProgramWorkflow> findPDSProgramWorkflowsNotExistsInMDServer() throws DAOException;
-
   public ProgramWorkflow getProgramWorkflowById(Integer programWorkflowId) throws DAOException;
 
   public boolean isSwappable(ProgramWorkflow programWorkflow) throws DAOException;
@@ -40,6 +39,8 @@ public interface HarmonizationProgramWorkflowServiceDAO {
   public List<ProgramWorkflow> findAllSwappable() throws DAOException;
 
   public List<ProgramWorkflow> findAllNotSwappable() throws DAOException;
+
+  public ProgramWorkflow updateProgramWorkflow(ProgramWorkflow programWorkflow) throws DAOException;
 
   public ProgramWorkflow updateProgramWorkflow(
       Integer nextId, ProgramWorkflow programWorkflow, boolean swappable) throws DAOException;
@@ -59,7 +60,12 @@ public interface HarmonizationProgramWorkflowServiceDAO {
 
   public ProgramWorkflow findMDSPProgramWorkflowByUuid(String uuid) throws DAOException;
 
-  public String getProgramWorkflowProgramName(ProgramWorkflow programWorkflow) throws DAOException;
+  public Program getProgramWorkflowProgram(ProgramWorkflow programWorkflow, boolean isFromMetadata)
+      throws DAOException;
 
-  public String getProgramWorkflowConceptName(ProgramWorkflow programWorkflow) throws DAOException;
+  public Integer getProgramWorkflowConceptId(
+      ProgramWorkflow programWorkflow, boolean isFromMetadata) throws DAOException;
+
+  public String getProgramWorkflowConceptName(
+      ProgramWorkflow programWorkflow, boolean isFromMetadata) throws DAOException;
 }

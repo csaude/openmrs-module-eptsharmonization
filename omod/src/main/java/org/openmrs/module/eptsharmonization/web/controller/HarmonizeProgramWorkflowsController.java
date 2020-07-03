@@ -6,16 +6,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowService;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
@@ -36,13 +37,13 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller("eptsharmonization.harmonizeProgramWorkflowController")
-@SessionAttributes({"differentIDsAndEqualUUID", "differentNameAndSameUUIDAndID"})
+@SessionAttributes({"differentIDsAndEqualUUID", "differentProgramsOrConceptsAndSameUUIDAndID"})
 public class HarmonizeProgramWorkflowsController {
 
   public static final String CONTROLLER_PATH =
       EptsHarmonizationConstants.MODULE_PATH + "/programWorkflows";
 
-  public static final String PROGRAMS_LIST =
+  public static final String PROGRAM_WORKFLOWS_LIST =
       HarmonizeProgramWorkflowsController.CONTROLLER_PATH + "/harmonizeProgramWorkflowsList";
 
   public static final String ADD_PROGRAM_MAPPING =
@@ -63,7 +64,7 @@ public class HarmonizeProgramWorkflowsController {
   public static final String PROCESS_HARMONIZATION_STEP4 =
       HarmonizeProgramWorkflowsController.CONTROLLER_PATH + "/processHarmonizationStep4";
 
-  public static final String EXPORT_PROGRAMS =
+  public static final String EXPORT_PROGRAMWORKFLOWS =
       HarmonizeProgramWorkflowsController.CONTROLLER_PATH + "/harmonizeExportProgramWorkflows";
 
   public static final String EXPORT_LOG =
@@ -90,28 +91,29 @@ public class HarmonizeProgramWorkflowsController {
     this.delegate = delegate;
   }
 
-  @RequestMapping(value = PROGRAMS_LIST, method = RequestMethod.GET)
+  @RequestMapping(value = PROGRAM_WORKFLOWS_LIST, method = RequestMethod.GET)
   public ModelAndView getHarmonizationScenariousData(
       HttpSession session,
       Model model,
       @ModelAttribute("newMDSProgramWorkflows") HarmonizationData newMDSProgramWorkflows,
       @ModelAttribute("productionItemsToDelete") List<ProgramWorkflowDTO> productionItemsToDelete,
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID,
-      @ModelAttribute("differentNameAndSameUUIDAndID")
-          HarmonizationData differentNameAndSameUUIDAndID,
+      @ModelAttribute("differentProgramsOrConceptsAndSameUUIDAndID")
+          HarmonizationData differentProgramsOrConceptsAndSameUUIDAndID,
       @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
       @ModelAttribute("notSwappableProgramWorkflows")
-          List<ProgramWorkflow> notSwappableProgramWorkflows,
-      @ModelAttribute("swappableProgramWorkflows") List<ProgramWorkflow> swappableProgramWorkflows,
+          List<ProgramWorkflowDTO> notSwappableProgramWorkflows,
+      @ModelAttribute("swappableProgramWorkflows")
+          List<ProgramWorkflowDTO> swappableProgramWorkflows,
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg,
       @RequestParam(required = false, value = "errorRequiredMdsValue") String errorRequiredMdsValue,
       @RequestParam(required = false, value = "errorRequiredPDSValue")
           String errorRequiredPDSValue) {
 
-    // TODO: I did this fetch as a workaround to prevent having cached data
     newMDSProgramWorkflows = getNewMDSProgramWorkflows();
     differentIDsAndEqualUUID = this.getDifferentIDsAndEqualUUID();
-    differentNameAndSameUUIDAndID = this.getDifferentNameAndSameUUIDAndID();
+    differentProgramsOrConceptsAndSameUUIDAndID =
+        this.getDifferentProgramsOrConceptsAndSameUUIDAndID();
     HarmonizationData productionItemsToExport =
         delegate.getConvertedData(getProductionItemsToExport());
 
@@ -128,7 +130,7 @@ public class HarmonizeProgramWorkflowsController {
         productionItemsToDelete,
         productionItemsToExport,
         differentIDsAndEqualUUID,
-        differentNameAndSameUUIDAndID,
+        differentProgramsOrConceptsAndSameUUIDAndID,
         notSwappableProgramWorkflows,
         swappableProgramWorkflows);
 
@@ -139,7 +141,8 @@ public class HarmonizeProgramWorkflowsController {
     model.addAttribute("newMDSProgramWorkflows", newMDSProgramWorkflows);
     model.addAttribute("productionItemsToExport", productionItemsToExport);
     model.addAttribute("differentIDsAndEqualUUID", differentIDsAndEqualUUID);
-    model.addAttribute("differentNameAndSameUUIDAndID", differentNameAndSameUUIDAndID);
+    model.addAttribute(
+        "differentProgramsOrConceptsAndSameUUIDAndID", differentProgramsOrConceptsAndSameUUIDAndID);
 
     return modelAndView;
   }
@@ -187,14 +190,15 @@ public class HarmonizeProgramWorkflowsController {
 
   @RequestMapping(value = PROCESS_HARMONIZATION_STEP3, method = RequestMethod.POST)
   public ModelAndView processHarmonizationStep3(
-      @ModelAttribute("differentNameAndSameUUIDAndID")
-          HarmonizationData differentNameAndSameUUIDAndID) {
+      @ModelAttribute("differentProgramsOrConceptsAndSameUUIDAndID")
+          HarmonizationData differentProgramsOrConceptsAndSameUUIDAndID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     Builder logBuilder = new ProgramWorkflowsHarmonizationCSVLog.Builder(defaultLocationName);
-    delegate.processUpdateProgramWorkflowsNames(differentNameAndSameUUIDAndID, logBuilder);
+    delegate.processUpdateProgramWorkflowsProgramsAndConcepts(
+        differentProgramsOrConceptsAndSameUUIDAndID, logBuilder);
     logBuilder.build();
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
@@ -209,8 +213,8 @@ public class HarmonizeProgramWorkflowsController {
   @RequestMapping(value = PROCESS_HARMONIZATION_STEP4, method = RequestMethod.POST)
   public ModelAndView processHarmonizationStep4(HttpSession session, HttpServletRequest request) {
 
-    Map<ProgramWorkflow, ProgramWorkflow> manualHarmonizeProgramWorkflows =
-        (Map<ProgramWorkflow, ProgramWorkflow>)
+    Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows =
+        (Map<ProgramWorkflowDTO, ProgramWorkflowDTO>)
             session.getAttribute("manualHarmonizeProgramWorkflows");
 
     if (manualHarmonizeProgramWorkflows != null && !manualHarmonizeProgramWorkflows.isEmpty()) {
@@ -224,7 +228,7 @@ public class HarmonizeProgramWorkflowsController {
     ModelAndView modelAndView = getRedirectModelAndView();
     modelAndView.addObject("openmrs_msg", "eptsharmonization.programworkflow.harmonized");
 
-    HarmonizeProgramWorkflowsDelegate.EXECUTED_PROGRAMS_MANUALLY_CACHE =
+    HarmonizeProgramWorkflowsDelegate.EXECUTED_PROGRAM_WORKFLOWS_MANUALLY_CACHE =
         new ArrayList<>(manualHarmonizeProgramWorkflows.keySet());
     session.removeAttribute("manualHarmonizeProgramWorkflows");
 
@@ -235,7 +239,8 @@ public class HarmonizeProgramWorkflowsController {
   @RequestMapping(value = ADD_PROGRAM_MAPPING, method = RequestMethod.POST)
   public ModelAndView addProgramWorkflowMapping(
       HttpSession session,
-      @ModelAttribute("swappableProgramWorkflows") List<ProgramWorkflow> swappableProgramWorkflows,
+      @ModelAttribute("swappableProgramWorkflows")
+          List<ProgramWorkflowDTO> swappableProgramWorkflows,
       @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem) {
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
@@ -260,15 +265,25 @@ public class HarmonizeProgramWorkflowsController {
         this.harmonizationProgramWorkflowService.findMetadataProgramWorkflowByUuid(
             (String) harmonizationItem.getValue());
 
-    Map<ProgramWorkflow, ProgramWorkflow> manualHarmonizeProgramWorkflows =
-        (Map<ProgramWorkflow, ProgramWorkflow>)
+    Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows =
+        (Map<ProgramWorkflowDTO, ProgramWorkflowDTO>)
             session.getAttribute("manualHarmonizeProgramWorkflows");
 
     if (manualHarmonizeProgramWorkflows == null) {
       manualHarmonizeProgramWorkflows = new HashMap<>();
     }
-    swappableProgramWorkflows.remove(pdsProgramWorkflow);
-    manualHarmonizeProgramWorkflows.put(pdsProgramWorkflow, mdsProgramWorkflow);
+
+    final ProgramWorkflowDTO pdsProgramWorkflowDTO =
+        DTOUtils.fromProgramWorkflow(pdsProgramWorkflow);
+    final ProgramWorkflowDTO mdsProgramWorkflowDTO =
+        DTOUtils.fromProgramWorkflow(mdsProgramWorkflow);
+    // TODO: This is not removing the items from list: may be related to cache
+    swappableProgramWorkflows.remove(pdsProgramWorkflowDTO);
+    harmonizationProgramWorkflowService.setProgramAndConceptNames(
+        Arrays.asList(pdsProgramWorkflowDTO), false);
+    harmonizationProgramWorkflowService.setProgramAndConceptNames(
+        Arrays.asList(mdsProgramWorkflowDTO), true);
+    manualHarmonizeProgramWorkflows.put(pdsProgramWorkflowDTO, mdsProgramWorkflowDTO);
     session.setAttribute("manualHarmonizeProgramWorkflows", manualHarmonizeProgramWorkflows);
 
     return modelAndView;
@@ -277,7 +292,8 @@ public class HarmonizeProgramWorkflowsController {
   @RequestMapping(value = REMOVE_PROGRAM_MAPPING, method = RequestMethod.POST)
   public ModelAndView removeProgramWorkflowMapping(
       HttpSession session,
-      @ModelAttribute("swappableProgramWorkflows") List<ProgramWorkflow> swappableProgramWorkflows,
+      @ModelAttribute("swappableProgramWorkflows")
+          List<ProgramWorkflowDTO> swappableProgramWorkflows,
       HttpServletRequest request) {
 
     ProgramWorkflow productionProgramWorkflow =
@@ -285,12 +301,16 @@ public class HarmonizeProgramWorkflowsController {
             request.getParameter("productionServerProgramWorkflowUuID"));
 
     @SuppressWarnings("unchecked")
-    Map<ProgramWorkflow, ProgramWorkflow> manualHarmonizeProgramWorkflows =
-        (Map<ProgramWorkflow, ProgramWorkflow>)
+    Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows =
+        (Map<ProgramWorkflowDTO, ProgramWorkflowDTO>)
             session.getAttribute("manualHarmonizeProgramWorkflows");
 
-    manualHarmonizeProgramWorkflows.remove(productionProgramWorkflow);
-    swappableProgramWorkflows.add(productionProgramWorkflow);
+    final ProgramWorkflowDTO pdsProgramWorkflowDTO =
+        DTOUtils.fromProgramWorkflow(productionProgramWorkflow);
+    manualHarmonizeProgramWorkflows.remove(pdsProgramWorkflowDTO);
+    harmonizationProgramWorkflowService.setProgramAndConceptNames(
+        Arrays.asList(pdsProgramWorkflowDTO), false);
+    swappableProgramWorkflows.add(pdsProgramWorkflowDTO);
 
     if (manualHarmonizeProgramWorkflows.isEmpty()) {
       session.removeAttribute("manualHarmonizeProgramWorkflows");
@@ -324,7 +344,7 @@ public class HarmonizeProgramWorkflowsController {
     return outputStream.toByteArray();
   }
 
-  @RequestMapping(value = EXPORT_PROGRAMS, method = RequestMethod.POST)
+  @RequestMapping(value = EXPORT_PROGRAMWORKFLOWS, method = RequestMethod.POST)
   public @ResponseBody byte[] exportProgramWorkflows(
       HttpSession session, HttpServletRequest request, HttpServletResponse response, Model model)
       throws FileNotFoundException {
@@ -340,7 +360,7 @@ public class HarmonizeProgramWorkflowsController {
     }
 
     ByteArrayOutputStream outputStream =
-        ProgramWorkflowsHarmonizationCSVLog.exportProgramWorkflowLogs(defaultLocationName, list);
+        ProgramWorkflowsHarmonizationCSVLog.exportProgramWorkflowsLogs(defaultLocationName, list);
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
@@ -376,6 +396,7 @@ public class HarmonizeProgramWorkflowsController {
     List<ProgramWorkflowDTO> onlyProductionProgramWorkflows =
         this.harmonizationProgramWorkflowService
             .findAllProductionProgramWorkflowsNotContainedInMetadataServer();
+
     List<ProgramWorkflowDTO> productionItemsToExport = new ArrayList<>();
     for (ProgramWorkflowDTO programWorkflowDTO : onlyProductionProgramWorkflows) {
       final int numberOfAffectedConceptStateConversions =
@@ -413,38 +434,43 @@ public class HarmonizeProgramWorkflowsController {
     return delegate.getConvertedData(programWorkflowsWithDifferentIDsSameUUIDs);
   }
 
-  @ModelAttribute("differentNameAndSameUUIDAndID")
-  public HarmonizationData getDifferentNameAndSameUUIDAndID() {
-    //    Map<String, List<ProgramWorkflowDTO>> programWorkflowsWithDifferentNames =
-    //        this.harmonizationProgramWorkflowService
-    //            .findAllProgramWorkflowsWithDifferentNameAndSameUUIDAndID();
-    //    return delegate.getConvertedData(programWorkflowsWithDifferentNames);
-    return new HarmonizationData(new TreeSet<HarmonizationItem>());
+  @ModelAttribute("differentProgramsOrConceptsAndSameUUIDAndID")
+  public HarmonizationData getDifferentProgramsOrConceptsAndSameUUIDAndID() {
+    Map<String, List<ProgramWorkflowDTO>> programWorkflowsWithDifferentNames =
+        this.harmonizationProgramWorkflowService
+            .findAllProgramWorkflowsWithDifferentProgramOrConceptAndSameUUIDAndID();
+    return delegate.getConvertedData(programWorkflowsWithDifferentNames);
   }
 
   @ModelAttribute("swappableProgramWorkflows")
-  public List<ProgramWorkflow> getSwappableProgramWorkflows() {
+  public List<ProgramWorkflowDTO> getSwappableProgramWorkflows() {
 
-    List<ProgramWorkflow> swappableProgramWorkflows = new ArrayList<>();
-    //    List<ProgramWorkflow> productionItemsToExport =
-    //        DTOUtils.fromProgramWorkflowDTOs(getProductionItemsToExport());
-    //    productionItemsToExport.addAll(HarmonizeProgramWorkflowsDelegate.PROGRAMS_NOT_PROCESSED);
-    //    final List<ProgramWorkflow> programWorkflows =
-    //        this.harmonizationProgramWorkflowService.findAllSwappableProgramWorkflows();
-    //    for (ProgramWorkflow programWorkflow : programWorkflows) {
-    //      if (productionItemsToExport.contains(programWorkflow)) {
-    //        swappableProgramWorkflows.add(programWorkflow);
-    //      }
-    //    }
+    List<ProgramWorkflowDTO> swappableProgramWorkflows = new ArrayList<>();
+    List<ProgramWorkflowDTO> productionItemsToExport = getProductionItemsToExport();
+    productionItemsToExport.addAll(
+        HarmonizeProgramWorkflowsDelegate.PROGRAM_WORKFLOWS_NOT_PROCESSED);
+    final List<ProgramWorkflowDTO> programWorkflows =
+        DTOUtils.fromProgramWorkflows(
+            this.harmonizationProgramWorkflowService.findAllSwappableProgramWorkflows());
+    for (ProgramWorkflowDTO programWorkflow : programWorkflows) {
+      if (productionItemsToExport.contains(programWorkflow)) {
+        swappableProgramWorkflows.add(programWorkflow);
+      }
+    }
+    harmonizationProgramWorkflowService.setProgramAndConceptNames(swappableProgramWorkflows, false);
     return swappableProgramWorkflows;
   }
 
   @ModelAttribute("notSwappableProgramWorkflows")
-  public List<ProgramWorkflow> getNotSwappableProgramWorkflows() {
-    return this.harmonizationProgramWorkflowService.findAllMetadataProgramWorkflows();
+  public List<ProgramWorkflowDTO> getNotSwappableProgramWorkflows() {
+    final List<ProgramWorkflowDTO> programWorkflows =
+        DTOUtils.fromProgramWorkflows(
+            this.harmonizationProgramWorkflowService.findAllMetadataProgramWorkflows());
+    harmonizationProgramWorkflowService.setProgramAndConceptNames(programWorkflows, true);
+    return programWorkflows;
   }
 
   private ModelAndView getRedirectModelAndView() {
-    return new ModelAndView("redirect:" + PROGRAMS_LIST + ".form");
+    return new ModelAndView("redirect:" + PROGRAM_WORKFLOWS_LIST + ".form");
   }
 }
