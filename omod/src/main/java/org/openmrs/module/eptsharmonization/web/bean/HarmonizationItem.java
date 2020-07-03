@@ -2,7 +2,9 @@ package org.openmrs.module.eptsharmonization.web.bean;
 
 import java.io.Serializable;
 import org.openmrs.EncounterType;
+import org.openmrs.Form;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.FormDTO;
 
 public class HarmonizationItem implements Serializable, Comparable<HarmonizationItem> {
 
@@ -13,6 +15,8 @@ public class HarmonizationItem implements Serializable, Comparable<Harmonization
   private boolean selected;
   private int encountersCount;
   private int formsCount;
+  private int formFieldsCount;
+  private int formResourceCount;
 
   public HarmonizationItem(Object key, Object value) {
     this.key = key;
@@ -61,6 +65,22 @@ public class HarmonizationItem implements Serializable, Comparable<Harmonization
     this.formsCount = formsCount;
   }
 
+  public int getFormFieldsCount() {
+    return formFieldsCount;
+  }
+
+  public void setFormFieldsCount(int formFieldsCount) {
+    this.formFieldsCount = formFieldsCount;
+  }
+
+  public int getFormResourceCount() {
+    return formResourceCount;
+  }
+
+  public void setFormResourceCount(int formResourceCount) {
+    this.formResourceCount = formResourceCount;
+  }
+
   @Override
   public int compareTo(HarmonizationItem other) {
 
@@ -76,6 +96,17 @@ public class HarmonizationItem implements Serializable, Comparable<Harmonization
       return ((EncounterType) this.key)
           .getUuid()
           .compareTo(((EncounterType) other.getKey()).getUuid());
+    }
+
+    if ((this.key instanceof Form) && other.getKey() instanceof Form) {
+      return ((Form) this.key).getUuid().compareTo(((Form) other.getKey()).getUuid());
+    }
+
+    if ((this.key instanceof FormDTO) && other.getKey() instanceof FormDTO) {
+      return ((FormDTO) this.key)
+          .getForm()
+          .getUuid()
+          .compareTo(((FormDTO) other.getKey()).getForm().getUuid());
     }
 
     return -1;

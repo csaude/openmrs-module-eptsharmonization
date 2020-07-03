@@ -179,80 +179,115 @@
 		</modifySql>
 	</changeSet>
 
-	<changeSet id="eptsharmonization_20200526-1507" author="Willa Mhawila">
+	<changeSet id="eptsharmonization_20200526-1507"
+		author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_visit_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _visit_type table
+		</comment>
 		<createTable tableName="_visit_type">
 			<column name="visit_type_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false"/>
+				<constraints primaryKey="true" nullable="false" />
 			</column>
 			<column name="name" type="varchar(255)">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
-			<column name="description" type="varchar(1024)"/>
+			<column name="description" type="varchar(1024)" />
 			<column name="creator" type="int">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<column name="date_created" type="DATETIME">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="DATETIME"/>
-			<column name="retired" type="BOOLEAN" defaultValueBoolean="false">
-				<constraints nullable="false"/>
+			<column name="changed_by" type="int" />
+			<column name="date_changed" type="DATETIME" />
+			<column name="retired" type="BOOLEAN"
+				defaultValueBoolean="false">
+				<constraints nullable="false" />
 			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="DATETIME"/>
-			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+			<column name="retired_by" type="int" />
+			<column name="date_retired" type="DATETIME" />
+			<column name="retire_reason" type="varchar(255)"
+				defaultValue="null" />
 			<column name="uuid" type="char(38)">
-				<constraints nullable="false" unique="true"/>
+				<constraints nullable="false" unique="true" />
 			</column>
 		</createTable>
 		<modifySql dbms="mssql">
-			<replace replace="CHAR(38)" with="UNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()" />
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()" />
 		</modifySql>
 	</changeSet>
 
-	<changeSet id="eptsharmonization_20200622-1547" author="Willa Mhawila">
+	<changeSet id="eptsharmonization_20200622-1547"
+		author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_relationship_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _relationship_type table
+		</comment>
 		<createTable tableName="_relationship_type">
-			<column autoIncrement="true" name="relationship_type_id" type="int">
-				<constraints nullable="false" primaryKey="true"/>
+			<column autoIncrement="true" name="relationship_type_id"
+				type="int">
+				<constraints nullable="false" primaryKey="true" />
 			</column>
 			<column name="a_is_to_b" type="varchar(50)">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<column name="b_is_to_a" type="varchar(50)">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
-			<column defaultValueBoolean="false" name="preferred" type="BOOLEAN">
-				<constraints nullable="false"/>
+			<column defaultValueBoolean="false" name="preferred"
+				type="BOOLEAN">
+				<constraints nullable="false" />
 			</column>
 			<column defaultValueNumeric="0" name="weight" type="int">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<column defaultValue="" name="description" type="varchar(255)">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<column defaultValueNumeric="0" name="creator" type="int">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
 			<column name="date_created" type="DATETIME">
-				<constraints nullable="false"/>
+				<constraints nullable="false" />
 			</column>
-			<column name="retired" type="BOOLEAN" defaultValueBoolean="false">
-				<constraints nullable="false"/>
+			<column name="retired" type="BOOLEAN"
+				defaultValueBoolean="false">
+				<constraints nullable="false" />
 			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="DATETIME"/>
-			<column name="retire_reason" type="varchar(255)"/>
+			<column name="retired_by" type="int" />
+			<column name="date_retired" type="DATETIME" />
+			<column name="retire_reason" type="varchar(255)" />
 			<column name="uuid" type="char(38)" />
 		</createTable>
 		<modifySql dbms="mssql">
-			<replace replace="CHAR(38)" with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
 		</modifySql>
 	</changeSet>
 
-	<changeSet id="eptsharmonization_20200624-1242" author="Willa Mhawila">
+	<changeSet id="eptsharmonization_20200624-1242"
+		author="Willa Mhawila">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_location_attribute_type" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _location_attribute_type table
+		</comment>
 		<createTable tableName="_location_attribute_type">
-			<column name="location_attribute_type_id" type="int" autoIncrement="true">
+			<column name="location_attribute_type_id" type="int"
+				autoIncrement="true">
 				<constraints primaryKey="true" nullable="false" />
 			</column>
 			<column name="name" type="varchar(255)">
@@ -275,21 +310,25 @@
 			</column>
 			<column name="changed_by" type="int" />
 			<column name="date_changed" type="datetime" />
-			<column name="retired" type="boolean" defaultValueBoolean="false">
+			<column name="retired" type="boolean"
+				defaultValueBoolean="false">
 				<constraints nullable="false" />
 			</column>
 			<column name="retired_by" type="int" />
 			<column name="date_retired" type="datetime" />
-			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
+			<column name="retire_reason" type="varchar(255)"
+				defaultValue="null" />
 			<column name="uuid" type="char(38)">
 				<constraints nullable="false" unique="true" />
 			</column>
 		</createTable>
 		<modifySql dbms="mssql">
-			<replace replace="CHAR(38)" with="UNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()"/>
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID()" />
 		</modifySql>
 	</changeSet>
-		<changeSet author="Guimino" id="20200601-1000">
+	
+	<changeSet author="Guimino" id="20200601-1000">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="_form" />
@@ -298,20 +337,19 @@
 		<comment>
 			Create _form table
 		</comment>
-		
 		<createTable tableName="_form">
-			<column autoIncrement="true" name="form_id"
-				type="int">
+			<column autoIncrement="true" name="form_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
 			<column defaultValue="" name="name" type="varchar(255)">
 				<constraints nullable="false" />
 			</column>
-			<column defaultValue=""  name="version" type="varchar(50)">
+			<column defaultValue="" name="version" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
 			<column name="build" type="int" />
-			<column name="published" type="tinyint" defaultValueNumeric="0">
+			<column name="published" type="tinyint"
+				defaultValueNumeric="0">
 				<constraints nullable="false" />
 			</column>
 			<column name="description" type="text" />
@@ -332,7 +370,7 @@
 			</column>
 			<column name="retired_by" type="int" />
 			<column name="date_retired" type="DATETIME" />
-			<column name="retire_reason" type="varchar(255)" />
+			<column name="retired_reason" type="varchar(255)" />
 			<column name="uuid" type="char(38)" />
 		</createTable>
 		<modifySql dbms="mssql">
@@ -340,5 +378,5 @@
 				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
 		</modifySql>
 	</changeSet>
-	
+
 </databaseChangeLog>

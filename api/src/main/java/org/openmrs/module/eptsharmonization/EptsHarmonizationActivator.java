@@ -23,176 +23,196 @@ import org.openmrs.module.dataexchange.DataImporter;
 import org.openmrs.util.DatabaseUpdater;
 
 /**
- * This class contains the logic that is run every time this module is either
- * started or shutdown
+ * This class contains the logic that is run every time this module is either started or shutdown
  */
 public class EptsHarmonizationActivator extends BaseModuleActivator {
 
-	private Log log = LogFactory.getLog(this.getClass());
+  private Log log = LogFactory.getLog(this.getClass());
 
-	@Override
-	public void contextRefreshed() {
-		log.debug("EPTS  Harmonization Module refreshed");
-	}
+  @Override
+  public void contextRefreshed() {
+    log.debug("EPTS  Harmonization Module refreshed");
+  }
 
-	@Override
-	public void willRefreshContext() {
-		log.debug("Refreshing Epts Harmonization Module");
-	}
+  @Override
+  public void willRefreshContext() {
+    log.debug("Refreshing Epts Harmonization Module");
+  }
 
-	@Override
-	public void willStart() {
-		log.debug("Creating Epts Harmnonization data directory");
-		try {
-			createLogFilesDirectory();
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
-		log.debug("Starting Epts Harmonization Module");
-	}
+  @Override
+  public void willStart() {
+    log.debug("Creating Epts Harmnonization data directory");
+    try {
+      createLogFilesDirectory();
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe);
+    }
+    log.debug("Starting Epts Harmonization Module");
+  }
 
-	@Override
-	public void willStop() {
-		log.debug("Stopping Epts Harmonization Module");
-	}
+  @Override
+  public void willStop() {
+    log.debug("Stopping Epts Harmonization Module");
+  }
 
-	public void started() {
-		log.info("Starting Epts Harmonization Module");
-		this.installMetaData();
-	}
+  public void started() {
+    log.info("Starting Epts Harmonization Module");
+    this.installMetaData();
 
-	private void installMetaData() {
-		DataImporter dataImporter = Context.getRegisteredComponents(DataImporter.class).get(0);
+    try {
+      log.info("Importing _form Metadata Server ");
+      EptsHarmonizationFormLoader.loadForms();
+    } catch (Exception e) {
+      log.error("Loading Forms", e);
+      throw new RuntimeException(e);
+    }
+  }
 
-		log.info("Importing _encounter_type Metadata");
-		dataImporter.importData("encounter-types.xml");
-		log.info(" _encounter_type Metadata imported");
+  private void installMetaData() {
+    DataImporter dataImporter = Context.getRegisteredComponents(DataImporter.class).get(0);
 
-		log.info("Importing _person_attribute_type Metadata");
-		dataImporter.importData("person-attribute-types.xml");
-		log.info(" _person_attribute_type Metadata imported");
+    log.info("Importing _encounter_type Metadata");
+    dataImporter.importData("encounter-types.xml");
+    log.info(" _encounter_type Metadata imported");
 
-		log.info("Importing _program Metadata");
-		dataImporter.importData("program.xml");
-		log.info(" _program Metadata imported");
+    log.info("Importing _person_attribute_type Metadata");
+    dataImporter.importData("person-attribute-types.xml");
+    log.info(" _person_attribute_type Metadata imported");
 
-		log.info("Importing _visit_type metadata");
-		dataImporter.importData("visit-types.xml");
-		log.info(" _visit_type metadata imported");
+    log.info("Importing _program Metadata");
+    dataImporter.importData("program.xml");
+    log.info(" _program Metadata imported");
 
-		log.info("Importing _relationship_type metadata");
-		dataImporter.importData("relationship-types.xml");
-		log.info(" _relationship_type metadata imported");
+    log.info("Importing _visit_type metadata");
+    dataImporter.importData("visit-types.xml");
+    log.info(" _visit_type metadata imported");
 
-		log.info("Importing _location_attribute_type metadata");
-		dataImporter.importData("location-attribute-types.xml");
-		log.info(" _location_attribute_type metadata imported");
+    log.info("Importing _relationship_type metadata");
+    dataImporter.importData("relationship-types.xml");
+    log.info(" _relationship_type metadata imported");
 
-		StringBuilder sb = new StringBuilder();
-		sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    log.info("Importing _location_attribute_type metadata");
+    dataImporter.importData("location-attribute-types.xml");
+    log.info(" _location_attribute_type metadata imported");
 
-		sb = new StringBuilder();
-		sb.append("ALTER TABLE `person_attribute_type` ADD COLUMN `swappable` boolean default false");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    StringBuilder sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder();
-		sb.append("ALTER TABLE `program` ADD COLUMN `swappable` boolean default false");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `person_attribute_type` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder();
-		sb.append("ALTER TABLE `form` ADD COLUMN `swappable` boolean default false");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `program` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		HarmonizationUtils.onModuleActivator();
-	}
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `form` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-	@Override
-	public void stopped() {
-		log.info("Shutting down Epts Harmonization Module");
-		this.deletePreviousHarmonizationLoadedDDLAndLiquibase();
-	}
+    HarmonizationUtils.onModuleActivator();
+  }
 
-	private void deletePreviousHarmonizationLoadedDDLAndLiquibase() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("DROP TABLE IF EXISTS `_encounter_type`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+  @Override
+  public void stopped() {
+    log.info("Shutting down Epts Harmonization Module");
+    this.deletePreviousHarmonizationLoadedDDLAndLiquibase();
+  }
 
-		sb = new StringBuilder();
-		sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+  private void deletePreviousHarmonizationLoadedDDLAndLiquibase() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_encounter_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder("DROP TABLE IF EXISTS `_visit_type`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder("DROP TABLE IF EXISTS `_relationship_type`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_visit_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder();
-		sb.append("DROP TABLE IF EXISTS `_program`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_relationship_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder("DROP TABLE IF EXISTS `_location_attribute_type`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_program`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		if (columnExists("encounter_type", "swappable")) {
-			sb = new StringBuilder();
-			sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
-			Context.getAdministrationService().executeSQL(sb.toString(), false);
-		}
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_location_attribute_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		if (columnExists("person_attribute_type", "swappable")) {
-			sb = new StringBuilder();
-			sb.append("ALTER TABLE `person_attribute_type` DROP `swappable`");
-			Context.getAdministrationService().executeSQL(sb.toString(), false);
-		}
+    if (columnExists("encounter_type", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
 
-		sb = new StringBuilder();
-		sb.append("ALTER TABLE `program` DROP `swappable`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    if (columnExists("person_attribute_type", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `person_attribute_type` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
 
-		sb = new StringBuilder();
-		sb.append("ALTER TABLE `form;` DROP `swappable`");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    if (columnExists("program", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `program` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
 
-		sb = new StringBuilder();
-		sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    if (columnExists("form", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `form` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
 
-		sb = new StringBuilder();
-		sb.append("delete from liquibasechangelog where ID ='20200423-0840';");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder();
-		sb.append("delete from liquibasechangelog where ID ='20200616-1620';");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
-		sb = new StringBuilder("delete from liquibasechangelog where ID ='eptsharmonization_20200526-1507';");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200423-0840';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder("delete from liquibasechangelog where ID ='eptsharmonization_20200622-1547';");
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200616-1620';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200526-1507';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200622-1547';");
 
-		sb = new StringBuilder("delete from liquibasechangelog where ID ='eptsharmonization_20200624-1242';");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-		sb = new StringBuilder("delete from liquibasechangelog where ID ='20200601-1000';");
-		Context.getAdministrationService().executeSQL(sb.toString(), false);
-	}
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200624-1242';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-	private void createLogFilesDirectory() throws IOException {
-		Path dataDirectoryPath = Paths.get(EptsHarmonizationConstants.MODULE_DATA_DIRECTORY);
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200601-1000';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+  }
 
-		if (!Files.exists(dataDirectoryPath)) {
-			Files.createDirectories(dataDirectoryPath);
-		}
-	}
+  private void createLogFilesDirectory() throws IOException {
+    Path dataDirectoryPath = Paths.get(EptsHarmonizationConstants.MODULE_DATA_DIRECTORY);
 
-	private boolean columnExists(String table, String column) {
-		try {
-			return DatabaseUpdater.getConnection().getMetaData().getColumns(null, null, table, column).next();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    if (!Files.exists(dataDirectoryPath)) {
+      Files.createDirectories(dataDirectoryPath);
+    }
+  }
+
+  private boolean columnExists(String table, String column) {
+    try {
+      return DatabaseUpdater.getConnection()
+          .getMetaData()
+          .getColumns(null, null, table, column)
+          .next();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

@@ -13,42 +13,36 @@ package org.openmrs.module.eptsharmonization.api.db;
 
 import java.util.List;
 import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
 import org.openmrs.Form;
+import org.openmrs.FormField;
+import org.openmrs.FormResource;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 
-/** Database methods for {@link HarmonizationEncounterTypeService}. */
 public interface HarmonizationFormServiceDAO {
 
-	public List<Form> findAllMetadataServerForms() throws DAOException;
+  public List<Form> findAllMetadataServerForms() throws DAOException;
 
-	public List<Form> findAllProductionServerEncounterTypes() throws DAOException;
+  public List<Form> findAllProductionServerForms() throws DAOException;
 
-	public List<Form> findEncontersByEncounterTypeId(Integer encounterTypeId) throws DAOException;
+  public List<Form> findPDSFormsNotExistsInMDServer() throws DAOException;
 
-	public List<Form> findFormsByEncounterTypeId(Integer encounterTypeId) throws DAOException;
+  public boolean isSwappable(Form form) throws DAOException;
 
-	public List<Form> findPDSEncounterTypesNotExistsInMDServer() throws DAOException;
+  public List<Form> findAllSwappable() throws DAOException;
 
-	public Form getEncounterTypeById(Integer encounterTypeId) throws DAOException;
+  public List<Form> findAllNotSwappable() throws DAOException;
 
-	public boolean isSwappable(EncounterType encounterType) throws DAOException;
+  public List<Encounter> findEncountersByForm(Form form) throws DAOException;
 
-	public List<Form> findAllSwappable() throws DAOException;
+  public List<FormField> findFormFieldsByForm(Form form) throws DAOException;
 
-	public List<Form> findAllNotSwappable() throws DAOException;
+  public List<FormResource> findFormResourcesByForm(Form form) throws DAOException;
 
-	public Form updateEncounterType(Integer nextId, EncounterType encounterType, boolean swappable)
-			throws DAOException;
+  public Form updateForm(Integer nextId, Form form, boolean swappable) throws DAOException;
 
-	public void updateEncounter(Encounter encounter, Integer encounterTypeId) throws DAOException;
+  public void saveNotSwappableForm(Form form) throws DAOException;
 
-	public void updateForm(Form form, Integer encounterTypeId) throws DAOException;
+  public Form updateToNextAvailableId(Form form) throws DAOException;
 
-	public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException;
-
-	public Form updateToNextAvailableId(EncounterType encounterType) throws DAOException;
-
-	public void deleteEncounterType(EncounterType encounterType) throws DAOException;
+  public void deleteForm(Form form) throws DAOException;
 }

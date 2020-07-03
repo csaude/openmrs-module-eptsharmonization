@@ -31,6 +31,7 @@
 
 	<properties>
 		<openmrsPlatformVersion>1.11.5</openmrsPlatformVersion>
+		<poiVersion>3.16-beta2</poiVersion>
 	</properties>
 
 	<dependencyManagement>
