@@ -13,6 +13,10 @@
 		href="${pageContext.request.contextPath}/module/eptsharmonization/programs/harmonizeProgramsList.form"><spring:message
 				code="eptsharmonization.harmonize.programs" /></a></li>
 	</li>
+	<li><a
+		href="${pageContext.request.contextPath}/module/eptsharmonization/programWorkflows/harmonizeProgramWorkflowsList.form"><spring:message
+				code="eptsharmonization.harmonize.programworkflows" /></a></li>
+	<li>
 	<li>
 		<a
 				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeVisitType.form"><spring:message
@@ -23,9 +27,13 @@
 				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeRelationshipType.form"><spring:message
 				code="eptsharmonization.relationshiptype.harmonize" /></a>
 	</li>
-	<li><a
-		href="${pageContext.request.contextPath}/module/eptsharmonization/programWorkflows/harmonizeProgramWorkflowsList.form"><spring:message
-				code="eptsharmonization.harmonize.programworkflows" /></a></li>
+		<a
+				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationAttributeType.form"><spring:message
+				code="eptsharmonization.locationattributetype.harmonize" /></a>
+	</li>
+	<li>
+		<a		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationTag.form"><spring:message
+				code="eptsharmonization.locationtag.harmonize" /></a>
 	</li>
 		
 	<!-- Add further links here -->

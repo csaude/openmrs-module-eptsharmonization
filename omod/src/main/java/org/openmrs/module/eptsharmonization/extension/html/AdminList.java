@@ -46,6 +46,9 @@ public class AdminList extends AdministrationSectionExt {
         "module/eptsharmonization/programs/harmonizeProgramsList.form",
         "eptsharmonization.harmonize.programs");
     map.put(
+        "module/eptsharmonization/programWorkflows/harmonizeProgramWorkflowsList.form",
+        "eptsharmonization.harmonize.programworkflows");
+    map.put(
         "module/eptsharmonization/harmonizeVisitType.form",
         "eptsharmonization.visittype.harmonize");
     map.put(
@@ -54,6 +57,12 @@ public class AdminList extends AdministrationSectionExt {
     map.put(
         "module/eptsharmonization/programWorkflows/harmonizeProgramWorkflowsList.form",
         "eptsharmonization.harmonize.programworkflows");
+    map.put(
+        "module/eptsharmonization/harmonizeLocationAttributeType.form",
+        "eptsharmonization.locationattributetype.harmonize");
+    map.put(
+        "module/eptsharmonization/harmonizeLocationTag.form",
+        "eptsharmonization.locationtag.harmonize");
     return map;
   }
 }

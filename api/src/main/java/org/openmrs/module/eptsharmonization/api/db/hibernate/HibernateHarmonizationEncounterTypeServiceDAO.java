@@ -259,4 +259,9 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
+
+  @Override
+  public EncounterType getEncounterTypeByUuid(String uuid) throws DAOException {
+    return this.encounterDAO.getEncounterTypeByUuid(uuid);
+  }
 }

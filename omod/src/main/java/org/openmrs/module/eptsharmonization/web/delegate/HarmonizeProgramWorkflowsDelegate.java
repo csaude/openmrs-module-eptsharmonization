@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.servlet.http.HttpSession;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
@@ -39,7 +37,7 @@ public class HarmonizeProgramWorkflowsDelegate {
 
   public HarmonizationData getConvertedData(List<ProgramWorkflowDTO> programWorkflows) {
 
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
     for (ProgramWorkflowDTO programWorkflowDTO : programWorkflows) {
       HarmonizationItem item =
           new HarmonizationItem(
@@ -57,7 +55,7 @@ public class HarmonizeProgramWorkflowsDelegate {
 
   public HarmonizationData getConvertedData(
       Map<String, List<ProgramWorkflowDTO>> mapProgramWorkflows) {
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
     for (String key : mapProgramWorkflows.keySet()) {
       List<ProgramWorkflowDTO> programWorkflows = mapProgramWorkflows.get(key);
       if (programWorkflows != null) {
@@ -159,7 +157,7 @@ public class HarmonizeProgramWorkflowsDelegate {
     HarmonizationData newItemsToExport = getConvertedData(PROGRAM_WORKFLOWS_NOT_PROCESSED);
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
 
-    Set<HarmonizationItem> itemsToRemove =
+    List<HarmonizationItem> itemsToRemove =
         getConvertedData(EXECUTED_PROGRAM_WORKFLOWS_MANUALLY_CACHE).getItems();
     productionItemsToExport.getItems().removeAll(itemsToRemove);
   }
@@ -266,8 +264,8 @@ public class HarmonizeProgramWorkflowsDelegate {
       Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows,
       Builder logBuilder) {
 
-    Set<HarmonizationItem> differntProgramsOrConceptsItems = new TreeSet<>();
-    Set<HarmonizationItem> differntIDsItems = new TreeSet<>();
+    List<HarmonizationItem> differntProgramsOrConceptsItems = new ArrayList<>();
+    List<HarmonizationItem> differntIDsItems = new ArrayList<>();
 
     Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeItens = new HashMap<>();
 

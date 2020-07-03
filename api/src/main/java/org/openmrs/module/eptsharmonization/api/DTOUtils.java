@@ -3,12 +3,16 @@ package org.openmrs.module.eptsharmonization.api;
 import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.EncounterType;
+import org.openmrs.LocationAttributeType;
+import org.openmrs.LocationTag;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.RelationshipType;
 import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
@@ -122,11 +126,14 @@ public class DTOUtils {
   public static List<ProgramWorkflowDTO> fromProgramWorkflows(
       List<ProgramWorkflow> programWorkflows) {
     List<ProgramWorkflowDTO> result = new ArrayList<>();
-
     for (ProgramWorkflow programWorkflow : programWorkflows) {
       result.add(new ProgramWorkflowDTO(programWorkflow));
     }
     return result;
+  }
+
+  public static ProgramWorkflowDTO fromProgramWorkflow(ProgramWorkflow programWorkflow) {
+    return new ProgramWorkflowDTO(programWorkflow);
   }
 
   public static List<ProgramWorkflow> fromProgramWorkflowDTOs(
@@ -138,7 +145,37 @@ public class DTOUtils {
     return result;
   }
 
-  public static ProgramWorkflowDTO fromProgramWorkflow(ProgramWorkflow programWorkflow) {
-    return new ProgramWorkflowDTO(programWorkflow);
+  public static List<LocationAttributeTypeDTO> fromLocationAttributeTypes(
+      final List<LocationAttributeType> locationAttributeTypes) {
+    List<LocationAttributeTypeDTO> locationAttributeTypeDTOList = new ArrayList<>();
+    for (LocationAttributeType locationAttributeType : locationAttributeTypes) {
+      locationAttributeTypeDTOList.add(new LocationAttributeTypeDTO(locationAttributeType));
+    }
+    return locationAttributeTypeDTOList;
+  }
+
+  public static List<LocationAttributeType> fromLocationAttributeTypeDTOs(
+      List<LocationAttributeTypeDTO> locationAttributeTypeDTOs) {
+    List<LocationAttributeType> result = new ArrayList<>();
+    for (LocationAttributeTypeDTO locationAttributeTypeDTO : locationAttributeTypeDTOs) {
+      result.add(locationAttributeTypeDTO.getLocationAttributeType());
+    }
+    return result;
+  }
+
+  public static List<LocationTagDTO> fromLocationTags(final List<LocationTag> relationshipTypes) {
+    List<LocationTagDTO> locationTagDTOList = new ArrayList<>();
+    for (LocationTag relationshipType : relationshipTypes) {
+      locationTagDTOList.add(new LocationTagDTO(relationshipType));
+    }
+    return locationTagDTOList;
+  }
+
+  public static List<LocationTag> fromLocationTagDTOs(List<LocationTagDTO> relationshipTypeDTOs) {
+    List<LocationTag> result = new ArrayList<>();
+    for (LocationTagDTO relationshipTypeDTO : relationshipTypeDTOs) {
+      result.add(relationshipTypeDTO.getLocationTag());
+    }
+    return result;
   }
 }

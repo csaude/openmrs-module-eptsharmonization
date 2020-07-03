@@ -34,6 +34,8 @@ public interface HarmonizationEncounterTypeServiceDAO {
 
   public EncounterType getEncounterTypeById(Integer encounterTypeId) throws DAOException;
 
+  public EncounterType getEncounterTypeByUuid(String uuid) throws DAOException;
+
   public boolean isSwappable(EncounterType encounterType) throws DAOException;
 
   public List<EncounterType> findAllSwappable() throws DAOException;
