@@ -35,6 +35,10 @@
 		<a		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationTag.form"><spring:message
 				code="eptsharmonization.locationtag.harmonize" /></a>
 	</li>
-		
+	<li>
+		<a		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeConcept.form"><spring:message
+				code="eptsharmonization.concept.harmonize.status" /></a>
+	</li>
+
 	<!-- Add further links here -->
 </ul>
