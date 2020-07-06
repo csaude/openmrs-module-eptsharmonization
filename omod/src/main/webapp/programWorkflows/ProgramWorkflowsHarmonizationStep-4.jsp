@@ -113,7 +113,6 @@
 				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
 				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 						<th><spring:message code="general.id" /></th>
-						<th><spring:message code="general.name" /></th>
 				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
 				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 						<th colspan="2"></th>
