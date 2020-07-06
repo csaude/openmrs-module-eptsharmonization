@@ -46,6 +46,16 @@ public class HarmonizationUtils {
             + "  where _program.program_id = program.program_id    "
             + "  and _program.uuid = program.uuid)) as a)                            ");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append(
+        "update program_workflow set swappable = true                      "
+            + "  where program_workflow_id in(  select a.* from(                  "
+            + "   select program_workflow.program_workflow_id from program_workflow  "
+            + "   where NOT EXISTS (select * from _program_workflow "
+            + "  where _program_workflow.program_workflow_id = program_workflow.program_workflow_id    "
+            + "  and _program_workflow.uuid = program_workflow.uuid)) as a)           ");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
   public static <T extends OpenmrsMetadata>

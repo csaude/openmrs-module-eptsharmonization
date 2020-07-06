@@ -266,6 +266,49 @@
 		</modifySql>
 	</changeSet>
 
+	<changeSet author="Hamilton" id="20200624-1130">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_program_workflow" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _program_workflow table
+		</comment>
+		<createTable tableName="_program_workflow">
+			<column autoIncrement="true" name="program_workflow_id" type="int">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="program_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="concept_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueBoolean="false" name="retired"
+				type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="changed_by" type="int">
+				<constraints nullable="true" />
+			</column>
+			<column name="date_changed" type="DATETIME">
+				<constraints nullable="true" />
+			</column>
+			<column name="uuid" type="char(38)" />
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
+
 	<changeSet id="eptsharmonization_20200624-1242" author="Willa Mhawila">
 		<preConditions onFail="MARK_RAN">
 			<not>

@@ -2,25 +2,28 @@
 	test="${hasSecondStepHarmonization && isFirstStepHarmonizationCompleted && isUUIDsAndIDsHarmonized && isNamesHarmonized}">
 	<br />
 	<b class="boxHeader"><spring:message
-			code="eptsharmonization.personattributetype.harmonize.onlyOnPServer.inuse" /></b>
+			code="eptsharmonization.programworkflow.harmonize.onlyOnPServer.inuse" /></b>
 	<form method="post" class="box"
-		action="harmonizeExportPersonAttributeTypes.form">
+		action="harmonizeExportProgramWorkflows.form">
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
 				<th><spring:message code="general.id" /></th>
-				<th><spring:message code="general.name" /></th>
-				<th><spring:message code="general.description" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 				<th><spring:message code="general.uuid" /></th>
 				<th><spring:message
-						code="eptsharmonization.personattributetype.harmonize.personattributes" /></th>
+						code="eptsharmonization.programworkflow.harmonize.conceptStateConversions" /></th>
+				<th><spring:message
+						code="eptsharmonization.programworkflow.harmonize.programWorkflowStates" /></th>
 			</tr>
 			<c:forEach var="item" items="${productionItemsToExport.items}">
 				<tr>
-					<td valign="top" align="center">${item.value.personAttributeType.id}</td>
-					<td valign="top">${item.value.personAttributeType.name}</td>
-					<td valign="top">${item.value.personAttributeType.description}</td>
-					<td valign="top">${item.value.personAttributeType.uuid}</td>
+					<td valign="top" align="center">${item.value.programWorkflow.id}</td>
+					<td valign="top">${item.value.program}</td>
+					<td valign="top">${item.value.concept}</td>
+					<td valign="top">${item.value.programWorkflow.uuid}</td>
 					<td style="text-align: right;">${item.encountersCount}</td>
+					<td style="text-align: right;">${item.formsCount}</td>
 				</tr>
 			</c:forEach>
 			<tr>
@@ -37,28 +40,28 @@
 	<br />
 
 	<c:if
-		test="${not empty swappablePersonAttributeTypesClone && not empty notSwappablePersonAttributeTypesClone}">
+		test="${not empty swappableProgramWorkflowsClone && not empty notSwappableProgramWorkflowsClone}">
 		<br />
 		<b class="boxHeader"><spring:message
-				code="eptsharmonization.personattributetype.defineNewMappings" /></b>
+				code="eptsharmonization.programworkflow.defineNewMappings" /></b>
 		<fieldset>
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>
 					<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.personattributetype.from.metadataServer" /></th>
+							code="eptsharmonization.programworkflow.from.metadataServer" /></th>
 					<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.personattributetype.created.OnProductionServer" /></th>
+							code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
 					<th colspan="2" style="text-align: left; width: 10%;"></th>
 				</tr>
-				<form method="post" action="addPersonAttributeTypeMapping.form">
+				<form method="post" action="addProgramWorkflowMapping.form">
 					<tr>
 						<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
 								path="harmonizationItem.value">
 								<select name="${status.expression}">
 									<option value="">Selecione</option>
-									<c:forEach items="${notSwappablePersonAttributeTypes}" var="type">
+									<c:forEach items="${notSwappableProgramWorkflows}" var="type">
 										<option value="${type.uuid}"
-											<c:if test="${type.uuid == status.value}">selected</c:if>>${type.name}</option>
+											<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
 									</c:forEach>
 								</select>
 								<c:if test="${not empty errorRequiredMdsValue}">
@@ -71,9 +74,9 @@
 								path="harmonizationItem.key">
 								<select name="${status.expression}">
 									<option value="">Selecione</option>
-									<c:forEach items="${swappablePersonAttributeTypes}" var="type">
+									<c:forEach items="${swappableProgramWorkflows}" var="type">
 										<option value="${type.uuid}"
-											<c:if test="${type.uuid == status.value}">selected</c:if>>${type.name}</option>
+											<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
 									</c:forEach>
 								</select>
 								<c:if test="${not empty errorRequiredPDSValue}">
@@ -84,7 +87,7 @@
 								</c:if>
 							</spring:bind></td>
 						<td colspan="2" style="text-align: left; width: 10%;"><c:choose>
-								<c:when test="${not empty swappablePersonAttributeTypes}">
+								<c:when test="${not empty swappableProgramWorkflows}">
 									<div class="submit-btn" align="left">
 										<input type="submit"
 											style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
@@ -100,35 +103,35 @@
 				<fieldset>
 					<tr>
 						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.personattributetype.from.metadataServer" /></th>
+								code="eptsharmonization.programworkflow.from.metadataServer" /></th>
 						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.personattributetype.created.OnProductionServer" /></th>
+								code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
 						<th colspan="2"></th>
 					</tr>
 					<tr>
 						<th><spring:message code="general.id" /></th>
-						<th><spring:message code="general.name" /></th>
-						<th><spring:message code="general.description" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 						<th><spring:message code="general.id" /></th>
-						<th><spring:message code="general.name" /></th>
-						<th><spring:message code="general.description" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 						<th colspan="2"></th>
 					</tr>
-					<c:if test="${not empty manualHarmonizePersonAttributeTypes}">
-						<form method="post" action="removePersonAttributeTypeMapping.form">
-							<c:forEach var="item" items="${manualHarmonizePersonAttributeTypes}"
+					<c:if test="${not empty manualHarmonizeProgramWorkflows}">
+						<form method="post" action="removeProgramWorkflowMapping.form">
+							<c:forEach var="item" items="${manualHarmonizeProgramWorkflows}"
 								varStatus="itemsRow">
 								<tr>
 									<td valign="top">${item.value.id}</td>
-									<td valign="top">${item.value.name}</td>
-									<td valign="top">${item.value.description}</td>
+									<td valign="top">${item.value.program}</td>
+									<td valign="top">${item.value.concept}</td>
 									<td valign="top">${item.key.id}</td>
-									<td valign="top">${item.key.name}</td>
-									<td valign="top">${item.key.description}</td>
+									<td valign="top">${item.key.program}</td>
+									<td valign="top">${item.key.concept}</td>
 									<td colspan="2">
 										<div class="submit-btn" align="left">
 											<input type="hidden" id="${item.key.uuid}"
-												name="productionServerPersonAttributeTypeUuID"
+												name="productionServerProgramWorkflowUuID"
 												value="${item.key.uuid}" /> <input type="submit"
 												id="${item.key.uuid}"
 												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
@@ -161,34 +164,34 @@
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>
 					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.personattributetype.from.metadataServer" /></th>
+							code="eptsharmonization.programworkflow.from.metadataServer" /></th>
 					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.personattributetype.created.OnProductionServer" /></th>
+							code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
 				</tr>
 				<tr>
 					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="general.name" /></th>
-					<th><spring:message code="general.description" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 					<th><spring:message code="general.uuid" /></th>
 					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="general.name" /></th>
-					<th><spring:message code="general.description" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
+				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 					<th><spring:message code="general.uuid" /></th>
 				</tr>
-				<c:forEach var="item" items="${notSwappablePersonAttributeTypesClone}"
+				<c:forEach var="item" items="${notSwappableProgramWorkflowsClone}"
 					varStatus="itemStatus">
 					<tr>
 						<td valign="top" align="center">${item.id}</td>
-						<td valign="top">${item.name}</td>
-						<td valign="top">${item.description}</td>
+						<td valign="top">${item.program}</td>
+						<td valign="top">${item.concept}</td>
 						<td valign="top">${item.uuid}</td>
 						<c:choose>
 							<c:when
-								test="${not empty swappablePersonAttributeTypesClone[itemStatus.index]}">
-								<td>${swappablePersonAttributeTypesClone[itemStatus.index].id}</td>
-								<td>${swappablePersonAttributeTypesClone[itemStatus.index].name}</td>
-								<td>${swappablePersonAttributeTypesClone[itemStatus.index].description}</td>
-								<td>${swappablePersonAttributeTypesClone[itemStatus.index].uuid}</td>
+								test="${not empty swappableProgramWorkflowsClone[itemStatus.index]}">
+								<td>${swappableProgramWorkflowsClone[itemStatus.index].id}</td>
+								<td>${swappableProgramWorkflowsClone[itemStatus.index].program}</td>
+								<td>${swappableProgramWorkflowsClone[itemStatus.index].concept}</td>
+								<td>${swappableProgramWorkflowsClone[itemStatus.index].uuid}</td>
 							</c:when>
 							<c:otherwise>
 								<td colspan="4"></td>
