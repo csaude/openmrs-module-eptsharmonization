@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -20,212 +19,350 @@ import org.openmrs.util.OpenmrsClassLoader;
 
 public class EptsHarmonizationFormLoader {
 
-	public static void loadForms() throws IOException {
+  public static void loadForms() throws IOException {
 
-		List<List<FormData>> formEntries = EptsHarmonizationFormLoader.readFormEntriesFromFile();
+    List<List<FormData>> entries = EptsHarmonizationFormLoader.loadFormEntries();
 
-		for (List<FormData> formItems : formEntries) {
+    for (List<FormData> formItems : entries) {
 
-			String insertColumns = "";
-			String insertValues = "";
+      String insertColumns = "";
+      String insertValues = "";
 
-			Iterator<FormData> iteratorItems = formItems.iterator();
+      Iterator<FormData> iteratorItems = formItems.iterator();
 
-			FormData formItem0 = iteratorItems.next();
+      FormData formItem0 = iteratorItems.next();
 
-			insertColumns += formItem0.getColumnName();
-			insertValues += formItem0.getValue();
+      insertColumns += formItem0.getColumnName();
+      insertValues += formItem0.getValue();
 
-			while (iteratorItems.hasNext()) {
-				FormData item = iteratorItems.next();
-				insertColumns += ", " + item.getColumnName();
-				insertValues += ", " + item.getConvertedValue();
-			}
-			StringBuilder sb = new StringBuilder();
-			sb.append("insert into _form (" + insertColumns + ") values(" + insertValues + ")");
-			Context.getAdministrationService().executeSQL(sb.toString(), false);
-		}
-	}
+      while (iteratorItems.hasNext()) {
+        FormData item = iteratorItems.next();
+        insertColumns += ", " + item.getColumnName();
+        insertValues += ", " + item.getConvertedValue();
+      }
+      StringBuilder sb = new StringBuilder();
+      sb.append("insert into _form (" + insertColumns + ") values(" + insertValues + ")");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+  }
 
-	private static List<List<FormData>> readFormEntriesFromFile() throws IOException {
-		List<List<FormData>> formData = new ArrayList<>();
-		Sheet sheet = getResourse();
-		Iterator<Row> rows = sheet.rowIterator();
+  public static void loadHtmlForms() throws IOException {
 
-		if (rows.hasNext()) {
-			rows.next();
-		}
-		while (rows.hasNext()) {
-			Row row = (Row) rows.next();
+    List<List<FormData>> entries = EptsHarmonizationFormLoader.loadHtmlFormEntries();
 
-			List<FormData> rowList = new ArrayList<>();
+    for (List<FormData> formItems : entries) {
 
-			rowList.add(new FormData("form_id", getRequiredNumericValue(row.getCell(0)), FormDataTypes.NUMBER));
-			rowList.add(new FormData("name", getRequiredStringValue(row.getCell(1)), FormDataTypes.STRING));
-			rowList.add(new FormData("version", getRequiredNumericValueAsString(row.getCell(2)), FormDataTypes.STRING));
-			rowList.add(new FormData("build", getOptionalNumericValue(row.getCell(3)), FormDataTypes.NUMBER));
-			rowList.add(new FormData("published", getRequiredBooleanValue(row.getCell(4)), FormDataTypes.BOOLEAN));
-			rowList.add(new FormData("encounter_type", getOptionalNumericValue(row.getCell(6)), FormDataTypes.NUMBER));
-			rowList.add(new FormData("creator", getRequiredNumericValue(row.getCell(9)), FormDataTypes.NUMBER));
-			rowList.add(new FormData("date_created", getRequiredDateValue(row.getCell(10)), FormDataTypes.DATE));
-			rowList.add(new FormData("changed_by", getOptionalNumericValue(row.getCell(11)), FormDataTypes.NUMBER));
-			rowList.add(new FormData("date_changed", getOptionalDateValue(row.getCell(12)), FormDataTypes.DATE));
-			rowList.add(new FormData("retired", getRequiredBooleanValue(row.getCell(13)), FormDataTypes.BOOLEAN));
-			rowList.add(new FormData("retired_by", getOptionalNumericValue(row.getCell(14)), FormDataTypes.NUMBER));
-			rowList.add(new FormData("date_retired", getOptionalDateValue(row.getCell(15)), FormDataTypes.DATE));
-			rowList.add(new FormData("retired_reason", getOptionalStringValue(row.getCell(16)), FormDataTypes.STRING));
-			rowList.add(new FormData("uuid", getRequiredStringValue(row.getCell(17)), FormDataTypes.STRING));
-			rowList.add(new FormData("template", getOptionalStringValue(row.getCell(7)), FormDataTypes.XML));
-			rowList.add(new FormData("xslt", getOptionalStringValue(row.getCell(8)), FormDataTypes.XML));
+      String insertColumns = "";
+      String insertValues = "";
 
-			formData.add(rowList);
-		}
-		return filterNonNullValues(formData);
-	}
+      Iterator<FormData> iteratorItems = formItems.iterator();
 
-	@SuppressWarnings("resource")
-	private static Sheet getResourse() throws IOException {
+      FormData formItem0 = iteratorItems.next();
 
-		InputStream excelFileToRead = OpenmrsClassLoader.getInstance().getResourceAsStream("all-forms-01072020.xls");
-		XSSFWorkbook xssfWBook = new XSSFWorkbook(excelFileToRead);
+      insertColumns += formItem0.getColumnName();
+      insertValues += formItem0.getValue();
 
-		return xssfWBook.getSheetAt(0);
-	}
+      while (iteratorItems.hasNext()) {
+        FormData item = iteratorItems.next();
+        insertColumns += ", " + item.getColumnName();
+        insertValues += ", " + item.getConvertedValue();
+      }
+      StringBuilder sb = new StringBuilder();
+      sb.append(
+          "insert into _htmlformentry_html_form ("
+              + insertColumns
+              + ") values("
+              + insertValues
+              + ")");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+  }
 
-	private static List<List<FormData>> filterNonNullValues(List<List<FormData>> formData) {
-		for (List<FormData> list : formData) {
-			Iterator<FormData> iterator = list.iterator();
-			while (iterator.hasNext()) {
-				EptsHarmonizationFormLoader.FormData formDataItem = (EptsHarmonizationFormLoader.FormData) iterator
-						.next();
-				if (formDataItem.isNullValue()) {
-					iterator.remove();
-				}
-			}
-		}
-		return formData;
-	}
+  private static List<List<FormData>> loadFormEntries() throws IOException {
+    List<List<FormData>> formData = new ArrayList<>();
+    Sheet sheet = getFormResource();
+    Iterator<Row> rows = sheet.rowIterator();
 
-	private static int getRequiredNumericValue(Cell cell) {
-		return Double.valueOf(cell.getNumericCellValue()).intValue();
-	}
+    if (rows.hasNext()) {
+      rows.next();
+    }
+    while (rows.hasNext()) {
+      Row row = (Row) rows.next();
 
-	private static String getRequiredNumericValueAsString(Cell cell) {
-		return String.valueOf(cell.getNumericCellValue());
-	}
+      List<FormData> rowList = new ArrayList<>();
 
-	private static String getRequiredStringValue(Cell cell) {
-		return cell.getStringCellValue().trim();
-	}
+      rowList.add(
+          new FormData("form_id", getRequiredNumericValue(row.getCell(0)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("name", getRequiredStringValue(row.getCell(1)), FormDataTypes.STRING));
+      rowList.add(
+          new FormData(
+              "version", getRequiredNumericValueAsString(row.getCell(2)), FormDataTypes.STRING));
+      rowList.add(
+          new FormData("build", getOptionalNumericValue(row.getCell(3)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData(
+              "published", getRequiredBooleanValue(row.getCell(4)), FormDataTypes.BOOLEAN));
+      rowList.add(
+          new FormData(
+              "encounter_type", getOptionalNumericValue(row.getCell(6)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("creator", getRequiredNumericValue(row.getCell(9)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("date_created", getRequiredDateValue(row.getCell(10)), FormDataTypes.DATE));
+      rowList.add(
+          new FormData(
+              "changed_by", getOptionalNumericValue(row.getCell(11)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("date_changed", getOptionalDateValue(row.getCell(12)), FormDataTypes.DATE));
+      rowList.add(
+          new FormData("retired", getRequiredBooleanValue(row.getCell(13)), FormDataTypes.BOOLEAN));
+      rowList.add(
+          new FormData(
+              "retired_by", getOptionalNumericValue(row.getCell(14)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("date_retired", getOptionalDateValue(row.getCell(15)), FormDataTypes.DATE));
+      rowList.add(
+          new FormData(
+              "retired_reason", getOptionalStringValue(row.getCell(16)), FormDataTypes.STRING));
+      rowList.add(
+          new FormData("uuid", getRequiredStringValue(row.getCell(17)), FormDataTypes.STRING));
+      // rowList.add(new FormData("template", getOptionalStringValue(row.getCell(7)),
+      // FormDataTypes.XML));
+      // rowList.add(new FormData("xslt", getOptionalStringValue(row.getCell(8)),
+      // FormDataTypes.XML));
 
-	@SuppressWarnings("deprecation")
-	private static Date getRequiredDateValue(Cell cell) {
-		return new Date(cell.toString());
-	}
+      formData.add(rowList);
+    }
+    return filterNonNullValues(formData);
+  }
 
-	@SuppressWarnings("deprecation")
-	private static Date getOptionalDateValue(Cell cell) {
-		if (cell == null) {
-			return null;
-		}
-		if (cell.toString().equals("\\N") || cell.toString().isEmpty()) {
-			return null;
-		}
-		return new Date(cell.toString());
-	}
+  private static List<List<FormData>> loadHtmlFormEntries() throws IOException {
+    List<List<FormData>> formData = new ArrayList<>();
+    Sheet sheet = getHtmlFormResource();
+    Iterator<Row> rows = sheet.rowIterator();
 
-	private static String getOptionalNumericValue(Cell cell) {
-		if (cell == null) {
-			return null;
-		}
-		if (cell.toString().equals("\\N")) {
-			return null;
-		}
-		return String.valueOf(Double.valueOf(cell.getNumericCellValue()).intValue());
-	}
+    if (rows.hasNext()) {
+      rows.next();
+    }
+    while (rows.hasNext()) {
+      Row row = (Row) rows.next();
 
-	private static String getOptionalStringValue(Cell cell) {
-		if (cell == null) {
-			return null;
-		}
-		if (cell.toString().equals("\\N")) {
-			return null;
-		}
-		return cell.getStringCellValue();
-	}
+      List<FormData> rowList = new ArrayList<>();
 
-	private static boolean getRequiredBooleanValue(Cell cell) {
-		int value = Double.valueOf(cell.getNumericCellValue()).intValue();
-		return value == 1 ? true : false;
-	}
+      int skipID = getRequiredNumericValue(row.getCell(0));
 
-	public static class FormData {
+      if (skipID == 3
+          || skipID == 12
+          || skipID == 19
+          || skipID == 28
+          || skipID == 29
+          || skipID == 32
+          || skipID == 35
+          || skipID == 36
+          || skipID == 38
+          || skipID == 39
+          || skipID == 40
+          || skipID == 44
+          || skipID == 58) {
+        continue;
+      }
+      rowList.add(
+          new FormData("id", getRequiredNumericValue(row.getCell(0)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("form_id", getOptionalNumericValue(row.getCell(1)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("name", getOptionalStringValue(row.getCell(2)), FormDataTypes.STRING));
+      rowList.add(
+          new FormData("xml_data", getRequiredStringValue(row.getCell(3)), FormDataTypes.XML));
+      rowList.add(
+          new FormData("creator", getRequiredNumericValue(row.getCell(4)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("date_created", getRequiredDateValue(row.getCell(5)), FormDataTypes.DATE));
+      rowList.add(
+          new FormData(
+              "changed_by", getOptionalNumericValue(row.getCell(6)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("date_changed", getOptionalDateValue(row.getCell(7)), FormDataTypes.DATE));
+      rowList.add(
+          new FormData("retired", getRequiredBooleanValue(row.getCell(8)), FormDataTypes.BOOLEAN));
+      rowList.add(
+          new FormData("uuid", getRequiredStringValue(row.getCell(9)), FormDataTypes.STRING));
+      rowList.add(
+          new FormData(
+              "description", getOptionalStringValue(row.getCell(10)), FormDataTypes.STRING));
+      rowList.add(
+          new FormData(
+              "retired_by", getOptionalNumericValue(row.getCell(11)), FormDataTypes.NUMBER));
+      rowList.add(
+          new FormData("date_retired", getOptionalDateValue(row.getCell(12)), FormDataTypes.DATE));
+      rowList.add(
+          new FormData(
+              "retired_reason", getOptionalStringValue(row.getCell(13)), FormDataTypes.STRING));
 
-		private String columnName;
-		private Object value;
-		private FormDataTypes dataType;
+      formData.add(rowList);
+    }
+    return filterNonNullValues(formData);
+  }
 
-		public FormData(String columnName, Object value, FormDataTypes dataType) {
-			this.columnName = columnName;
-			this.value = value;
-			this.dataType = dataType;
-		}
+  @SuppressWarnings("resource")
+  private static Sheet getFormResource() throws IOException {
 
-		public String getColumnName() {
-			return columnName;
-		}
+    InputStream excelFileToRead =
+        OpenmrsClassLoader.getInstance().getResourceAsStream("all-forms.xls");
+    XSSFWorkbook xssfWBook = new XSSFWorkbook(excelFileToRead);
 
-		public Object getValue() {
-			return value;
-		}
+    return xssfWBook.getSheetAt(0);
+  }
 
-		public FormDataTypes getDataType() {
-			return dataType;
-		}
+  @SuppressWarnings("resource")
+  private static Sheet getHtmlFormResource() throws IOException {
 
-		public boolean isNullValue() {
-			if (this.value == null) {
-				return true;
-			}
-			if (this.value instanceof String) {
-				String valueAsString = (String) this.value;
+    InputStream excelFileToRead =
+        OpenmrsClassLoader.getInstance().getResourceAsStream("htmlformentry_html_form.xls");
+    XSSFWorkbook xssfWBook = new XSSFWorkbook(excelFileToRead);
 
-				if (StringUtils.isEmpty(valueAsString) || valueAsString.equals("null")) {
-					return true;
-				}
-			}
-			return false;
-		}
+    return xssfWBook.getSheetAt(0);
+  }
 
-		public Object getConvertedValue() {
+  private static List<List<FormData>> filterNonNullValues(List<List<FormData>> formData) {
+    for (List<FormData> list : formData) {
+      Iterator<FormData> iterator = list.iterator();
+      while (iterator.hasNext()) {
+        EptsHarmonizationFormLoader.FormData formDataItem =
+            (EptsHarmonizationFormLoader.FormData) iterator.next();
+        if (formDataItem.isNullValue()) {
+          iterator.remove();
+        }
+      }
+    }
+    return formData;
+  }
 
-			if (FormDataTypes.STRING.equals(this.getDataType())) {
-				return "'" + this.value + "'";
-			}
+  private static int getRequiredNumericValue(Cell cell) {
+    return Double.valueOf(cell.getNumericCellValue()).intValue();
+  }
 
-			if (FormDataTypes.NUMBER.equals(this.getDataType())) {
-				return Integer.valueOf(this.value.toString());
-			}
+  private static String getRequiredNumericValueAsString(Cell cell) {
+    return String.valueOf(cell.getNumericCellValue());
+  }
 
-			if (FormDataTypes.BOOLEAN.equals(this.getDataType())) {
-				return (Boolean) this.value;
-			}
-			if (FormDataTypes.XML.equals(this.getDataType())) {
+  private static String getRequiredStringValue(Cell cell) {
+    return cell.getStringCellValue().trim();
+  }
 
-				return "N'" + this.value + "'";
-			}
+  @SuppressWarnings("deprecation")
+  private static Date getRequiredDateValue(Cell cell) {
+    return new Date(cell.toString());
+  }
 
-			if (FormDataTypes.DATE.equals(this.getDataType())) {
+  @SuppressWarnings("deprecation")
+  private static Date getOptionalDateValue(Cell cell) {
+    if (cell == null) {
+      return null;
+    }
+    if (cell.toString().equals("\\N") || cell.toString().isEmpty()) {
+      return null;
+    }
+    return new Date(cell.toString());
+  }
 
-				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-				String strDate = dateFormat.format((Date) this.value);
-				return "'" + strDate + "'";
-			}
-			return null;
-		}
+  private static String getOptionalNumericValue(Cell cell) {
+    if (cell == null) {
+      return null;
+    }
+    if (cell.toString().equals("\\N")) {
+      return null;
+    }
+    return String.valueOf(Double.valueOf(cell.getNumericCellValue()).intValue());
+  }
 
-		public enum FormDataTypes {
-			STRING, NUMBER, DATE, BOOLEAN, XML;
-		}
-	}
+  private static String getOptionalStringValue(Cell cell) {
+    if (cell == null) {
+      return null;
+    }
+    if (cell.toString().equals("\\N")) {
+      return null;
+    }
+    return cell.getStringCellValue();
+  }
+
+  private static boolean getRequiredBooleanValue(Cell cell) {
+    int value = Double.valueOf(cell.getNumericCellValue()).intValue();
+    return value == 1 ? true : false;
+  }
+
+  public static class FormData {
+
+    private String columnName;
+    private Object value;
+    private FormDataTypes dataType;
+
+    public FormData(String columnName, Object value, FormDataTypes dataType) {
+      this.columnName = columnName;
+      this.value = value;
+      this.dataType = dataType;
+    }
+
+    public String getColumnName() {
+      return columnName;
+    }
+
+    public Object getValue() {
+      return value;
+    }
+
+    public FormDataTypes getDataType() {
+      return dataType;
+    }
+
+    public boolean isNullValue() {
+      if (this.value == null) {
+        return true;
+      }
+      if (this.value instanceof String) {
+        String valueAsString = (String) this.value;
+
+        if (StringUtils.isEmpty(valueAsString) || valueAsString.equals("null")) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public Object getConvertedValue() {
+
+      if (FormDataTypes.STRING.equals(this.getDataType())) {
+        return "'" + this.value + "'";
+      }
+
+      if (FormDataTypes.NUMBER.equals(this.getDataType())) {
+        return Integer.valueOf(this.value.toString());
+      }
+
+      if (FormDataTypes.BOOLEAN.equals(this.getDataType())) {
+        return (Boolean) this.value;
+      }
+      if (FormDataTypes.XML.equals(this.getDataType())) {
+
+        return "N'" + this.value + "'";
+      }
+
+      if (FormDataTypes.DATE.equals(this.getDataType())) {
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String strDate = dateFormat.format((Date) this.value);
+        return "'" + strDate + "'";
+      }
+      return null;
+    }
+
+    public enum FormDataTypes {
+      STRING,
+      NUMBER,
+      DATE,
+      BOOLEAN,
+      XML;
+    }
+  }
 }

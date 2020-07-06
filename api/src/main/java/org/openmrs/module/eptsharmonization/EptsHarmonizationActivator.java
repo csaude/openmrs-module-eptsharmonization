@@ -58,14 +58,6 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
   public void started() {
     log.info("Starting Epts Harmonization Module");
     this.installMetaData();
-
-    try {
-      log.info("Importing _form Metadata Server ");
-      EptsHarmonizationFormLoader.loadForms();
-    } catch (Exception e) {
-      log.error("Loading Forms", e);
-      throw new RuntimeException(e);
-    }
   }
 
   private void installMetaData() {
@@ -111,6 +103,26 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("ALTER TABLE `form` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `htmlformentry_html_form` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    try {
+      log.info("Importing _form Metadata Server ");
+      EptsHarmonizationFormLoader.loadForms();
+    } catch (Exception e) {
+      log.error("Loading _forms entries", e);
+      throw new RuntimeException(e);
+    }
+
+    try {
+      log.info("Importing _htmlformentry_html_form Metadata Server ");
+      EptsHarmonizationFormLoader.loadHtmlForms();
+    } catch (Exception e) {
+      log.error("Loading _htmlformentry_html_form entries", e);
+      throw new RuntimeException(e);
+    }
+
     HarmonizationUtils.onModuleActivator();
   }
 
@@ -142,6 +154,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb = new StringBuilder("DROP TABLE IF EXISTS `_location_attribute_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_form`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_htmlformentry_html_form`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     if (columnExists("encounter_type", "swappable")) {
       sb = new StringBuilder();
       sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
@@ -163,6 +181,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     if (columnExists("form", "swappable")) {
       sb = new StringBuilder();
       sb.append("ALTER TABLE `form` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+
+    if (columnExists("htmlformentry_html_form", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `htmlformentry_html_form` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
@@ -194,6 +218,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("delete from liquibasechangelog where ID ='20200601-1000';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200601-1010';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
