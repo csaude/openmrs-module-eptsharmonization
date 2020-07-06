@@ -6,28 +6,28 @@
 			method="post" action="processHarmonizationStep2.form">
 			<br />
 			<b class="boxHeader"><spring:message
-					code="eptsharmonization.encountertype.harmonize.differentID.andEqualUUID" /></b>
+					code="eptsharmonization.form.harmonize.differentID.andEqualUUID" /></b>
 			<fieldset>
 				<table cellspacing="0" border="0" style="width: 100%">
 					<tr>
 						<th style="text-align: left; width: 5%;"><spring:message
-								code="eptsharmonization.encountertype.mdserver.id" /></th>
+								code="eptsharmonization.form.mdserver.id" /></th>
 						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.encountertype.mdserver.name" /></th>
+								code="eptsharmonization.form.mdserver.name" /></th>
 						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.encountertype.mdserver.description" /></th>
+								code="eptsharmonization.form.mdserver.description" /></th>
 						<th style="text-align: left; width: 5%;"><spring:message
-								code="eptsharmonization.encountertype.pdserver.id" /></th>
+								code="eptsharmonization.form.pdserver.id" /></th>
 						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.encountertype.pdserver.name" /></th>
+								code="eptsharmonization.form.pdserver.name" /></th>
 						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.encountertype.pdserver.description" /></th>
+								code="eptsharmonization.form.pdserver.description" /></th>
 						<th style="text-align: left; width: 10%;"><spring:message
 								code="general.uuid" /></th>
 						<th style="text-align: left; width: 5%;"><spring:message
-								code="eptsharmonization.encountertype.harmonize.encounters" /></th>
+								code="eptsharmonization.form.harmonize.encounters" /></th>
 						<th style="text-align: left; width: 5%;"><spring:message
-								code="eptsharmonization.encountertype.harmonize.forms" /></th>
+								code="eptsharmonization.form.harmonize.forms" /></th>
 						<th style="text-align: center; width: 10%;"><spring:message
 								code="eptsharmonization.proceedHarmonization" /></th>
 					</tr>
@@ -68,7 +68,7 @@
 			<br />
 			<div class="submit-btn" align="center">
 				<input type="submit"
-					value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
+					value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
 					name="processHarmonizationStep2" id="btn-partialHarmonization" />
 			</div>
 		</springform:form>

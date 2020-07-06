@@ -17,11 +17,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.hibernate.ObjectNotFoundException;
 import org.openmrs.Encounter;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.FormResource;
 import org.openmrs.api.APIException;
+import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
@@ -42,31 +44,34 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   private HarmonizationServiceDAO harmonizationDAO;
   private FormService formService;
   private HarmonizationFormServiceDAO harmonizationFormServiceDAO;
+  private EncounterService encounterService;
 
-  //	@Autowired
-  //	public void setHarmonizationDAO(HarmonizationServiceDAO harmonizationDAO) {
-  //		this.harmonizationDAO = harmonizationDAO;
-  //	}
+  // @Autowired
+  // public void setHarmonizationDAO(HarmonizationServiceDAO harmonizationDAO) {
+  // this.harmonizationDAO = harmonizationDAO;
+  // }
   //
-  //	@Autowired
-  //	public void setHarmonizationFormServiceDAO(
-  //			HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO) {
-  //		this.harmonizationFormServiceDAO = harmonizationEncounterTypeServiceDAO;
-  //	}
+  // @Autowired
+  // public void setHarmonizationFormServiceDAO(
+  // HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO) {
+  // this.harmonizationFormServiceDAO = harmonizationEncounterTypeServiceDAO;
+  // }
   //
-  //	@Autowired
-  //	public void setEncounterService(EncounterService encounterService) {
-  //		this.formService = encounterService;
-  //	}
+  // @Autowired
+  // public void setEncounterService(EncounterService encounterService) {
+  // this.formService = encounterService;
+  // }
 
   @Autowired
   public HarmonizationFormServiceImpl(
       FormService formService,
       HarmonizationServiceDAO harmonizationDAO,
-      HarmonizationFormServiceDAO harmonizationFormServiceDAO) {
+      HarmonizationFormServiceDAO harmonizationFormServiceDAO,
+      EncounterService encounterService) {
     this.formService = formService;
     this.harmonizationDAO = harmonizationDAO;
     this.harmonizationFormServiceDAO = harmonizationFormServiceDAO;
+    this.encounterService = encounterService;
   }
 
   @Override
@@ -76,7 +81,10 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     List<Form> mdsForms = harmonizationFormServiceDAO.findAllMetadataServerForms();
     List<Form> pdsForms = harmonizationFormServiceDAO.findAllProductionServerForms();
     mdsForms.removeAll(pdsForms);
-    return DTOUtils.fromForms(mdsForms);
+
+    List<FormDTO> dtos = DTOUtils.fromForms(mdsForms);
+    seXDTORelatedData(dtos);
+    return dtos;
   }
 
   @Override
@@ -242,60 +250,65 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   public void saveFormsWithDifferentIDAndEqualUUID(Map<String, List<FormDTO>> forms)
       throws APIException {
 
-    //		this.harmonizationDAO.evictCache();
-    //		try {
+    // this.harmonizationDAO.evictCache();
+    // try {
     //
-    //			this.harmonizationDAO.setDisabledCheckConstraints();
-    //			for (String uuid : mapEncounterTypes.keySet()) {
+    // this.harmonizationDAO.setDisabledCheckConstraints();
+    // for (String uuid : mapEncounterTypes.keySet()) {
     //
-    //				List<EncounterTypeDTO> list = mapEncounterTypes.get(uuid);
-    //				EncounterType mdsEncounterType = list.get(0).getEncounterType();
-    //				EncounterType pdSEncounterType = list.get(1).getEncounterType();
-    //				Integer mdServerEncounterId = mdsEncounterType.getEncounterTypeId();
+    // List<EncounterTypeDTO> list = mapEncounterTypes.get(uuid);
+    // EncounterType mdsEncounterType = list.get(0).getEncounterType();
+    // EncounterType pdSEncounterType = list.get(1).getEncounterType();
+    // Integer mdServerEncounterId = mdsEncounterType.getEncounterTypeId();
     //
-    //				EncounterType foundMDS = this.harmonizationFormServiceDAO
-    //						.getEncounterTypeById(mdsEncounterType.getId());
+    // EncounterType foundMDS = this.harmonizationFormServiceDAO
+    // .getEncounterTypeById(mdsEncounterType.getId());
     //
-    //				if (foundMDS != null) {
-    //					if (!this.harmonizationFormServiceDAO.isSwappable(foundMDS)) {
-    //						throw new APIException(String.format(
-    //								"Cannot update the Production Server Encounter type [ID = {%s}, UUID = {%s}, NAME =
-    // {%s}] with the ID {%s} this new ID is already referencing an Existing Encounter Type In
+    // if (foundMDS != null) {
+    // if (!this.harmonizationFormServiceDAO.isSwappable(foundMDS)) {
+    // throw new APIException(String.format(
+    // "Cannot update the Production Server Encounter type [ID = {%s}, UUID = {%s},
+    // NAME =
+    // {%s}] with the ID {%s} this new ID is already referencing an Existing
+    // Encounter Type In
     // Metadata Server",
-    //								pdSEncounterType.getId(), pdSEncounterType.getUuid(), pdSEncounterType.getName(),
-    //								mdServerEncounterId));
-    //					}
-    //					List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
-    //							.findEncontersByEncounterTypeId(foundMDS.getId());
-    //					List<Form> relatedForms = this.harmonizationFormServiceDAO
-    //							.findFormsByEncounterTypeId(foundMDS.getId());
-    //					this.updateToNextAvailableID(foundMDS, relatedEncounters, relatedForms);
-    //				}
+    // pdSEncounterType.getId(), pdSEncounterType.getUuid(),
+    // pdSEncounterType.getName(),
+    // mdServerEncounterId));
+    // }
+    // List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
+    // .findEncontersByEncounterTypeId(foundMDS.getId());
+    // List<Form> relatedForms = this.harmonizationFormServiceDAO
+    // .findFormsByEncounterTypeId(foundMDS.getId());
+    // this.updateToNextAvailableID(foundMDS, relatedEncounters, relatedForms);
+    // }
     //
-    //				EncounterType foundPDS = this.harmonizationFormServiceDAO
-    //						.getEncounterTypeById(pdSEncounterType.getId());
-    //				if (!this.harmonizationFormServiceDAO.isSwappable(foundPDS)) {
-    //					throw new APIException(String.format(
-    //							"Cannot update the Production Server Encounter type with ID {%s}, UUID {%s} and NAME
-    // {%s}. This Encounter Type is a Reference from an Encounter Type of Metadata Server",
-    //							foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
-    //				}
-    //				List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
-    //						.findEncontersByEncounterTypeId(foundPDS.getId());
-    //				List<Form> relatedForms =
+    // EncounterType foundPDS = this.harmonizationFormServiceDAO
+    // .getEncounterTypeById(pdSEncounterType.getId());
+    // if (!this.harmonizationFormServiceDAO.isSwappable(foundPDS)) {
+    // throw new APIException(String.format(
+    // "Cannot update the Production Server Encounter type with ID {%s}, UUID {%s}
+    // and NAME
+    // {%s}. This Encounter Type is a Reference from an Encounter Type of Metadata
+    // Server",
+    // foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
+    // }
+    // List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
+    // .findEncontersByEncounterTypeId(foundPDS.getId());
+    // List<Form> relatedForms =
     // this.harmonizationFormServiceDAO.findFormsByEncounterTypeId(foundPDS.getId());
-    //				this.updateToGivenId(foundPDS, mdServerEncounterId, false, relatedEncounters,
+    // this.updateToGivenId(foundPDS, mdServerEncounterId, false, relatedEncounters,
     // relatedForms);
-    //			}
-    //		} catch (Exception e) {
-    //			e.printStackTrace();
-    //		} finally {
-    //			try {
-    //				this.harmonizationDAO.setEnableCheckConstraints();
-    //			} catch (Exception e) {
-    //				e.printStackTrace();
-    //			}
-    //		}
+    // }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // } finally {
+    // try {
+    // this.harmonizationDAO.setEnableCheckConstraints();
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // }
 
   }
 
@@ -303,55 +316,56 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   public void saveManualMapping(Map<Form, Form> forms) throws APIException {
 
     //
-    //		this.harmonizationDAO.evictCache();
-    //		try {
+    // this.harmonizationDAO.evictCache();
+    // try {
     //
-    //			this.harmonizationDAO.setDisabledCheckConstraints();
-    //			for (Entry<EncounterType, EncounterType> entry : mapEncounterTypes.entrySet()) {
+    // this.harmonizationDAO.setDisabledCheckConstraints();
+    // for (Entry<EncounterType, EncounterType> entry :
+    // mapEncounterTypes.entrySet()) {
     //
-    //				EncounterType pdSEncounterType = entry.getKey();
-    //				EncounterType mdsEncounterType = entry.getValue();
+    // EncounterType pdSEncounterType = entry.getKey();
+    // EncounterType mdsEncounterType = entry.getValue();
     //
-    //				EncounterType foundPDS = this.harmonizationFormServiceDAO
-    //						.getEncounterTypeById(pdSEncounterType.getId());
+    // EncounterType foundPDS = this.harmonizationFormServiceDAO
+    // .getEncounterTypeById(pdSEncounterType.getId());
     //
-    //				if (mdsEncounterType.getUuid().equals(pdSEncounterType.getUuid())
-    //						&& mdsEncounterType.getId().equals(pdSEncounterType.getId())) {
-    //					if (mdsEncounterType.getId().equals(pdSEncounterType.getId())
-    //							&& mdsEncounterType.getName().equals(pdSEncounterType.getName())) {
-    //						return;
-    //					}
-    //					foundPDS.setName(mdsEncounterType.getName());
-    //					foundPDS.setDescription(mdsEncounterType.getDescription());
-    //					this.formService.saveEncounterType(foundPDS);
+    // if (mdsEncounterType.getUuid().equals(pdSEncounterType.getUuid())
+    // && mdsEncounterType.getId().equals(pdSEncounterType.getId())) {
+    // if (mdsEncounterType.getId().equals(pdSEncounterType.getId())
+    // && mdsEncounterType.getName().equals(pdSEncounterType.getName())) {
+    // return;
+    // }
+    // foundPDS.setName(mdsEncounterType.getName());
+    // foundPDS.setDescription(mdsEncounterType.getDescription());
+    // this.formService.saveEncounterType(foundPDS);
     //
-    //				} else {
-    //					List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
-    //							.findEncontersByEncounterTypeId(foundPDS.getId());
+    // } else {
+    // List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
+    // .findEncontersByEncounterTypeId(foundPDS.getId());
     //
-    //					List<Form> relatedForms = this.harmonizationFormServiceDAO
-    //							.findFormsByEncounterTypeId(foundPDS.getId());
+    // List<Form> relatedForms = this.harmonizationFormServiceDAO
+    // .findFormsByEncounterTypeId(foundPDS.getId());
     //
-    //					for (Form form : relatedForms) {
-    //						this.harmonizationFormServiceDAO.updateForm(form,
+    // for (Form form : relatedForms) {
+    // this.harmonizationFormServiceDAO.updateForm(form,
     // mdsEncounterType.getEncounterTypeId());
-    //					}
-    //					for (Encounter encounter : relatedEncounters) {
-    //						this.harmonizationFormServiceDAO.updateEncounter(encounter,
-    //								mdsEncounterType.getEncounterTypeId());
-    //					}
-    //					this.harmonizationFormServiceDAO.deleteEncounterType(foundPDS);
-    //				}
-    //			}
-    //		} catch (Exception e) {
-    //			e.printStackTrace();
-    //		} finally {
-    //			try {
-    //				this.harmonizationDAO.setEnableCheckConstraints();
-    //			} catch (Exception e) {
-    //				e.printStackTrace();
-    //			}
-    //		}
+    // }
+    // for (Encounter encounter : relatedEncounters) {
+    // this.harmonizationFormServiceDAO.updateEncounter(encounter,
+    // mdsEncounterType.getEncounterTypeId());
+    // }
+    // this.harmonizationFormServiceDAO.deleteEncounterType(foundPDS);
+    // }
+    // }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // } finally {
+    // try {
+    // this.harmonizationDAO.setEnableCheckConstraints();
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // }
 
   }
 
@@ -409,19 +423,21 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     return map;
   }
 
-  //	private void updateToGivenId(EncounterType encounterType, Integer encounterTypeId, boolean
+  // private void updateToGivenId(EncounterType encounterType, Integer
+  // encounterTypeId, boolean
   // swappable,
-  //			List<Encounter> relatedEncounters, List<Form> relatedForms) {
-  //		this.harmonizationFormServiceDAO.updateEncounterType(encounterTypeId, encounterType,
+  // List<Encounter> relatedEncounters, List<Form> relatedForms) {
+  // this.harmonizationFormServiceDAO.updateEncounterType(encounterTypeId,
+  // encounterType,
   // swappable);
   //
-  //		for (Form form : relatedForms) {
-  //			this.harmonizationFormServiceDAO.updateForm(form, encounterTypeId);
-  //		}
-  //		for (Encounter encounter : relatedEncounters) {
-  //			this.harmonizationFormServiceDAO.updateEncounter(encounter, encounterTypeId);
-  //		}
-  //	}
+  // for (Form form : relatedForms) {
+  // this.harmonizationFormServiceDAO.updateForm(form, encounterTypeId);
+  // }
+  // for (Encounter encounter : relatedEncounters) {
+  // this.harmonizationFormServiceDAO.updateEncounter(encounter, encounterTypeId);
+  // }
+  // }
 
   private void updateToNextAvailableID(
       Form form,
@@ -430,8 +446,22 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       List<FormResource> relatedFormResources) {
     Form updated = this.harmonizationFormServiceDAO.updateToNextAvailableId(form);
 
-    //		for (Encounter encounter : relatedEncounters) {
-    //			this.harmonizationFormServiceDAO.updateEncounter(encounter, updated.getEncounterTypeId());
-    //		}
+    // for (Encounter encounter : relatedEncounters) {
+    // this.harmonizationFormServiceDAO.updateEncounter(encounter,
+    // updated.getEncounterTypeId());
+    // }
+  }
+
+  private void seXDTORelatedData(List<FormDTO> dtos) {
+
+    for (FormDTO formDTO : dtos) {
+      if (formDTO.getForm().getEncounterType() != null) {
+        try {
+          formDTO.setEncounterType(
+              this.encounterService.getEncounterType(formDTO.getForm().getEncounterType().getId()));
+        } catch (ObjectNotFoundException e) {
+        }
+      }
+    }
   }
 }

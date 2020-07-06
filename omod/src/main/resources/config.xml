@@ -51,6 +51,14 @@
 		<name>View Program</name>
 		<description>Able to view Program</description>
 	</privilege>
+	<privilege>
+		<name>Manage Program Workflow</name>
+		<description>Able to add/edit/retire Program Workflow</description>
+	</privilege>
+	<privilege>
+		<name>View Program workflow</name>
+		<description>Able to view Program Workflow</description>
+	</privilege>
 
 	<!-- Required Global Properties <globalProperty> <property>@MODULE_ID@.someProperty</property> 
 		<defaultValue></defaultValue> <description> A description of the global property 

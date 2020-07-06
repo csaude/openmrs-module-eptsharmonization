@@ -11,15 +11,16 @@
  */
 package org.openmrs.module.eptsharmonization.api.db;
 
+import java.sql.SQLException;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 
 /** Database methods for {@link HarmonizationEncounterTypeService}. */
 public interface HarmonizationServiceDAO {
 
-  public void setEnableCheckConstraints() throws DAOException, Exception;
+  public void setEnableCheckConstraints() throws DAOException, SQLException;
 
-  public void setDisabledCheckConstraints() throws DAOException, Exception;
+  public void setDisabledCheckConstraints() throws DAOException, SQLException;
 
   public void evictCache();
 }

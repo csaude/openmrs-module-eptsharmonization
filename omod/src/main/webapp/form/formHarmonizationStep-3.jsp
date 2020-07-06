@@ -6,18 +6,18 @@
 		<springform:form modelAttribute="differentNameAndSameUUIDAndID"
 			method="post" action="processHarmonizationStep3.form">
 			<b class="boxHeader"><spring:message
-					code="eptsharmonization.encountertype.harmonize.differentNamesAndSameUUIDAndID" /></b>
+					code="eptsharmonization.form.harmonize.differentNamesAndSameUUIDAndID" /></b>
 			<fieldset>
 				<table cellspacing="0" border="0" style="width: 100%">
 					<tr>
 						<th><spring:message
-								code="eptsharmonization.encountertype.mdserver.name" /></th>
+								code="eptsharmonization.form.mdserver.name" /></th>
 						<th><spring:message
-								code="eptsharmonization.encountertype.mdserver.description" /></th>
+								code="eptsharmonization.form.mdserver.description" /></th>
 						<th><spring:message
-								code="eptsharmonization.encountertype.pdserver.name" /></th>
+								code="eptsharmonization.form.pdserver.name" /></th>
 						<th><spring:message
-								code="eptsharmonization.encountertype.pdserver.description" /></th>
+								code="eptsharmonization.form.pdserver.description" /></th>
 						<th><spring:message code="general.id" /></th>
 						<th><spring:message code="general.uuid" /></th>
 						<th style="text-align: center; width: 10%;"><spring:message
@@ -58,7 +58,7 @@
 			<br />
 			<div class="submit-btn" align="center">
 				<input type="submit"
-					value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
+					value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
 					name="processHarmonizationStep2" id="btn-partialHarmonization" />
 			</div>
 		</springform:form>

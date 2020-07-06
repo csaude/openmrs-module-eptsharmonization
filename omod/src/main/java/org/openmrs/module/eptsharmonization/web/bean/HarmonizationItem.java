@@ -1,12 +1,8 @@
 package org.openmrs.module.eptsharmonization.web.bean;
 
 import java.io.Serializable;
-import org.openmrs.EncounterType;
-import org.openmrs.Form;
-import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
-import org.openmrs.module.eptsharmonization.api.model.FormDTO;
 
-public class HarmonizationItem implements Serializable, Comparable<HarmonizationItem> {
+public class HarmonizationItem implements Serializable {
 
   private static final long serialVersionUID = 3319508983151116282L;
   private Object key;
@@ -81,34 +77,34 @@ public class HarmonizationItem implements Serializable, Comparable<Harmonization
     this.formResourceCount = formResourceCount;
   }
 
-  @Override
-  public int compareTo(HarmonizationItem other) {
-
-    if ((this.key instanceof String) && other.getKey() instanceof String) {
-      return ((String) this.key).compareTo(((String) other.getKey()));
-    }
-
-    if ((this.key instanceof EncounterTypeDTO) && other.getKey() instanceof EncounterTypeDTO) {
-      return ((EncounterTypeDTO) this.key).compareTo(((EncounterTypeDTO) other.getKey()));
-    }
-
-    if ((this.key instanceof EncounterType) && other.getKey() instanceof EncounterType) {
-      return ((EncounterType) this.key)
-          .getUuid()
-          .compareTo(((EncounterType) other.getKey()).getUuid());
-    }
-
-    if ((this.key instanceof Form) && other.getKey() instanceof Form) {
-      return ((Form) this.key).getUuid().compareTo(((Form) other.getKey()).getUuid());
-    }
-
-    if ((this.key instanceof FormDTO) && other.getKey() instanceof FormDTO) {
-      return ((FormDTO) this.key)
-          .getForm()
-          .getUuid()
-          .compareTo(((FormDTO) other.getKey()).getForm().getUuid());
-    }
-
-    return -1;
-  }
+  //  @Override
+  //  public int compareTo(HarmonizationItem other) {
+  //
+  //    if ((this.key instanceof String) && other.getKey() instanceof String) {
+  //      return ((String) this.key).compareTo(((String) other.getKey()));
+  //    }
+  //
+  //    if ((this.key instanceof EncounterTypeDTO) && other.getKey() instanceof EncounterTypeDTO) {
+  //      return ((EncounterTypeDTO) this.key).compareTo(((EncounterTypeDTO) other.getKey()));
+  //    }
+  //
+  //    if ((this.key instanceof EncounterType) && other.getKey() instanceof EncounterType) {
+  //      return ((EncounterType) this.key)
+  //          .getUuid()
+  //          .compareTo(((EncounterType) other.getKey()).getUuid());
+  //    }
+  //
+  //    if ((this.key instanceof Form) && other.getKey() instanceof Form) {
+  //      return ((Form) this.key).getUuid().compareTo(((Form) other.getKey()).getUuid());
+  //    }
+  //
+  //    if ((this.key instanceof FormDTO) && other.getKey() instanceof FormDTO) {
+  //      return ((FormDTO) this.key)
+  //          .getForm()
+  //          .getUuid()
+  //          .compareTo(((FormDTO) other.getKey()).getForm().getUuid());
+  //    }
+  //
+  //    return -1;
+  //  }
 }

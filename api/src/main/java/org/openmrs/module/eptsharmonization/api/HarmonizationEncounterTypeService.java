@@ -11,11 +11,13 @@
  */
 package org.openmrs.module.eptsharmonization.api;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.EncounterType;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 
 /**
@@ -33,6 +35,8 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
 
   public List<EncounterTypeDTO> findAllMetadataEncounterNotContainedInProductionServer()
       throws APIException;
+
+  public List<EncounterType> findAllMetadataServerEncounterTypes() throws APIException;
 
   public List<EncounterTypeDTO> findAllProductionEncountersNotContainedInMetadataServer()
       throws APIException;
@@ -69,7 +73,7 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException;
 
   public void saveManualMapping(Map<EncounterType, EncounterType> encounterTypes)
-      throws APIException;
+      throws UUIDDuplicationException, SQLException;
 
   public void deleteNewEncounterTypesFromPDS(List<EncounterTypeDTO> encounterTypes)
       throws APIException;

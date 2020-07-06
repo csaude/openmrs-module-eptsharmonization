@@ -11,6 +11,7 @@
  */
 package org.openmrs.module.eptsharmonization.api.impl;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationEncounterTypeServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -200,6 +202,14 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Encountery Types"})
+  public List<EncounterType> findAllMetadataServerEncounterTypes() throws APIException {
+
+    return this.harmonizationEncounterTypeServiceDAO.findAllMetadataServerEncounterTypes();
+  }
+
+  @Override
   @Authorized({"Manage Encountery Types"})
   public void saveEncounterTypesWithDifferentNames(
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException {
@@ -339,7 +349,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   @Override
   @Authorized({"Manage Encountery Types"})
   public void saveManualMapping(Map<EncounterType, EncounterType> mapEncounterTypes)
-      throws APIException {
+      throws UUIDDuplicationException, SQLException {
     this.harmonizationDAO.evictCache();
     try {
 
@@ -348,6 +358,25 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
 
         EncounterType pdSEncounterType = entry.getKey();
         EncounterType mdsEncounterType = entry.getValue();
+
+        EncounterType foundMDSEncounterTypeByUuid =
+            this.harmonizationEncounterTypeServiceDAO.getEncounterTypeByUuid(
+                mdsEncounterType.getUuid());
+
+        if ((foundMDSEncounterTypeByUuid != null
+                && !foundMDSEncounterTypeByUuid.getId().equals(mdsEncounterType.getId()))
+            && (!foundMDSEncounterTypeByUuid.getId().equals(pdSEncounterType.getId())
+                && !foundMDSEncounterTypeByUuid.getUuid().equals(pdSEncounterType.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the Encounter Type '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdSEncounterType.getName(),
+                  mdsEncounterType.getName(),
+                  foundMDSEncounterTypeByUuid.getName(),
+                  foundMDSEncounterTypeByUuid.getId(),
+                  foundMDSEncounterTypeByUuid.getUuid()));
+        }
 
         EncounterType foundPDS =
             this.harmonizationEncounterTypeServiceDAO.getEncounterTypeById(
@@ -359,10 +388,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
               && mdsEncounterType.getName().equals(pdSEncounterType.getName())) {
             return;
           }
-          foundPDS.setName(mdsEncounterType.getName());
-          foundPDS.setDescription(mdsEncounterType.getDescription());
-          this.encounterService.saveEncounterType(foundPDS);
-
         } else {
           List<Encounter> relatedEncounters =
               this.harmonizationEncounterTypeServiceDAO.findEncontersByEncounterTypeId(
@@ -380,15 +405,22 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
             this.harmonizationEncounterTypeServiceDAO.updateEncounter(
                 encounter, mdsEncounterType.getEncounterTypeId());
           }
+
           this.harmonizationEncounterTypeServiceDAO.deleteEncounterType(foundPDS);
+
+          EncounterType foundMDSEncounterTypeByID =
+              this.harmonizationEncounterTypeServiceDAO.getEncounterTypeById(
+                  mdsEncounterType.getId());
+          if (foundMDSEncounterTypeByID == null) {
+            this.harmonizationEncounterTypeServiceDAO.saveNotSwappableEncounterType(
+                mdsEncounterType);
+          }
         }
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
-      } catch (Exception e) {
+      } catch (SQLException e) {
         e.printStackTrace();
       }
     }
@@ -419,7 +451,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       for (EncounterType pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
             && mdsItem.getId() == pdsItem.getId()
-            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
+            && !mdsItem.getName().trim().equalsIgnoreCase(pdsItem.getName().trim())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }

@@ -40,7 +40,7 @@
 		test="${not empty swappablePersonAttributeTypesClone && not empty notSwappablePersonAttributeTypesClone}">
 		<br />
 		<b class="boxHeader"><spring:message
-				code="eptsharmonization.encounterType.defineNewMappings" /></b>
+				code="eptsharmonization.personattributetype.defineNewMappings" /></b>
 		<fieldset>
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>

@@ -2,9 +2,9 @@
 	test="${hasSecondStepHarmonization && isFirstStepHarmonizationCompleted && isUUIDsAndIDsHarmonized && isNamesHarmonized}">
 	<br />
 	<b class="boxHeader"><spring:message
-			code="eptsharmonization.encountertype.harmonize.onlyOnPServer.inuse" /></b>
+			code="eptsharmonization.form.harmonize.onlyOnPServer.inuse" /></b>
 	<form method="post" class="box"
-		action="harmonizeExportEncounterTypes.form">
+		action="harmonizeExportForms.form">
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
 				<th><spring:message code="general.id" /></th>
@@ -12,16 +12,16 @@
 				<th><spring:message code="general.description" /></th>
 				<th><spring:message code="general.uuid" /></th>
 				<th><spring:message
-						code="eptsharmonization.encountertype.harmonize.encounters" /></th>
+						code="eptsharmonization.form.harmonize.encounters" /></th>
 				<th><spring:message
-						code="eptsharmonization.encountertype.harmonize.forms" /></th>
+						code="eptsharmonization.form.harmonize.forms" /></th>
 			</tr>
 			<c:forEach var="item" items="${productionItemsToExport.items}">
 				<tr>
 					<td valign="top" align="center">${item.value.encounterType.id}</td>
-					<td valign="top">${item.value.encounterType.name}</td>
-					<td valign="top">${item.value.encounterType.description}</td>
-					<td valign="top">${item.value.encounterType.uuid}</td>
+					<td valign="top">${item.value.form.name}</td>
+					<td valign="top">${item.value.form.description}</td>
+					<td valign="top">${item.value.form.uuid}</td>
 					<td style="text-align: right;">${item.encountersCount}</td>
 					<td style="text-align: right;">${item.formsCount}</td>
 				</tr>
@@ -30,7 +30,7 @@
 				<td colspan="6">
 					<div class="submit-btn" align="center">
 						<input type="submit"
-							value='<spring:message code="eptsharmonization.encountertype.btn.exportNewFromPDS"/>'
+							value='<spring:message code="eptsharmonization.form.btn.exportNewFromPDS"/>'
 							name="exportNewFromProduction" />
 					</div>
 				</td>
@@ -43,17 +43,17 @@
 		test="${not empty swappableEncounterTypesClone && not empty notSwappableEncounterTypesClone}">
 		<br />
 		<b class="boxHeader"><spring:message
-				code="eptsharmonization.encounterType.defineNewMappings" /></b>
+				code="eptsharmonization.form.defineNewMappings" /></b>
 		<fieldset>
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>
 					<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.encounterType.from.metadataServer" /></th>
+							code="eptsharmonization.form.from.metadataServer" /></th>
 					<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.encounterType.created.OnProductionServer" /></th>
+							code="eptsharmonization.form.created.OnProductionServer" /></th>
 					<th colspan="2" style="text-align: left; width: 10%;"></th>
 				</tr>
-				<form method="post" action="addEncounterTypeMapping.form">
+				<form method="post" action="addFormMapping.form">
 					<tr>
 						<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
 								path="harmonizationItem.value">
@@ -103,9 +103,9 @@
 				<fieldset>
 					<tr>
 						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.encounterType.from.metadataServer" /></th>
+								code="eptsharmonization.form.from.metadataServer" /></th>
 						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.encounterType.created.OnProductionServer" /></th>
+								code="eptsharmonization.form.created.OnProductionServer" /></th>
 						<th colspan="2"></th>
 					</tr>
 					<tr>
@@ -117,9 +117,9 @@
 						<th><spring:message code="general.description" /></th>
 						<th colspan="2"></th>
 					</tr>
-					<c:if test="${not empty manualHarmonizeEtypes}">
-						<form method="post" action="removeEncounterTypeMapping.form">
-							<c:forEach var="item" items="${manualHarmonizeEtypes}"
+					<c:if test="${not empty manualHarmonizeForms}">
+						<form method="post" action="removeFormMapping.form">
+							<c:forEach var="item" items="${manualHarmonizeForms}"
 								varStatus="itemsRow">
 								<tr>
 									<td valign="top">${item.value.id}</td>
@@ -148,7 +148,7 @@
 								<form method="post" action="processHarmonizationStep4.form">
 									<div class="submit-btn" align="center">
 										<input type="submit"
-											value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
+											value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
 											name="processHarmonizationStep3" />
 									</div>
 								</form>
@@ -164,9 +164,9 @@
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>
 					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.encounterType.from.metadataServer" /></th>
+							code="eptsharmonization.form.from.metadataServer" /></th>
 					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.encounterType.created.OnProductionServer" /></th>
+							code="eptsharmonization.form.created.OnProductionServer" /></th>
 				</tr>
 				<tr>
 					<th><spring:message code="general.id" /></th>

@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.servlet.http.HttpSession;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
@@ -38,7 +36,7 @@ public class HarmonizePersonAttributeTypeDelegate {
 
   public HarmonizationData getConvertedData(List<PersonAttributeTypeDTO> personAttributeTypes) {
 
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
     for (PersonAttributeTypeDTO personAttributeTypeDTO : personAttributeTypes) {
       HarmonizationItem item =
           new HarmonizationItem(
@@ -46,14 +44,16 @@ public class HarmonizePersonAttributeTypeDelegate {
       item.setEncountersCount(
           this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
               personAttributeTypeDTO));
-      items.add(item);
+      if (!items.contains(item)) {
+        items.add(item);
+      }
     }
     return new HarmonizationData(items);
   }
 
   public HarmonizationData getConvertedData(
       Map<String, List<PersonAttributeTypeDTO>> mapPersonAttributeTypes) {
-    Set<HarmonizationItem> items = new TreeSet<>();
+    List<HarmonizationItem> items = new ArrayList<>();
     for (String key : mapPersonAttributeTypes.keySet()) {
       List<PersonAttributeTypeDTO> personAttributeTypes = mapPersonAttributeTypes.get(key);
       if (personAttributeTypes != null) {
@@ -61,7 +61,9 @@ public class HarmonizePersonAttributeTypeDelegate {
         item.setEncountersCount(
             this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
                 personAttributeTypes.get(1)));
-        items.add(item);
+        if (!items.contains(item)) {
+          items.add(item);
+        }
       }
     }
     return new HarmonizationData(items);
@@ -154,7 +156,7 @@ public class HarmonizePersonAttributeTypeDelegate {
         getConvertedData(DTOUtils.fromPersonAttributeTypes(PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED));
     productionItemsToExport.getItems().addAll(newItemsToExport.getItems());
 
-    Set<HarmonizationItem> itemsToRemove =
+    List<HarmonizationItem> itemsToRemove =
         getConvertedData(
                 DTOUtils.fromPersonAttributeTypes(EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE))
             .getItems();
@@ -266,8 +268,8 @@ public class HarmonizePersonAttributeTypeDelegate {
       Map<PersonAttributeType, PersonAttributeType> manualHarmonizePersonAttributeTypes,
       Builder logBuilder) {
 
-    Set<HarmonizationItem> differntNamesItems = new TreeSet<>();
-    Set<HarmonizationItem> differntIDsItems = new TreeSet<>();
+    List<HarmonizationItem> differntNamesItems = new ArrayList<>();
+    List<HarmonizationItem> differntIDsItems = new ArrayList<>();
 
     Map<PersonAttributeType, PersonAttributeType> manualHarmonizeItens = new HashMap<>();
 
@@ -288,7 +290,9 @@ public class HarmonizePersonAttributeTypeDelegate {
               this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
                   DTOUtils.fromPersonAttributeType(pdsPersonAttributeType)));
           item.setSelected(Boolean.TRUE);
-          differntIDsItems.add(item);
+          if (!differntIDsItems.contains(item)) {
+            differntIDsItems.add(item);
+          }
         } else {
           if (!mdsPersonAttributeType.getName().equals(pdsPersonAttributeType.getName())) {
             HarmonizationItem item =
@@ -300,7 +304,10 @@ public class HarmonizePersonAttributeTypeDelegate {
                 this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
                     DTOUtils.fromPersonAttributeType(pdsPersonAttributeType)));
             item.setSelected(Boolean.TRUE);
-            differntNamesItems.add(item);
+
+            if (!differntNamesItems.contains(item)) {
+              differntNamesItems.add(item);
+            }
           }
         }
 
