@@ -129,6 +129,14 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_program`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_program_workflow`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     sb = new StringBuilder("DROP TABLE IF EXISTS `_visit_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
@@ -136,15 +144,6 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_location_tag`");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
-
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_program_workflow`");
-    Context.getAdministrationService().executeSQL(sb.toString(), false);
-
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
-    sb.append("DROP TABLE IF EXISTS `_program`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_location_attribute_type`");
@@ -198,6 +197,7 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
 
     sb = new StringBuilder();
     sb.append("delete from liquibasechangelog where ID ='20200624-1130';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =
         new StringBuilder(
