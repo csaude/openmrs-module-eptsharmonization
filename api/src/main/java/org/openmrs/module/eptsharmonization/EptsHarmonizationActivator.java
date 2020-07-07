@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
@@ -98,6 +99,9 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     log.info("Importing _program_workflow_state Metadata");
     dataImporter.importData("program-workflow-state.xml");
     log.info("_program_workflow_state Metadata imported");
+    log.info("Importing _concept metadata");
+    dataImporter.importData("concepts.xml");
+    log.info("_concept metadata imported");
 
     StringBuilder sb = new StringBuilder();
     sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
@@ -152,6 +156,13 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_location_tag`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_concept`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_program`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_location_attribute_type`");
@@ -229,6 +240,11 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
 
     sb = new StringBuilder();
     sb.append("delete from liquibasechangelog where ID ='20200706-0945';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "delete from liquibasechangelog where ID ='eptsharmonization_20200701-1657';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
