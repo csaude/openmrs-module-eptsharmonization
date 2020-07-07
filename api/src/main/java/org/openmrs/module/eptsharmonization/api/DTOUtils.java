@@ -8,6 +8,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
+import org.openmrs.ProgramWorkflowState;
 import org.openmrs.RelationshipType;
 import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
@@ -16,6 +17,7 @@ import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
+import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowStateDTO;
 import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 
@@ -177,5 +179,29 @@ public class DTOUtils {
       result.add(relationshipTypeDTO.getLocationTag());
     }
     return result;
+  }
+
+  public static List<ProgramWorkflowStateDTO> fromProgramWorkflowStates(
+      List<ProgramWorkflowState> programWorkflowStates) {
+    List<ProgramWorkflowStateDTO> result = new ArrayList<>();
+
+    for (ProgramWorkflowState programWorkflowState : programWorkflowStates) {
+      result.add(new ProgramWorkflowStateDTO(programWorkflowState));
+    }
+    return result;
+  }
+
+  public static List<ProgramWorkflowState> fromProgramWorkflowStateDTOs(
+      List<ProgramWorkflowStateDTO> programWorkflowStateDTOs) {
+    List<ProgramWorkflowState> result = new ArrayList<>();
+    for (ProgramWorkflowStateDTO programWorkflowStateDTO : programWorkflowStateDTOs) {
+      result.add(programWorkflowStateDTO.getProgramWorkflowState());
+    }
+    return result;
+  }
+
+  public static ProgramWorkflowStateDTO fromProgramWorkflowState(
+      ProgramWorkflowState programWorkflowState) {
+    return new ProgramWorkflowStateDTO(programWorkflowState);
   }
 }
