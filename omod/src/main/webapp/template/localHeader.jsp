@@ -11,7 +11,6 @@
 				code="eptsharmonization.harmonize.programs" /></a></li>
 	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/programWorkflows/harmonizeProgramWorkflowsList.form"><spring:message
 				code="eptsharmonization.harmonize.programworkflows" /></a></li>
-<<<<<<< HEAD
 	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/programWorkflowStates/harmonizeProgramWorkflowStatesList.form"><spring:message
 				code="eptsharmonization.harmonize.programworkflowstates" /></a></li>
 	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeVisitType.form"><spring:message
@@ -22,32 +21,16 @@
 				code="eptsharmonization.locationattributetype.harmonize" /></a></li>
 	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationTag.form"><spring:message
 				code="eptsharmonization.locationtag.harmonize" /></a></li>
-		
-=======
-	<li>
-	<li>
-		<a
-				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeVisitType.form"><spring:message
-				code="eptsharmonization.visittype.harmonize" /></a>
-	</li>
-	<li>
-		<a
-				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeRelationshipType.form"><spring:message
-				code="eptsharmonization.relationshiptype.harmonize" /></a>
-	</li>
-		<a
-				href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationAttributeType.form"><spring:message
-				code="eptsharmonization.locationattributetype.harmonize" /></a>
-	</li>
-	<li>
-		<a		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationTag.form"><spring:message
-				code="eptsharmonization.locationtag.harmonize" /></a>
-	</li>
-	<li>
-		<a		href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeConcept.form"><spring:message
-				code="eptsharmonization.concept.harmonize.status" /></a>
-	</li>
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeVisitType.form"><spring:message
+				code="eptsharmonization.visittype.harmonize" /></a></li>
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeRelationshipType.form"><spring:message
+				code="eptsharmonization.relationshiptype.harmonize" /></a></li>
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationAttributeType.form"><spring:message
+				code="eptsharmonization.locationattributetype.harmonize" /></a></li>
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeLocationTag.form"><spring:message
+				code="eptsharmonization.locationtag.harmonize" /></a></li>
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeConcept.form"><spring:message
+				code="eptsharmonization.concept.harmonize.status" /></a></li>
 
->>>>>>> master
 	<!-- Add further links here -->
 </ul>
