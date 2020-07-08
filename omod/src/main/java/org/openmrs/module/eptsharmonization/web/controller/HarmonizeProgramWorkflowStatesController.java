@@ -271,10 +271,10 @@ public class HarmonizeProgramWorkflowStatesController {
     }
 
     ProgramWorkflowState pdsProgramWorkflowState =
-        this.harmonizationProgramWorkflowStateService.findProductionProgramWorkflowStateByUuid(
+        this.harmonizationProgramWorkflowStateService.findPDSProgramWorkflowStateByUuid(
             (String) harmonizationItem.getKey());
     ProgramWorkflowState mdsProgramWorkflowState =
-        this.harmonizationProgramWorkflowStateService.findMetadataProgramWorkflowStateByUuid(
+        this.harmonizationProgramWorkflowStateService.findMDSProgramWorkflowStateByUuid(
             (String) harmonizationItem.getValue());
 
     Map<ProgramWorkflowStateDTO, ProgramWorkflowStateDTO> manualHarmonizeProgramWorkflowStates =
@@ -311,7 +311,7 @@ public class HarmonizeProgramWorkflowStatesController {
       HttpServletRequest request) {
 
     ProgramWorkflowState productionProgramWorkflowState =
-        this.harmonizationProgramWorkflowStateService.findProductionProgramWorkflowStateByUuid(
+        this.harmonizationProgramWorkflowStateService.findPDSProgramWorkflowStateByUuid(
             request.getParameter("productionServerProgramWorkflowStateUuID"));
 
     @SuppressWarnings("unchecked")
@@ -392,8 +392,7 @@ public class HarmonizeProgramWorkflowStatesController {
   public List<ProgramWorkflowStateDTO> getProductionItemsToDelete() {
     List<ProgramWorkflowStateDTO> productionItemsToDelete = new ArrayList<>();
     List<ProgramWorkflowStateDTO> onlyProductionProgramWorkflowStates =
-        this.harmonizationProgramWorkflowStateService
-            .findAllProductionProgramWorkflowStatesNotContainedInMetadataServer();
+        this.harmonizationProgramWorkflowStateService.findAllPDSStatesNotContainedInMDS();
     for (ProgramWorkflowStateDTO programWorkflowStateDTO : onlyProductionProgramWorkflowStates) {
       final int numberOfAffectedConceptStateConversions =
           this.harmonizationProgramWorkflowStateService.getNumberOfAffectedConceptStateConversions(
@@ -410,8 +409,7 @@ public class HarmonizeProgramWorkflowStatesController {
 
   public List<ProgramWorkflowStateDTO> getProductionItemsToExport() {
     List<ProgramWorkflowStateDTO> onlyProductionProgramWorkflowStates =
-        this.harmonizationProgramWorkflowStateService
-            .findAllProductionProgramWorkflowStatesNotContainedInMetadataServer();
+        this.harmonizationProgramWorkflowStateService.findAllPDSStatesNotContainedInMDS();
 
     List<ProgramWorkflowStateDTO> productionItemsToExport = new ArrayList<>();
     for (ProgramWorkflowStateDTO programWorkflowStateDTO : onlyProductionProgramWorkflowStates) {
@@ -437,16 +435,14 @@ public class HarmonizeProgramWorkflowStatesController {
   @ModelAttribute("newMDSProgramWorkflowStates")
   public HarmonizationData getNewMDSProgramWorkflowStates() {
     List<ProgramWorkflowStateDTO> data =
-        this.harmonizationProgramWorkflowStateService
-            .findAllMetadataProgramWorkflowStatesNotContainedInProductionServer();
+        this.harmonizationProgramWorkflowStateService.findAllMDSStatesNotContainedInPDS();
     return delegate.getConvertedData(data);
   }
 
   @ModelAttribute("differentIDsAndEqualUUID")
   public HarmonizationData getDifferentIDsAndEqualUUID() {
     Map<String, List<ProgramWorkflowStateDTO>> programWorkflowStatesWithDifferentIDsSameUUIDs =
-        this.harmonizationProgramWorkflowStateService
-            .findAllProgramWorkflowStatesWithDifferentIDAndSameUUID();
+        this.harmonizationProgramWorkflowStateService.findAllStatesWithDifferentIDAndSameUUID();
     return delegate.getConvertedData(programWorkflowStatesWithDifferentIDsSameUUIDs);
   }
 
@@ -454,7 +450,7 @@ public class HarmonizeProgramWorkflowStatesController {
   public HarmonizationData getDifferentProgramWorkflowsOrConceptsAndSameUUIDAndID() {
     Map<String, List<ProgramWorkflowStateDTO>> programWorkflowStatesWithDifferentNames =
         this.harmonizationProgramWorkflowStateService
-            .findAllProgramWorkflowStatesWithDifferentProgramWorkflowOrConceptAndSameUUIDAndID();
+            .findAllStatesWithDifferentWorkflowOrConceptAndSameUUIDAndID();
     return delegate.getConvertedData(programWorkflowStatesWithDifferentNames);
   }
 
@@ -482,7 +478,7 @@ public class HarmonizeProgramWorkflowStatesController {
   public List<ProgramWorkflowStateDTO> getNotSwappableProgramWorkflowStates() {
     final List<ProgramWorkflowStateDTO> programWorkflowStates =
         DTOUtils.fromProgramWorkflowStates(
-            this.harmonizationProgramWorkflowStateService.findAllMetadataProgramWorkflowStates());
+            this.harmonizationProgramWorkflowStateService.findAllMDSProgramWorkflowStates());
     harmonizationProgramWorkflowStateService.setProgramWorkflowAndConcept(
         programWorkflowStates, true);
     return programWorkflowStates;

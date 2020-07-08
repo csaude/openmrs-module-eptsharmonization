@@ -47,8 +47,7 @@ public class HibernateHarmonizationProgramWorkflowStateServiceDAO
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<ProgramWorkflowState> findAllMetadataServerProgramWorkflowStates()
-      throws DAOException {
+  public List<ProgramWorkflowState> findAllMDSProgramWorkflowStates() throws DAOException {
     this.harmonizationServiceDAO.evictCache();
     final Query query =
         this.sessionFactory
@@ -60,8 +59,7 @@ public class HibernateHarmonizationProgramWorkflowStateServiceDAO
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<ProgramWorkflowState> findAllProductionServerProgramWorkflowStates()
-      throws DAOException {
+  public List<ProgramWorkflowState> findAllPDSProgramWorkflowStates() throws DAOException {
     this.harmonizationServiceDAO.evictCache();
     final Query query =
         this.sessionFactory
@@ -178,26 +176,8 @@ public class HibernateHarmonizationProgramWorkflowStateServiceDAO
   public String getConceptName(ProgramWorkflowState programWorkflowState, boolean isFromMetadata)
       throws DAOException {
     final Integer conceptId = getConceptId(programWorkflowState, isFromMetadata);
-    String result =
-        (String)
-            this.sessionFactory
-                .getCurrentSession()
-                .createSQLQuery(
-                    "select c.name from concept_name c where c.concept_id=:conceptId and c.locale='pt' and c.locale_preferred=1 ")
-                .setInteger("conceptId", conceptId)
-                .uniqueResult();
-    if (result == null) {
-      result =
-          (String)
-              this.sessionFactory
-                  .getCurrentSession()
-                  .createSQLQuery(
-                      "select c.name from concept_name c where c.concept_id=:conceptId and c.locale='pt' ")
-                  .setInteger("conceptId", conceptId)
-                  .list()
-                  .get(0);
-    }
-    return result;
+
+    return getConceptName(conceptId);
   }
 
   public String getConceptName(Integer conceptId) throws DAOException {

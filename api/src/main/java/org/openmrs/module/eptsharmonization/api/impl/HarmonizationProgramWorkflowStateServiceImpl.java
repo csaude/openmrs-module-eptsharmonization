@@ -11,7 +11,6 @@
  */
 package org.openmrs.module.eptsharmonization.api.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -64,13 +63,12 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View ProgramWorkflowState"})
-  public List<ProgramWorkflowStateDTO>
-      findAllMetadataProgramWorkflowStatesNotContainedInProductionServer() throws APIException {
+  public List<ProgramWorkflowStateDTO> findAllMDSStatesNotContainedInPDS() throws APIException {
     this.harmonizationDAO.evictCache();
     List<ProgramWorkflowState> mdsProgramWorkflowStates =
-        harmonizationProgramWorkflowStateServiceDAO.findAllMetadataServerProgramWorkflowStates();
+        harmonizationProgramWorkflowStateServiceDAO.findAllMDSProgramWorkflowStates();
     List<ProgramWorkflowState> pdsProgramWorkflowStates =
-        harmonizationProgramWorkflowStateServiceDAO.findAllProductionServerProgramWorkflowStates();
+        harmonizationProgramWorkflowStateServiceDAO.findAllPDSProgramWorkflowStates();
     mdsProgramWorkflowStates.removeAll(pdsProgramWorkflowStates);
     final List<ProgramWorkflowStateDTO> programWorkflowStates =
         DTOUtils.fromProgramWorkflowStates(mdsProgramWorkflowStates);
@@ -81,13 +79,12 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View ProgramWorkflowState"})
-  public List<ProgramWorkflowStateDTO>
-      findAllProductionProgramWorkflowStatesNotContainedInMetadataServer() throws APIException {
+  public List<ProgramWorkflowStateDTO> findAllPDSStatesNotContainedInMDS() throws APIException {
     this.harmonizationDAO.evictCache();
     List<ProgramWorkflowState> pdsProgramWorkflowStates =
-        harmonizationProgramWorkflowStateServiceDAO.findAllProductionServerProgramWorkflowStates();
+        harmonizationProgramWorkflowStateServiceDAO.findAllPDSProgramWorkflowStates();
     List<ProgramWorkflowState> mdsProgramWorkflowStates =
-        harmonizationProgramWorkflowStateServiceDAO.findAllMetadataServerProgramWorkflowStates();
+        harmonizationProgramWorkflowStateServiceDAO.findAllMDSProgramWorkflowStates();
     pdsProgramWorkflowStates.removeAll(mdsProgramWorkflowStates);
     final List<ProgramWorkflowStateDTO> programWorkflowStates =
         DTOUtils.fromProgramWorkflowStates(pdsProgramWorkflowStates);
@@ -98,60 +95,16 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View ProgramWorkflowState"})
-  public List<ProgramWorkflowStateDTO>
-      findAllMetadataProgramWorkflowStatesPartialEqualsToProductionServer() throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<ProgramWorkflowState> allMDS =
-        harmonizationProgramWorkflowStateServiceDAO.findAllMetadataServerProgramWorkflowStates();
-    List<ProgramWorkflowState> allPDS =
-        harmonizationProgramWorkflowStateServiceDAO.findAllProductionServerProgramWorkflowStates();
-    List<ProgramWorkflowState> mdsProgramWorkflowStates =
-        this.removeElementsWithDifferentIDsAndSameUUIDs(allMDS, allPDS);
-    allMDS.removeAll(allPDS);
-    mdsProgramWorkflowStates.removeAll(allMDS);
-    final List<ProgramWorkflowStateDTO> programWorkflowStates =
-        DTOUtils.fromProgramWorkflowStates(mdsProgramWorkflowStates);
-    setProgramWorkflowAndConcept(programWorkflowStates, true);
-    return programWorkflowStates;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View ProgramWorkflowState"})
-  public List<ProgramWorkflowStateDTO>
-      findAllProductionProgramWorkflowStatesPartialEqualsToMetadataServer() throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<ProgramWorkflowState> allPDS =
-        harmonizationProgramWorkflowStateServiceDAO.findAllProductionServerProgramWorkflowStates();
-    List<ProgramWorkflowState> allMDS =
-        harmonizationProgramWorkflowStateServiceDAO.findAllMetadataServerProgramWorkflowStates();
-    List<ProgramWorkflowState> pdsProgramWorkflowStates =
-        this.removeElementsWithDifferentIDsAndSameUUIDs(allPDS, allMDS);
-    allPDS.removeAll(allMDS);
-    pdsProgramWorkflowStates.removeAll(allPDS);
-    final List<ProgramWorkflowStateDTO> programWorkflowStates =
-        DTOUtils.fromProgramWorkflowStates(pdsProgramWorkflowStates);
-
-    setProgramWorkflowAndConcept(programWorkflowStates, false);
-    return programWorkflowStates;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View ProgramWorkflowState"})
   public Map<String, List<ProgramWorkflowStateDTO>>
-      findAllProgramWorkflowStatesWithDifferentProgramWorkflowOrConceptAndSameUUIDAndID()
-          throws APIException {
+      findAllStatesWithDifferentWorkflowOrConceptAndSameUUIDAndID() throws APIException {
     this.harmonizationDAO.evictCache();
 
     List<ProgramWorkflowStateDTO> allMDS =
         DTOUtils.fromProgramWorkflowStates(
-            harmonizationProgramWorkflowStateServiceDAO
-                .findAllMetadataServerProgramWorkflowStates());
+            harmonizationProgramWorkflowStateServiceDAO.findAllMDSProgramWorkflowStates());
     List<ProgramWorkflowStateDTO> allPDS =
         DTOUtils.fromProgramWorkflowStates(
-            harmonizationProgramWorkflowStateServiceDAO
-                .findAllProductionServerProgramWorkflowStates());
+            harmonizationProgramWorkflowStateServiceDAO.findAllPDSProgramWorkflowStates());
 
     Map<String, List<ProgramWorkflowStateDTO>> result = new TreeMap<>();
     for (ProgramWorkflowStateDTO mdsItem : allMDS) {
@@ -184,17 +137,15 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View ProgramWorkflowState"})
-  public Map<String, List<ProgramWorkflowStateDTO>>
-      findAllProgramWorkflowStatesWithDifferentIDAndSameUUID() throws APIException {
+  public Map<String, List<ProgramWorkflowStateDTO>> findAllStatesWithDifferentIDAndSameUUID()
+      throws APIException {
     this.harmonizationDAO.evictCache();
     List<ProgramWorkflowStateDTO> allPDS =
         DTOUtils.fromProgramWorkflowStates(
-            harmonizationProgramWorkflowStateServiceDAO
-                .findAllProductionServerProgramWorkflowStates());
+            harmonizationProgramWorkflowStateServiceDAO.findAllPDSProgramWorkflowStates());
     List<ProgramWorkflowStateDTO> allMDS =
         DTOUtils.fromProgramWorkflowStates(
-            harmonizationProgramWorkflowStateServiceDAO
-                .findAllMetadataServerProgramWorkflowStates());
+            harmonizationProgramWorkflowStateServiceDAO.findAllMDSProgramWorkflowStates());
     setProgramWorkflowAndConcept(allPDS, false);
     setProgramWorkflowAndConcept(allMDS, true);
     Map<String, List<ProgramWorkflowStateDTO>> result = new TreeMap<>();
@@ -253,7 +204,7 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
   @SuppressWarnings("deprecation")
   @Override
   @Authorized({"Manage ProgramWorkflowState"})
-  public void updateProgramWorkflowStatesWithDifferentProgramworkflowsOrConcept(
+  public void updateStatesWithDifferentWorkflowsOrConcept(
       Map<String, List<ProgramWorkflowStateDTO>> programWorkflowStates) throws APIException {
     this.harmonizationDAO.evictCache();
     for (String key : programWorkflowStates.keySet()) {
@@ -330,7 +281,7 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
 
   @Override
   @Authorized({"Manage ProgramWorkflowState"})
-  public void saveProgramWorkflowStatesWithDifferentIDAndEqualUUID(
+  public void saveStatesWithDifferentIDAndEqualUUID(
       Map<String, List<ProgramWorkflowStateDTO>> mapProgramWorkflowStates) throws APIException {
     this.harmonizationDAO.evictCache();
     try {
@@ -491,20 +442,6 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
     }
   }
 
-  private List<ProgramWorkflowState> removeElementsWithDifferentIDsAndSameUUIDs(
-      List<ProgramWorkflowState> allMDS, List<ProgramWorkflowState> allPDS) {
-    List<ProgramWorkflowState> auxMDS = new ArrayList<>();
-    for (ProgramWorkflowState mdsProgramWorkflowState : allMDS) {
-      for (ProgramWorkflowState pdsProgramWorkflowState : allPDS) {
-        if (mdsProgramWorkflowState.getId().compareTo(pdsProgramWorkflowState.getId()) != 0
-            && mdsProgramWorkflowState.getUuid().contentEquals(pdsProgramWorkflowState.getUuid())) {
-          auxMDS.add(mdsProgramWorkflowState);
-        }
-      }
-    }
-    return auxMDS;
-  }
-
   private void updateToGivenId(
       ProgramWorkflowState programWorkflowState,
       Integer givenId,
@@ -542,23 +479,20 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
   }
 
   @Override
-  public ProgramWorkflowState findMetadataProgramWorkflowStateByUuid(String uuid)
-      throws APIException {
+  public ProgramWorkflowState findMDSProgramWorkflowStateByUuid(String uuid) throws APIException {
     return harmonizationProgramWorkflowStateServiceDAO.findMDSPProgramWorkflowStateByUuid(uuid);
   }
 
   @Override
-  public ProgramWorkflowState findProductionProgramWorkflowStateByUuid(String uuid)
-      throws APIException {
+  public ProgramWorkflowState findPDSProgramWorkflowStateByUuid(String uuid) throws APIException {
     this.harmonizationDAO.evictCache();
     return programWorkflowService.getStateByUuid(uuid);
   }
 
   @Override
-  public List<ProgramWorkflowState> findAllMetadataProgramWorkflowStates() throws APIException {
+  public List<ProgramWorkflowState> findAllMDSProgramWorkflowStates() throws APIException {
     this.harmonizationDAO.evictCache();
-    return this.harmonizationProgramWorkflowStateServiceDAO
-        .findAllMetadataServerProgramWorkflowStates();
+    return this.harmonizationProgramWorkflowStateServiceDAO.findAllMDSProgramWorkflowStates();
   }
 
   @Override

@@ -32,24 +32,15 @@ import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowStateDTO;
  */
 public interface HarmonizationProgramWorkflowStateService extends OpenmrsService {
 
-  public List<ProgramWorkflowStateDTO>
-      findAllMetadataProgramWorkflowStatesNotContainedInProductionServer() throws APIException;
+  public List<ProgramWorkflowStateDTO> findAllMDSStatesNotContainedInPDS() throws APIException;
 
-  public List<ProgramWorkflowStateDTO>
-      findAllProductionProgramWorkflowStatesNotContainedInMetadataServer() throws APIException;
-
-  public List<ProgramWorkflowStateDTO>
-      findAllMetadataProgramWorkflowStatesPartialEqualsToProductionServer() throws APIException;
-
-  public List<ProgramWorkflowStateDTO>
-      findAllProductionProgramWorkflowStatesPartialEqualsToMetadataServer() throws APIException;
+  public List<ProgramWorkflowStateDTO> findAllPDSStatesNotContainedInMDS() throws APIException;
 
   public Map<String, List<ProgramWorkflowStateDTO>>
-      findAllProgramWorkflowStatesWithDifferentProgramWorkflowOrConceptAndSameUUIDAndID()
-          throws APIException;
+      findAllStatesWithDifferentWorkflowOrConceptAndSameUUIDAndID() throws APIException;
 
-  public Map<String, List<ProgramWorkflowStateDTO>>
-      findAllProgramWorkflowStatesWithDifferentIDAndSameUUID() throws APIException;
+  public Map<String, List<ProgramWorkflowStateDTO>> findAllStatesWithDifferentIDAndSameUUID()
+      throws APIException;
 
   public List<ProgramWorkflowState> findAllNotSwappableProgramWorkflowStates() throws APIException;
 
@@ -60,13 +51,13 @@ public interface HarmonizationProgramWorkflowStateService extends OpenmrsService
 
   public int getNumberOfAffectedPatientStates(ProgramWorkflowStateDTO programWorkflowStateDTO);
 
-  public void updateProgramWorkflowStatesWithDifferentProgramworkflowsOrConcept(
+  public void updateStatesWithDifferentWorkflowsOrConcept(
       Map<String, List<ProgramWorkflowStateDTO>> programWorkflowStates) throws APIException;
 
   public void saveNewProgramWorkflowStatesFromMDS(
       List<ProgramWorkflowStateDTO> programWorkflowStates) throws APIException;
 
-  public void saveProgramWorkflowStatesWithDifferentIDAndEqualUUID(
+  public void saveStatesWithDifferentIDAndEqualUUID(
       Map<String, List<ProgramWorkflowStateDTO>> programWorkflowStates) throws APIException;
 
   public void saveManualMapping(
@@ -76,13 +67,11 @@ public interface HarmonizationProgramWorkflowStateService extends OpenmrsService
   public void deleteNewProgramWorkflowStatesFromPDS(
       List<ProgramWorkflowStateDTO> programWorkflowStates) throws APIException;
 
-  public ProgramWorkflowState findMetadataProgramWorkflowStateByUuid(String uuid)
-      throws APIException;
+  public ProgramWorkflowState findMDSProgramWorkflowStateByUuid(String uuid) throws APIException;
 
-  public ProgramWorkflowState findProductionProgramWorkflowStateByUuid(String uuid)
-      throws APIException;
+  public ProgramWorkflowState findPDSProgramWorkflowStateByUuid(String uuid) throws APIException;
 
-  public List<ProgramWorkflowState> findAllMetadataProgramWorkflowStates() throws APIException;
+  public List<ProgramWorkflowState> findAllMDSProgramWorkflowStates() throws APIException;
 
   public void setProgramWorkflowAndConcept(
       List<ProgramWorkflowStateDTO> programWorkflowStateDTO, boolean isFromMetadata)

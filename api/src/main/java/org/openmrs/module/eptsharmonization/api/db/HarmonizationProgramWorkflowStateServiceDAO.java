@@ -22,11 +22,9 @@ import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowStat
 /** Database methods for {@link HarmonizationProgramWorkflowStateService}. */
 public interface HarmonizationProgramWorkflowStateServiceDAO {
 
-  public List<ProgramWorkflowState> findAllMetadataServerProgramWorkflowStates()
-      throws DAOException;
+  public List<ProgramWorkflowState> findAllMDSProgramWorkflowStates() throws DAOException;
 
-  public List<ProgramWorkflowState> findAllProductionServerProgramWorkflowStates()
-      throws DAOException;
+  public List<ProgramWorkflowState> findAllPDSProgramWorkflowStates() throws DAOException;
 
   public List<PatientState> findPatientStatesByProgramWorkflowStateId(
       Integer programWorkflowStateId) throws DAOException;
