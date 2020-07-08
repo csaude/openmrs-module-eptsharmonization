@@ -59,6 +59,14 @@
 		<name>View Program workflow</name>
 		<description>Able to view Program Workflow</description>
 	</privilege>
+	<privilege>
+		<name>View Person Attribute Types</name>
+		<description>Able to view Person Attribute Types</description>
+	</privilege>
+	<privilege>
+		<name>View Program Workflow States</name>
+		<description>Able to view Program Workflow States</description>
+	</privilege>
 
 	<!-- Required Global Properties <globalProperty> <property>@MODULE_ID@.someProperty</property> 
 		<defaultValue></defaultValue> <description> A description of the global property 

@@ -173,14 +173,27 @@ public class HibernateHarmonizationProgramWorkflowServiceDAO
   @Override
   public String getProgramWorkflowConceptName(
       ProgramWorkflow programWorkflow, boolean isFromMetadata) throws DAOException {
-    return (String)
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select c.name from concept_name c where c.concept_id=:conceptId and c.locale='pt' ")
-            .setInteger("conceptId", getProgramWorkflowConceptId(programWorkflow, isFromMetadata))
-            .list()
-            .get(0);
+    Integer conceptId = getProgramWorkflowConceptId(programWorkflow, isFromMetadata);
+    String result =
+        (String)
+            this.sessionFactory
+                .getCurrentSession()
+                .createSQLQuery(
+                    "select c.name from concept_name c where c.concept_id=:conceptId and c.locale='pt' and c.locale_preferred=1 ")
+                .setInteger("conceptId", conceptId)
+                .uniqueResult();
+    if (result == null) {
+      result =
+          (String)
+              this.sessionFactory
+                  .getCurrentSession()
+                  .createSQLQuery(
+                      "select c.name from concept_name c where c.concept_id=:conceptId and c.locale='pt' ")
+                  .setInteger("conceptId", conceptId)
+                  .list()
+                  .get(0);
+    }
+    return result;
   }
 
   @SuppressWarnings("unchecked")
