@@ -69,6 +69,9 @@ public class AdminList extends AdministrationSectionExt {
     map.put(
         "module/eptsharmonization/harmonizeConcept.form",
         "eptsharmonization.concept.harmonize.status");
+    map.put(
+        "module/eptsharmonization/patientIdentifierTypes/harmonizePatientIdentifierTypesList.form",
+        "eptsharmonization.harmonize.patientidentifiertypes");
     return map;
   }
 }
