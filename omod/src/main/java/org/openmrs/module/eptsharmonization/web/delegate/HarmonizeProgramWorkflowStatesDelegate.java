@@ -233,8 +233,8 @@ public class HarmonizeProgramWorkflowStatesDelegate {
       }
     }
     if (!list.isEmpty()) {
-      this.harmonizationProgramWorkflowStateService
-          .updateProgramWorkflowStatesWithDifferentProgramworkflowsOrConcept(list);
+      this.harmonizationProgramWorkflowStateService.updateStatesWithDifferentWorkflowsOrConcept(
+          list);
       SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.summary.programworkflowstate.harmonize.differentProgramWorkflowsOrConceptsAndSameUUIDAndID");
       logBuilder.appendLogForUpdatedProgramsAndConcepts(list);
@@ -256,8 +256,7 @@ public class HarmonizeProgramWorkflowStatesDelegate {
       }
     }
     if (!list.isEmpty()) {
-      this.harmonizationProgramWorkflowStateService
-          .saveProgramWorkflowStatesWithDifferentIDAndEqualUUID(list);
+      this.harmonizationProgramWorkflowStateService.saveStatesWithDifferentIDAndEqualUUID(list);
       SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.summary.programworkflowstate.harmonize.differentID.andEqualUUID");
       logBuilder.appendLogForProgramWorkflowStatesWithDiferrentIdsAndEqualUUID(list);
