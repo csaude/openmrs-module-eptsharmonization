@@ -26,6 +26,9 @@ public interface HarmonizationPatientIdentifierTypeService {
   public Map<String, List<PatientIdentifierTypeDTO>> findAllWithDifferentNameAndSameUUIDAndID()
       throws APIException;
 
+  public Map<String, List<PatientIdentifierTypeDTO>>
+      findAllWithDifferentDetailsAndSameNameUUIDAndID() throws APIException;
+
   public Map<String, List<PatientIdentifierTypeDTO>> findAllWithDifferentIDAndSameUUID()
       throws APIException;
 
@@ -37,6 +40,9 @@ public interface HarmonizationPatientIdentifierTypeService {
 
   public int getNumberOfAffectedPatientIdentifiers(
       PatientIdentifierTypeDTO patientIdentifierTypeDTO);
+
+  public void saveWithDifferentNames(
+      Map<String, List<PatientIdentifierTypeDTO>> patientIdentifierTypes) throws APIException;
 
   public void saveWithDifferentDetails(
       Map<String, List<PatientIdentifierTypeDTO>> patientIdentifierTypes) throws APIException;

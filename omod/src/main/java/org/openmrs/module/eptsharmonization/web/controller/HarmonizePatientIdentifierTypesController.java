@@ -106,6 +106,8 @@ public class HarmonizePatientIdentifierTypesController {
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID,
       @ModelAttribute("differentNameAndSameUUIDAndID")
           HarmonizationData differentNameAndSameUUIDAndID,
+      @ModelAttribute("differentDetailsAndSameNameUUIDAndID")
+          HarmonizationData differentDetailsAndSameNameUUIDAndID,
       @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
       @ModelAttribute("notSwappablePatientIdentifierTypes")
           List<PatientIdentifierType> notSwappablePatientIdentifierTypes,
@@ -120,6 +122,7 @@ public class HarmonizePatientIdentifierTypesController {
     newMDSPatientIdentifierTypes = getNewMDSPatientIdentifierTypes();
     differentIDsAndEqualUUID = this.getDifferentIDsAndEqualUUID();
     differentNameAndSameUUIDAndID = this.getDifferentNameAndSameUUIDAndID();
+    differentDetailsAndSameNameUUIDAndID = this.getDifferentDetailsAndSameNameUUIDAndID();
     HarmonizationData productionItemsToExport =
         delegate.getConvertedData(getProductionItemToExport());
 
@@ -137,6 +140,7 @@ public class HarmonizePatientIdentifierTypesController {
         productionItemsToExport,
         differentIDsAndEqualUUID,
         differentNameAndSameUUIDAndID,
+        differentDetailsAndSameNameUUIDAndID,
         notSwappablePatientIdentifierTypes,
         swappablePatientIdentifierTypes);
 
@@ -148,6 +152,8 @@ public class HarmonizePatientIdentifierTypesController {
     model.addAttribute("productionItemsToExport", productionItemsToExport);
     model.addAttribute("differentIDsAndEqualUUID", differentIDsAndEqualUUID);
     model.addAttribute("differentNameAndSameUUIDAndID", differentNameAndSameUUIDAndID);
+    model.addAttribute(
+        "differentDetailsAndSameNameUUIDAndID", differentDetailsAndSameNameUUIDAndID);
 
     return modelAndView;
   }
@@ -158,7 +164,9 @@ public class HarmonizePatientIdentifierTypesController {
       @ModelAttribute("newMDSPatientIdentifierTypes")
           HarmonizationData newMDSPatientIdentifierTypes,
       @ModelAttribute("productionItemsToDelete")
-          List<PatientIdentifierTypeDTO> productionItemsToDelete) {
+          List<PatientIdentifierTypeDTO> productionItemsToDelete,
+      @ModelAttribute("differentDetailsAndSameNameUUIDAndID")
+          HarmonizationData differentDetailsAndSameNameUUIDAndID) {
 
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
@@ -166,6 +174,8 @@ public class HarmonizePatientIdentifierTypesController {
 
     delegate.processAddNewFromMetadataServer(newMDSPatientIdentifierTypes, logBuilder);
     delegate.processDeleteFromProductionServer(productionItemsToDelete, logBuilder);
+    delegate.processUpdatePatientIdentifierTypesDetails(
+        differentDetailsAndSameNameUUIDAndID, logBuilder);
 
     logBuilder.build();
 
@@ -204,7 +214,7 @@ public class HarmonizePatientIdentifierTypesController {
     String defaultLocationName =
         Context.getAdministrationService().getGlobalProperty("default_location");
     Builder logBuilder = new PatientIdentifierTypesHarmonizationCSVLog.Builder(defaultLocationName);
-    delegate.processUpdatePatientIdentifierTypesDetails(differentNameAndSameUUIDAndID, logBuilder);
+    delegate.processUpdatePatientIdentifierTypesNames(differentNameAndSameUUIDAndID, logBuilder);
     logBuilder.build();
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
@@ -425,6 +435,14 @@ public class HarmonizePatientIdentifierTypesController {
   public HarmonizationData getDifferentNameAndSameUUIDAndID() {
     Map<String, List<PatientIdentifierTypeDTO>> patientIdentifierTypesWithDifferentNames =
         this.harmonizationPatientIdentifierTypeService.findAllWithDifferentNameAndSameUUIDAndID();
+    return delegate.getConvertedData(patientIdentifierTypesWithDifferentNames);
+  }
+
+  @ModelAttribute("differentDetailsAndSameNameUUIDAndID")
+  public HarmonizationData getDifferentDetailsAndSameNameUUIDAndID() {
+    Map<String, List<PatientIdentifierTypeDTO>> patientIdentifierTypesWithDifferentNames =
+        this.harmonizationPatientIdentifierTypeService
+            .findAllWithDifferentDetailsAndSameNameUUIDAndID();
     return delegate.getConvertedData(patientIdentifierTypesWithDifferentNames);
   }
 

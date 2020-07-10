@@ -166,6 +166,50 @@ public class PatientIdentifierTypesHarmonizationCSVLog {
       return this;
     }
 
+    @SuppressWarnings("deprecation")
+    public Builder appendLogForUpdatedPatientIdentifierTypesDetails(
+        Map<String, List<PatientIdentifierTypeDTO>> data) {
+
+      try {
+        printer.print(
+            "Metadata Harmonization Process Flow: Updated Patient Identifier Type Format, Check Digit or Required");
+        printer.println();
+        printer.print(
+            "===============================================================================================================================");
+        printer.println();
+
+        for (String key : data.keySet()) {
+          List<PatientIdentifierTypeDTO> dtos = data.get(key);
+          PatientIdentifierType mdServerET = dtos.get(0).getPatientIdentifierType();
+          PatientIdentifierType pdServerET = dtos.get(1).getPatientIdentifierType();
+          try {
+            printer.print(
+                String.format(
+                    "ID:{%s}, UUID:%s, NAME:%s updated FORMAT from '%s' to '%s', CHECK DIGIT from '%s' to '%s', and REQUIRED from '%s' to '%s'",
+                    mdServerET.getId(),
+                    mdServerET.getUuid(),
+                    pdServerET.getName(),
+                    mdServerET.getFormat(),
+                    pdServerET.getFormat(),
+                    mdServerET.getCheckDigit(),
+                    pdServerET.getCheckDigit(),
+                    pdServerET.getRequired(),
+                    mdServerET.getRequired()));
+            printer.println();
+          } catch (Exception e) {
+            e.printStackTrace();
+            throw new APIException("Unable to write record to CSV: " + e.getMessage());
+          }
+        }
+        printer.println();
+
+        printer.flush();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      return this;
+    }
+
     public Builder appendLogForPatientIdentifierTypesWithDiferrentIdsAndEqualUUID(
         Map<String, List<PatientIdentifierTypeDTO>> data) {
 

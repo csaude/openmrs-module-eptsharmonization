@@ -79,6 +79,7 @@ public class HarmonizePatientIdentifierTypesDelegate {
       HarmonizationData productionItemsToExport,
       HarmonizationData differentIDsAndEqualUUID,
       HarmonizationData differentNameAndSameUUIDAndID,
+      HarmonizationData differentDetailsAndSameNameUUIDAndID,
       List<PatientIdentifierType> notSwappablePatientIdentifierTypes,
       List<PatientIdentifierType> swappablePatientIdentifierTypes) {
 
@@ -91,7 +92,9 @@ public class HarmonizePatientIdentifierTypesDelegate {
     this.removeAllChoosenToManualHarmonize(session, swappablePatientIdentifierTypes);
 
     boolean isFirstStepHarmonizationCompleted =
-        newMDSPatientIdentifierTypes.getItems().isEmpty() && productionItemsToDelete.isEmpty();
+        newMDSPatientIdentifierTypes.getItems().isEmpty()
+            && productionItemsToDelete.isEmpty()
+            && differentDetailsAndSameNameUUIDAndID.getItems().isEmpty();
 
     this.setIDsAndUUIDsHarmonizationStatus(
         productionItemsToExport, differentIDsAndEqualUUID, isFirstStepHarmonizationCompleted);
@@ -228,8 +231,7 @@ public class HarmonizePatientIdentifierTypesDelegate {
   }
 
   @SuppressWarnings("unchecked")
-  public void processUpdatePatientIdentifierTypesDetails(
-      HarmonizationData data, Builder logBuilder) {
+  public void processUpdatePatientIdentifierTypesNames(HarmonizationData data, Builder logBuilder) {
     Map<String, List<PatientIdentifierTypeDTO>> list = new HashMap<>();
     for (HarmonizationItem item : data.getItems()) {
       List<PatientIdentifierTypeDTO> value = (List<PatientIdentifierTypeDTO>) item.getValue();
@@ -240,10 +242,27 @@ public class HarmonizePatientIdentifierTypesDelegate {
       }
     }
     if (!list.isEmpty()) {
-      this.harmonizationPatientIdentifierTypeService.saveWithDifferentDetails(list);
+      this.harmonizationPatientIdentifierTypeService.saveWithDifferentNames(list);
       SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.summary.patientidentifiertype.harmonize.differentNamesAndSameUUIDAndID");
       logBuilder.appendLogForUpdatedPatientIdentifierTypesNames(list);
+      HarmonizePatientIdentifierTypesController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public void processUpdatePatientIdentifierTypesDetails(
+      HarmonizationData data, Builder logBuilder) {
+    Map<String, List<PatientIdentifierTypeDTO>> list = new HashMap<>();
+    for (HarmonizationItem item : data.getItems()) {
+      List<PatientIdentifierTypeDTO> value = (List<PatientIdentifierTypeDTO>) item.getValue();
+      list.put((String) item.getKey(), value);
+    }
+    if (!list.isEmpty()) {
+      this.harmonizationPatientIdentifierTypeService.saveWithDifferentDetails(list);
+      SUMMARY_EXECUTED_SCENARIOS.add(
+          "eptsharmonization.summary.patientidentifiertype.harmonize.differentDetailsAndSameNamesUUIDAndID");
+      logBuilder.appendLogForUpdatedPatientIdentifierTypesDetails(list);
       HarmonizePatientIdentifierTypesController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
     }
   }
@@ -271,7 +290,7 @@ public class HarmonizePatientIdentifierTypesDelegate {
   }
 
   @SuppressWarnings("deprecation")
-public void processManualMapping(
+  public void processManualMapping(
       Map<PatientIdentifierType, PatientIdentifierType> manualHarmonizePatientIdentifierTypes,
       Builder logBuilder) {
 
@@ -346,7 +365,7 @@ public void processManualMapping(
     }
     if (!differentDetailsItems.isEmpty()) {
       HarmonizationData harmonizationData = new HarmonizationData(differentDetailsItems);
-      processUpdatePatientIdentifierTypesDetails(harmonizationData, logBuilder);
+      processUpdatePatientIdentifierTypesNames(harmonizationData, logBuilder);
       logBuilder.build();
       HarmonizePatientIdentifierTypesController.IS_NAMES_DIFFERENCES_HARMONIZED = true;
     }

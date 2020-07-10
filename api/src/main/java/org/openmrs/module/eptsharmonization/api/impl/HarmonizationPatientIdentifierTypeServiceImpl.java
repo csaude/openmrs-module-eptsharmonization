@@ -91,7 +91,21 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
       throws APIException {
     this.harmonizationDAO.evictCache();
     Map<String, List<PatientIdentifierTypeDTO>> result = new HashMap<>();
-    Map<String, List<PatientIdentifierType>> map = findByWithDifferentDetailsAndSameUUIDAndID();
+    Map<String, List<PatientIdentifierType>> map = findByWithDifferentNameAndSameUUIDAndID();
+    for (String key : map.keySet()) {
+      result.put(key, DTOUtils.fromPatientIdentifierTypes(map.get(key)));
+    }
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  @Authorized({"View Patient Identifier Types"})
+  public Map<String, List<PatientIdentifierTypeDTO>>
+      findAllWithDifferentDetailsAndSameNameUUIDAndID() throws APIException {
+    this.harmonizationDAO.evictCache();
+    Map<String, List<PatientIdentifierTypeDTO>> result = new HashMap<>();
+    Map<String, List<PatientIdentifierType>> map = findByWithDifferentDetailsAndSameNameUUIDAndID();
     for (String key : map.keySet()) {
       result.put(key, DTOUtils.fromPatientIdentifierTypes(map.get(key)));
     }
@@ -154,6 +168,23 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
     return findAllSwappable;
   }
 
+  @Override
+  @Authorized({"Manage Patient Identifier Types"})
+  public void saveWithDifferentNames(
+      Map<String, List<PatientIdentifierTypeDTO>> patientIdentifierTypes) throws APIException {
+    this.harmonizationDAO.evictCache();
+    for (String key : patientIdentifierTypes.keySet()) {
+      List<PatientIdentifierTypeDTO> list = patientIdentifierTypes.get(key);
+      PatientIdentifierType mdsPatientIdentifierType = list.get(0).getPatientIdentifierType();
+      PatientIdentifierType pdsPatientIdentifierType = list.get(1).getPatientIdentifierType();
+      PatientIdentifierType patientIdentifierType =
+          this.patientService.getPatientIdentifierType(pdsPatientIdentifierType.getId());
+      patientIdentifierType.setName(mdsPatientIdentifierType.getName());
+      patientIdentifierType.setDescription(mdsPatientIdentifierType.getDescription());
+      this.patientService.savePatientIdentifierType(patientIdentifierType);
+    }
+  }
+
   @SuppressWarnings("deprecation")
   @Override
   @Authorized({"Manage Patient Identifier Types"})
@@ -166,8 +197,6 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
       PatientIdentifierType pdsPatientIdentifierType = list.get(1).getPatientIdentifierType();
       PatientIdentifierType patientIdentifierType =
           this.patientService.getPatientIdentifierType(pdsPatientIdentifierType.getId());
-      patientIdentifierType.setName(mdsPatientIdentifierType.getName());
-      patientIdentifierType.setDescription(mdsPatientIdentifierType.getDescription());
       patientIdentifierType.setFormat(mdsPatientIdentifierType.getFormat());
       patientIdentifierType.setCheckDigit(mdsPatientIdentifierType.getCheckDigit());
       patientIdentifierType.setRequired(mdsPatientIdentifierType.getRequired());
@@ -347,8 +376,7 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
     }
   }
 
-  @SuppressWarnings("deprecation")
-  private Map<String, List<PatientIdentifierType>> findByWithDifferentDetailsAndSameUUIDAndID() {
+  private Map<String, List<PatientIdentifierType>> findByWithDifferentNameAndSameUUIDAndID() {
     List<PatientIdentifierType> allMDS =
         harmonizationPatientIdentifierTypeServiceDAO.findAllMDSServerPatientIdentifierTypes();
     List<PatientIdentifierType> allPDS =
@@ -359,8 +387,29 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
       for (PatientIdentifierType pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
             && mdsItem.getId() == pdsItem.getId()
-            && !(mdsItem.getName().equalsIgnoreCase(pdsItem.getName())
-                && StringUtils.defaultString(mdsItem.getFormat())
+            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
+          map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
+        }
+      }
+    }
+    return map;
+  }
+
+  @SuppressWarnings("deprecation")
+  private Map<String, List<PatientIdentifierType>>
+      findByWithDifferentDetailsAndSameNameUUIDAndID() {
+    List<PatientIdentifierType> allMDS =
+        harmonizationPatientIdentifierTypeServiceDAO.findAllMDSServerPatientIdentifierTypes();
+    List<PatientIdentifierType> allPDS =
+        harmonizationPatientIdentifierTypeServiceDAO.findAllPDSServerPatientIdentifierTypes();
+
+    Map<String, List<PatientIdentifierType>> map = new TreeMap<>();
+    for (PatientIdentifierType mdsItem : allMDS) {
+      for (PatientIdentifierType pdsItem : allPDS) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid())
+            && mdsItem.getId() == pdsItem.getId()
+            && mdsItem.getName().equalsIgnoreCase(pdsItem.getName())
+            && !(StringUtils.defaultString(mdsItem.getFormat())
                     .equalsIgnoreCase(StringUtils.defaultString(pdsItem.getFormat()))
                 && mdsItem.getCheckDigit().equals(pdsItem.getCheckDigit())
                 && mdsItem.getRequired().equals(pdsItem.getRequired()))) {
