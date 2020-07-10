@@ -86,6 +86,16 @@ public class HarmonizationUtils {
             + "  where _program_workflow_state.program_workflow_state_id = program_workflow_state.program_workflow_state_id    "
             + "  and _program_workflow_state.uuid = program_workflow_state.uuid)) as a)           ");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append(
+        "update patient_identifier_type set swappable = true                      "
+            + "  where patient_identifier_type_id in(  select a.* from(                  "
+            + "   select patient_identifier_type.patient_identifier_type_id from patient_identifier_type  "
+            + "   where NOT EXISTS (select * from _patient_identifier_type "
+            + "  where _patient_identifier_type.patient_identifier_type_id = patient_identifier_type.patient_identifier_type_id    "
+            + "  and _patient_identifier_type.uuid = patient_identifier_type.uuid)) as a)           ");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
   public static <T extends OpenmrsMetadata>

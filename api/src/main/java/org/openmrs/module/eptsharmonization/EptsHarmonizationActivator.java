@@ -98,13 +98,17 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     log.info("Importing _program_workflow_state Metadata");
     dataImporter.importData("program-workflow-state.xml");
     log.info("_program_workflow_state Metadata imported");
+
     log.info("Importing _concept metadata");
     dataImporter.importData("concepts.xml");
     log.info("_concept metadata imported");
 
-    StringBuilder sb =
-        new StringBuilder(
-            "ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
+    log.info("Importing _patient_identifier_type Metadata");
+    dataImporter.importData("patient-identifier-types.xml");
+    log.info(" _patient_identifier_type Metadata imported");
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =
@@ -145,6 +149,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     }
     sb = new StringBuilder();
     sb.append("ALTER TABLE `program_workflow_state` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `patient_identifier_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     HarmonizationUtils.onModuleActivator();
@@ -195,6 +203,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("DROP TABLE IF EXISTS `_program_workflow_state`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_patient_identifier_type`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     if (columnExists("encounter_type", "swappable")) {
       sb = new StringBuilder("ALTER TABLE `encounter_type` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -229,6 +241,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     if (columnExists("program_workflow_state", "swappable")) {
       sb = new StringBuilder();
       sb.append("ALTER TABLE `program_workflow_state` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+
+    if (columnExists("patient_identifier_type", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `patient_identifier_type` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
@@ -278,6 +296,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb =
         new StringBuilder(
             "delete from liquibasechangelog where ID ='eptsharmonization_20200701-1657';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200708-0930';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 

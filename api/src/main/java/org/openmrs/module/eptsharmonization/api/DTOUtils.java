@@ -6,6 +6,7 @@ import org.openmrs.EncounterType;
 import org.openmrs.Form;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
@@ -16,6 +17,7 @@ import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.FormDTO;
 import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
+import org.openmrs.module.eptsharmonization.api.model.PatientIdentifierTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
@@ -221,5 +223,30 @@ public class DTOUtils {
   public static ProgramWorkflowStateDTO fromProgramWorkflowState(
       ProgramWorkflowState programWorkflowState) {
     return new ProgramWorkflowStateDTO(programWorkflowState);
+  }
+
+  public static List<PatientIdentifierTypeDTO> fromPatientIdentifierTypes(
+      List<PatientIdentifierType> patientIdentifierTypes) {
+    List<PatientIdentifierTypeDTO> result = new ArrayList<>();
+
+    for (PatientIdentifierType patientIdentifierType : patientIdentifierTypes) {
+      result.add(new PatientIdentifierTypeDTO(patientIdentifierType));
+    }
+
+    return result;
+  }
+
+  public static List<PatientIdentifierType> fromPatientIdentifierTypesDTOs(
+      List<PatientIdentifierTypeDTO> personAttributeDTOs) {
+    List<PatientIdentifierType> result = new ArrayList<>();
+    for (PatientIdentifierTypeDTO item : personAttributeDTOs) {
+      result.add(item.getPatientIdentifierType());
+    }
+    return result;
+  }
+
+  public static PatientIdentifierTypeDTO fromPatientIdentifierType(
+      PatientIdentifierType patientIdentifierType) {
+    return new PatientIdentifierTypeDTO(patientIdentifierType);
   }
 }
