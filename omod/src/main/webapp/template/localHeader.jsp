@@ -31,6 +31,8 @@
 				code="eptsharmonization.locationtag.harmonize" /></a></li>
 	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeConcept.form"><spring:message
 				code="eptsharmonization.concept.harmonize.status" /></a></li>
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/patientIdentifierTypes/harmonizePatientIdentifierTypesList.form"><spring:message
+				code="eptsharmonization.harmonize.patientidentifiertypes" /></a></li>
 
 	<!-- Add further links here -->
 </ul>
