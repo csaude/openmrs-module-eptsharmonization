@@ -111,18 +111,42 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("ALTER TABLE `encounter_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `person_attribute_type` ADD COLUMN `swappable` boolean default false");
+    sb =
+        new StringBuilder(
+            "ALTER TABLE `person_attribute_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `program` ADD COLUMN `swappable` boolean default false");
+    sb = new StringBuilder("ALTER TABLE `program` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `program_workflow` ADD COLUMN `swappable` boolean default false");
+    sb = new StringBuilder("ALTER TABLE `form` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb =
+        new StringBuilder(
+            "ALTER TABLE `htmlformentry_html_form` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb =
+        new StringBuilder(
+            "ALTER TABLE `program_workflow` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    try {
+      log.info("Importing _form Metadata Server ");
+      EptsHarmonizationFormLoader.loadForms();
+    } catch (Exception e) {
+      log.error("Loading _forms entries", e);
+      throw new RuntimeException(e);
+    }
+
+    try {
+      log.info("Importing _htmlformentry_html_form Metadata Server ");
+      EptsHarmonizationFormLoader.loadHtmlForms();
+    } catch (Exception e) {
+      log.error("Loading _htmlformentry_html_form entries", e);
+      throw new RuntimeException(e);
+    }
     sb = new StringBuilder();
     sb.append("ALTER TABLE `program_workflow_state` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -141,20 +165,16 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
   }
 
   private void deletePreviousHarmonizationLoadedDDLAndLiquibase() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_encounter_type`");
+    StringBuilder sb = new StringBuilder("DROP TABLE IF EXISTS `_encounter_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_person_attribute_type`");
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_person_attribute_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_program`");
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_program`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_program_workflow`");
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_program_workflow`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_visit_type`");
@@ -169,13 +189,16 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb = new StringBuilder("DROP TABLE IF EXISTS `_concept`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_program`");
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_program`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_location_attribute_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_form`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_htmlformentry_html_form`");
     sb = new StringBuilder();
     sb.append("DROP TABLE IF EXISTS `_program_workflow_state`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
@@ -185,29 +208,36 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     if (columnExists("encounter_type", "swappable")) {
-      sb = new StringBuilder();
-      sb.append("ALTER TABLE `encounter_type` DROP `swappable`");
+      sb = new StringBuilder("ALTER TABLE `encounter_type` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
     if (columnExists("person_attribute_type", "swappable")) {
-      sb = new StringBuilder();
-      sb.append("ALTER TABLE `person_attribute_type` DROP `swappable`");
+      sb = new StringBuilder("ALTER TABLE `person_attribute_type` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
     if (columnExists("program", "swappable")) {
-      sb = new StringBuilder();
-      sb.append("ALTER TABLE `program` DROP `swappable`");
+      sb = new StringBuilder("ALTER TABLE `program` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
     if (columnExists("program_workflow", "swappable")) {
-      sb = new StringBuilder();
-      sb.append("ALTER TABLE `program_workflow` DROP `swappable`");
+      sb = new StringBuilder("ALTER TABLE `program_workflow` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
+    if (columnExists("form", "swappable")) {
+      sb = new StringBuilder("ALTER TABLE `form` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+
+    if (columnExists("htmlformentry_html_form", "swappable")) {
+      sb = new StringBuilder("ALTER TABLE `htmlformentry_html_form` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200402-1806';");
     if (columnExists("program_workflow_state", "swappable")) {
       sb = new StringBuilder();
       sb.append("ALTER TABLE `program_workflow_state` DROP `swappable`");
@@ -224,12 +254,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("delete from liquibasechangelog where ID ='20200423-0840';");
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200423-0840';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("delete from liquibasechangelog where ID ='20200616-1620';");
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200616-1620';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =
@@ -242,13 +270,18 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
             "delete from liquibasechangelog where ID ='eptsharmonization_20200622-1547';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("delete from liquibasechangelog where ID ='20200624-1130';");
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200624-1130';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =
         new StringBuilder(
             "delete from liquibasechangelog where ID ='eptsharmonization_20200624-1242';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200601-1000';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200601-1010';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =

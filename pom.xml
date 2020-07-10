@@ -31,6 +31,7 @@
 
 	<properties>
 		<openmrsPlatformVersion>1.11.5</openmrsPlatformVersion>
+		<poiVersion>3.16-beta2</poiVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -59,6 +60,11 @@
 				<version>${openmrsPlatformVersion}</version>
 				<type>pom</type>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>formentry</artifactId>
+				<version>5.0.7-SNAPSHOT</version>
 			</dependency>
 			<!-- End OpenMRS core -->
 		</dependencies>

@@ -49,6 +49,26 @@ public class HarmonizationUtils {
 
     sb = new StringBuilder();
     sb.append(
+        "update form set swappable = true                          "
+            + "  where form_id in(  select a.* from(                  "
+            + "   select form.form_id from form                     "
+            + "   where NOT EXISTS (select * from _form             "
+            + "  where _form.form_id = form.form_id                "
+            + "  and _form.uuid = form.uuid)) as a)                            ");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append(
+        "update htmlformentry_html_form set swappable = true                          "
+            + "  where form_id in(  select a.* from(                  "
+            + "   select htmlformentry_html_form.form_id from htmlformentry_html_form                     "
+            + "   where NOT EXISTS (select * from _htmlformentry_html_form           "
+            + "  where _htmlformentry_html_form.form_id = htmlformentry_html_form.form_id                "
+            + "  and _htmlformentry_html_form.uuid = htmlformentry_html_form.uuid)) as a)                            ");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append(
         "update program_workflow set swappable = true                      "
             + "  where program_workflow_id in(  select a.* from(                  "
             + "   select program_workflow.program_workflow_id from program_workflow  "

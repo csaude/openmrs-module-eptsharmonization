@@ -3,6 +3,7 @@ package org.openmrs.module.eptsharmonization.api;
 import java.util.ArrayList;
 import java.util.List;
 import org.openmrs.EncounterType;
+import org.openmrs.Form;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.PatientIdentifierType;
@@ -13,6 +14,7 @@ import org.openmrs.ProgramWorkflowState;
 import org.openmrs.RelationshipType;
 import org.openmrs.VisitType;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
+import org.openmrs.module.eptsharmonization.api.model.FormDTO;
 import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
 import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
 import org.openmrs.module.eptsharmonization.api.model.PatientIdentifierTypeDTO;
@@ -163,6 +165,22 @@ public class DTOUtils {
     List<LocationAttributeType> result = new ArrayList<>();
     for (LocationAttributeTypeDTO locationAttributeTypeDTO : locationAttributeTypeDTOs) {
       result.add(locationAttributeTypeDTO.getLocationAttributeType());
+    }
+    return result;
+  }
+
+  public static List<FormDTO> fromForms(List<Form> forms) {
+    List<FormDTO> result = new ArrayList<>();
+    for (Form form : forms) {
+      result.add(new FormDTO(form));
+    }
+    return result;
+  }
+
+  public static List<Form> fromFormDTOs(List<FormDTO> formDTOs) {
+    List<Form> result = new ArrayList<>();
+    for (FormDTO formDTO : formDTOs) {
+      result.add(formDTO.getForm());
     }
     return result;
   }

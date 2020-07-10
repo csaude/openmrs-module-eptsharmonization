@@ -33,6 +33,8 @@
 				code="eptsharmonization.concept.harmonize.status" /></a></li>
 	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/patientIdentifierTypes/harmonizePatientIdentifierTypesList.form"><spring:message
 				code="eptsharmonization.harmonize.patientidentifiertypes" /></a></li>
-
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/form/harmonizeFormList.form"><spring:message
+		code="eptsharmonization.harmonize.form" /></a></li>
+   
 	<!-- Add further links here -->
 </ul>
