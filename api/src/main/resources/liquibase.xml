@@ -533,4 +533,52 @@
           </modifySql>
      </changeSet>
 	
+	<changeSet author="Hamilton" id="20200706-0945">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="_program_workflow_state" />
+			</not>
+		</preConditions>
+		<comment>
+			Create _program_workflow_state table
+		</comment>
+		<createTable tableName="_program_workflow_state">
+			<column autoIncrement="true" name="program_workflow_state_id"
+				type="int">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="program_workflow_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="concept_id" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueBoolean="false" name="initial" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueBoolean="false" name="terminal" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueBoolean="false" name="retired" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="changed_by" type="int">
+				<constraints nullable="true" />
+			</column>
+			<column name="date_changed" type="DATETIME">
+				<constraints nullable="true" />
+			</column>
+			<column name="uuid" type="char(38)" />
+		</createTable>
+		<modifySql dbms="mssql">
+			<replace replace="CHAR(38)"
+				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
+		</modifySql>
+	</changeSet>
 </databaseChangeLog>

@@ -95,6 +95,9 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     dataImporter.importData("location-tags.xml");
     log.info(" _location_tag metadata imported");
 
+    log.info("Importing _program_workflow_state Metadata");
+    dataImporter.importData("program-workflow-state.xml");
+    log.info("_program_workflow_state Metadata imported");
     log.info("Importing _concept metadata");
     dataImporter.importData("concepts.xml");
     log.info("_concept metadata imported");
@@ -140,6 +143,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
       log.error("Loading _htmlformentry_html_form entries", e);
       throw new RuntimeException(e);
     }
+    sb = new StringBuilder();
+    sb.append("ALTER TABLE `program_workflow_state` ADD COLUMN `swappable` boolean default false");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     HarmonizationUtils.onModuleActivator();
   }
 
@@ -184,6 +191,8 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_htmlformentry_html_form`");
+    sb = new StringBuilder();
+    sb.append("DROP TABLE IF EXISTS `_program_workflow_state`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     if (columnExists("encounter_type", "swappable")) {
@@ -217,6 +226,14 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     }
 
     sb = new StringBuilder("delete from liquibasechangelog where ID ='20200402-1806';");
+    if (columnExists("program_workflow_state", "swappable")) {
+      sb = new StringBuilder();
+      sb.append("ALTER TABLE `program_workflow_state` DROP `swappable`");
+      Context.getAdministrationService().executeSQL(sb.toString(), false);
+    }
+
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("delete from liquibasechangelog where ID ='20200423-0840';");
@@ -252,6 +269,10 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb =
         new StringBuilder(
             "delete from liquibasechangelog where ID ='eptsharmonization_20200626-1520';");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder();
+    sb.append("delete from liquibasechangelog where ID ='20200706-0945';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =
