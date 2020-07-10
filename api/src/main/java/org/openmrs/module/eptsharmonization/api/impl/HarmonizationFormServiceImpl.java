@@ -11,26 +11,29 @@
  */
 package org.openmrs.module.eptsharmonization.api.impl;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
-import org.hibernate.ObjectNotFoundException;
 import org.openmrs.Encounter;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.FormResource;
 import org.openmrs.api.APIException;
-import org.openmrs.api.EncounterService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationFormService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationFormServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.FormDTO;
+import org.openmrs.module.eptsharmonization.api.model.FormFilter;
+import org.openmrs.module.eptsharmonization.api.model.FormentryXsn;
+import org.openmrs.module.eptsharmonization.api.model.HtmlForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,34 +47,20 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   private HarmonizationServiceDAO harmonizationDAO;
   private FormService formService;
   private HarmonizationFormServiceDAO harmonizationFormServiceDAO;
-  private EncounterService encounterService;
-
-  // @Autowired
-  // public void setHarmonizationDAO(HarmonizationServiceDAO harmonizationDAO) {
-  // this.harmonizationDAO = harmonizationDAO;
-  // }
-  //
-  // @Autowired
-  // public void setHarmonizationFormServiceDAO(
-  // HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO) {
-  // this.harmonizationFormServiceDAO = harmonizationEncounterTypeServiceDAO;
-  // }
-  //
-  // @Autowired
-  // public void setEncounterService(EncounterService encounterService) {
-  // this.formService = encounterService;
-  // }
 
   @Autowired
   public HarmonizationFormServiceImpl(
       FormService formService,
       HarmonizationServiceDAO harmonizationDAO,
-      HarmonizationFormServiceDAO harmonizationFormServiceDAO,
-      EncounterService encounterService) {
+      HarmonizationFormServiceDAO harmonizationFormServiceDAO) {
     this.formService = formService;
     this.harmonizationDAO = harmonizationDAO;
     this.harmonizationFormServiceDAO = harmonizationFormServiceDAO;
-    this.encounterService = encounterService;
+  }
+
+  @Override
+  public List<Form> findAllFormsFromMetadataServer() throws APIException {
+    return this.harmonizationFormServiceDAO.findAllMetadataServerForms();
   }
 
   @Override
@@ -81,10 +70,7 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     List<Form> mdsForms = harmonizationFormServiceDAO.findAllMetadataServerForms();
     List<Form> pdsForms = harmonizationFormServiceDAO.findAllProductionServerForms();
     mdsForms.removeAll(pdsForms);
-
-    List<FormDTO> dtos = DTOUtils.fromForms(mdsForms);
-    seXDTORelatedData(dtos);
-    return dtos;
+    return DTOUtils.fromForms(mdsForms);
   }
 
   @Override
@@ -94,32 +80,6 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     List<Form> pdsForms = harmonizationFormServiceDAO.findAllProductionServerForms();
     List<Form> mdsForms = harmonizationFormServiceDAO.findAllMetadataServerForms();
     pdsForms.removeAll(mdsForms);
-    return DTOUtils.fromForms(pdsForms);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public List<FormDTO> findAllMetadataServerFormsPartialEqualsToProductionServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<Form> allMDS = harmonizationFormServiceDAO.findAllMetadataServerForms();
-    List<Form> allPDS = harmonizationFormServiceDAO.findAllProductionServerForms();
-    List<Form> mdsForms = this.removeElementsWithDifferentIDsAndUUIDs(allMDS, allPDS);
-    allMDS.removeAll(allPDS);
-    mdsForms.removeAll(allMDS);
-    return DTOUtils.fromForms(mdsForms);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public List<FormDTO> findAllProductionServerFormsPartialEqualsToMetadataServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<Form> allPDS = harmonizationFormServiceDAO.findAllProductionServerForms();
-    List<Form> allMDS = harmonizationFormServiceDAO.findAllMetadataServerForms();
-    List<Form> pdsForms = this.removeElementsWithDifferentIDsAndUUIDs(allPDS, allMDS);
-    allPDS.removeAll(allMDS);
-    pdsForms.removeAll(allPDS);
     return DTOUtils.fromForms(pdsForms);
   }
 
@@ -148,6 +108,21 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  public List<FormDTO> findUnusedProductionServerForms() {
+    return DTOUtils.fromForms(this.harmonizationFormServiceDAO.findNotUsedPDSForms());
+  }
+
+  @Override
+  public Form findRelatedFormMetadataFromTablMDSForm(Form form) {
+    return this.harmonizationFormServiceDAO.setRelatedFormMetadataFromTablMDSForm(form);
+  }
+
+  @Override
+  public Form findRelatedFormMetadataFromTableForm(Form form) {
+    return this.harmonizationFormServiceDAO.setRelatedFormMetadataFromTableForm(form);
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public List<Form> findAllNotSwappableForms() throws APIException {
     this.harmonizationDAO.evictCache();
@@ -159,6 +134,12 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   public List<Form> findAllSwappableForms() throws APIException {
     this.harmonizationDAO.evictCache();
     return this.harmonizationFormServiceDAO.findAllSwappable();
+  }
+
+  @Override
+  public List<Form> findMDSFormsWithoutEncountersReferencesInPDServer() {
+    this.harmonizationDAO.evictCache();
+    return this.harmonizationFormServiceDAO.findMDSFormsWithoutEncountersReferencesInPDServer();
   }
 
   @Override
@@ -182,9 +163,38 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   }
 
   @Override
-  public List<Form> findPDSFormsNotExistsInMDServer() throws APIException {
+  public int getNumberOfAffectedFormFilters(Form form) {
     this.harmonizationDAO.evictCache();
-    return harmonizationFormServiceDAO.findPDSFormsNotExistsInMDServer();
+    return this.harmonizationFormServiceDAO.findFormFilterByForm(form).size();
+  }
+
+  @Override
+  public int getNumberOfAffectedFormEntryXsn(Form form) {
+    this.harmonizationDAO.evictCache();
+    return this.harmonizationFormServiceDAO.findFormentryXsnByForm(form).size();
+  }
+
+  @Override
+  public Map<String, List<HtmlForm>> findHtmlFormWithDifferentFormAndEqualUuid() {
+    List<HtmlForm> mdsForm =
+        this.harmonizationFormServiceDAO.findHtmlFormMDSWithDifferentFormAndEqualUuidFromPDS();
+    List<HtmlForm> pdsForm =
+        this.harmonizationFormServiceDAO.findHtmlFormPDSWithDifferentFormAndEqualUuidFromMDS();
+
+    Map<String, List<HtmlForm>> map = new TreeMap<>();
+    for (HtmlForm mdsItem : mdsForm) {
+      for (HtmlForm pdsItem : pdsForm) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid())) {
+          map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
+        }
+      }
+    }
+    return map;
+  }
+
+  @Override
+  public List<HtmlForm> findHtmlFormMetadataServerNotPresentInProductionServer() {
+    return this.harmonizationFormServiceDAO.findHtmlMDSNotPresentInPDS();
   }
 
   @Override
@@ -197,6 +207,7 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       Form form = this.formService.getForm(pdsForm.getForm().getId());
       form.setName(mdsForm.getForm().getName());
       form.setDescription(mdsForm.getForm().getDescription());
+      form.setEncounterType(mdsForm.getForm().getEncounterType());
       this.formService.saveForm(form);
     }
   }
@@ -207,13 +218,11 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     try {
       this.harmonizationDAO.setDisabledCheckConstraints();
       for (Form form : DTOUtils.fromFormDTOs(forms)) {
-
         Form found = this.formService.getForm(form.getId());
 
         if (found != null) {
 
           if (!this.harmonizationFormServiceDAO.isSwappable(found)) {
-
             throw new APIException(
                 String.format(
                     "Cannot Insert Form with ID %s, UUID %s and NAME %s. This ID is being in use by another Fomr from Metatada server with UUID %s and name %s ",
@@ -223,20 +232,13 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
                     found.getUuid(),
                     found.getName()));
           }
-          List<Encounter> relatedEncounters =
-              this.harmonizationFormServiceDAO.findEncountersByForm(found);
-          List<FormField> relatedFormFields =
-              this.harmonizationFormServiceDAO.findFormFieldsByForm(found);
-          List<FormResource> relatedFormResources =
-              this.harmonizationFormServiceDAO.findFormResourcesByForm(found);
-
-          this.updateToNextAvailableID(
-              form, relatedEncounters, relatedFormFields, relatedFormResources);
+          Form updated = this.harmonizationFormServiceDAO.updateToNextAvailableId(found);
+          this.updateRelatedMetadata(found, updated);
         }
         this.harmonizationFormServiceDAO.saveNotSwappableForm(form);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException("Error Saving new Forms From MDSersver", e.getCause());
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
@@ -250,157 +252,188 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   public void saveFormsWithDifferentIDAndEqualUUID(Map<String, List<FormDTO>> forms)
       throws APIException {
 
-    // this.harmonizationDAO.evictCache();
-    // try {
-    //
-    // this.harmonizationDAO.setDisabledCheckConstraints();
-    // for (String uuid : mapEncounterTypes.keySet()) {
-    //
-    // List<EncounterTypeDTO> list = mapEncounterTypes.get(uuid);
-    // EncounterType mdsEncounterType = list.get(0).getEncounterType();
-    // EncounterType pdSEncounterType = list.get(1).getEncounterType();
-    // Integer mdServerEncounterId = mdsEncounterType.getEncounterTypeId();
-    //
-    // EncounterType foundMDS = this.harmonizationFormServiceDAO
-    // .getEncounterTypeById(mdsEncounterType.getId());
-    //
-    // if (foundMDS != null) {
-    // if (!this.harmonizationFormServiceDAO.isSwappable(foundMDS)) {
-    // throw new APIException(String.format(
-    // "Cannot update the Production Server Encounter type [ID = {%s}, UUID = {%s},
-    // NAME =
-    // {%s}] with the ID {%s} this new ID is already referencing an Existing
-    // Encounter Type In
-    // Metadata Server",
-    // pdSEncounterType.getId(), pdSEncounterType.getUuid(),
-    // pdSEncounterType.getName(),
-    // mdServerEncounterId));
-    // }
-    // List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
-    // .findEncontersByEncounterTypeId(foundMDS.getId());
-    // List<Form> relatedForms = this.harmonizationFormServiceDAO
-    // .findFormsByEncounterTypeId(foundMDS.getId());
-    // this.updateToNextAvailableID(foundMDS, relatedEncounters, relatedForms);
-    // }
-    //
-    // EncounterType foundPDS = this.harmonizationFormServiceDAO
-    // .getEncounterTypeById(pdSEncounterType.getId());
-    // if (!this.harmonizationFormServiceDAO.isSwappable(foundPDS)) {
-    // throw new APIException(String.format(
-    // "Cannot update the Production Server Encounter type with ID {%s}, UUID {%s}
-    // and NAME
-    // {%s}. This Encounter Type is a Reference from an Encounter Type of Metadata
-    // Server",
-    // foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
-    // }
-    // List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
-    // .findEncontersByEncounterTypeId(foundPDS.getId());
-    // List<Form> relatedForms =
-    // this.harmonizationFormServiceDAO.findFormsByEncounterTypeId(foundPDS.getId());
-    // this.updateToGivenId(foundPDS, mdServerEncounterId, false, relatedEncounters,
-    // relatedForms);
-    // }
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // } finally {
-    // try {
-    // this.harmonizationDAO.setEnableCheckConstraints();
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    // }
+    this.harmonizationDAO.evictCache();
+    try {
 
+      this.harmonizationDAO.setDisabledCheckConstraints();
+      for (String uuid : forms.keySet()) {
+
+        List<FormDTO> list = forms.get(uuid);
+        Form mdsForm = list.get(0).getForm();
+        Form pdSForm = list.get(1).getForm();
+        Integer mdServerFormId = mdsForm.getFormId();
+
+        Form foundMDS = this.harmonizationFormServiceDAO.findFormById(mdsForm.getId());
+
+        if (foundMDS != null) {
+          if (!this.harmonizationFormServiceDAO.isSwappable(foundMDS)) {
+            throw new APIException(
+                String.format(
+                    "Cannot update the Production Server Form [ID = {%s}, UUID = {%s}, NAME = {%s}] with the ID {%s} this new ID is already referencing an Existing Form In Metadata Server",
+                    pdSForm.getId(), pdSForm.getUuid(), pdSForm.getName(), mdServerFormId));
+          }
+          Form updated = this.harmonizationFormServiceDAO.updateToNextAvailableId(foundMDS);
+          this.updateRelatedMetadata(foundMDS, updated);
+        }
+
+        Form foundPDS = this.harmonizationFormServiceDAO.findFormById(pdSForm.getId());
+        if (!this.harmonizationFormServiceDAO.isSwappable(foundPDS)) {
+          throw new APIException(
+              String.format(
+                  "Cannot update the Production Server Form with ID {%s}, UUID {%s} and NAME {%s}. This Encounter Type is a Reference from an Form of Metadata Server",
+                  foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
+        }
+        Form updated = this.harmonizationFormServiceDAO.updateForm(foundPDS, mdsForm, false);
+        updateRelatedMetadata(foundPDS, updated);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e.getCause());
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
-  public void saveManualMapping(Map<Form, Form> forms) throws APIException {
+  public void saveManualMapping(Map<Form, Form> mapForms)
+      throws UUIDDuplicationException, SQLException {
+    this.harmonizationDAO.evictCache();
+    try {
 
-    //
-    // this.harmonizationDAO.evictCache();
-    // try {
-    //
-    // this.harmonizationDAO.setDisabledCheckConstraints();
-    // for (Entry<EncounterType, EncounterType> entry :
-    // mapEncounterTypes.entrySet()) {
-    //
-    // EncounterType pdSEncounterType = entry.getKey();
-    // EncounterType mdsEncounterType = entry.getValue();
-    //
-    // EncounterType foundPDS = this.harmonizationFormServiceDAO
-    // .getEncounterTypeById(pdSEncounterType.getId());
-    //
-    // if (mdsEncounterType.getUuid().equals(pdSEncounterType.getUuid())
-    // && mdsEncounterType.getId().equals(pdSEncounterType.getId())) {
-    // if (mdsEncounterType.getId().equals(pdSEncounterType.getId())
-    // && mdsEncounterType.getName().equals(pdSEncounterType.getName())) {
-    // return;
-    // }
-    // foundPDS.setName(mdsEncounterType.getName());
-    // foundPDS.setDescription(mdsEncounterType.getDescription());
-    // this.formService.saveEncounterType(foundPDS);
-    //
-    // } else {
-    // List<Encounter> relatedEncounters = this.harmonizationFormServiceDAO
-    // .findEncontersByEncounterTypeId(foundPDS.getId());
-    //
-    // List<Form> relatedForms = this.harmonizationFormServiceDAO
-    // .findFormsByEncounterTypeId(foundPDS.getId());
-    //
-    // for (Form form : relatedForms) {
-    // this.harmonizationFormServiceDAO.updateForm(form,
-    // mdsEncounterType.getEncounterTypeId());
-    // }
-    // for (Encounter encounter : relatedEncounters) {
-    // this.harmonizationFormServiceDAO.updateEncounter(encounter,
-    // mdsEncounterType.getEncounterTypeId());
-    // }
-    // this.harmonizationFormServiceDAO.deleteEncounterType(foundPDS);
-    // }
-    // }
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // } finally {
-    // try {
-    // this.harmonizationDAO.setEnableCheckConstraints();
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    // }
+      this.harmonizationDAO.setDisabledCheckConstraints();
+      for (Entry<Form, Form> entry : mapForms.entrySet()) {
 
+        Form pdsForm = entry.getKey();
+        Form mdsForm = entry.getValue();
+
+        Form foundMDSFormByUuid =
+            this.harmonizationFormServiceDAO.findFormByUuid(mdsForm.getUuid());
+
+        if ((foundMDSFormByUuid != null && !foundMDSFormByUuid.getId().equals(mdsForm.getId()))
+            && (!foundMDSFormByUuid.getId().equals(pdsForm.getId())
+                && !foundMDSFormByUuid.getUuid().equals(pdsForm.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the Form '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdsForm.getName(),
+                  mdsForm.getName(),
+                  foundMDSFormByUuid.getName(),
+                  foundMDSFormByUuid.getId(),
+                  foundMDSFormByUuid.getUuid()));
+        }
+
+        Form foundPDS = this.harmonizationFormServiceDAO.findFormById(pdsForm.getId());
+
+        if (mdsForm.getUuid().equals(pdsForm.getUuid())
+            && mdsForm.getId().equals(pdsForm.getId())
+            && mdsForm.getName().equalsIgnoreCase(pdsForm.getName())) {
+          return;
+        } else {
+
+          if (!foundPDS.getId().equals(mdsForm.getId())) {
+            updateRelatedMetadata(foundPDS, mdsForm);
+          }
+          this.harmonizationFormServiceDAO.deleteForm(foundPDS);
+
+          Form foundMDSFormByID = this.harmonizationFormServiceDAO.findFormById(mdsForm.getId());
+          if (foundMDSFormByID == null) {
+            this.harmonizationFormServiceDAO.saveNotSwappableForm(mdsForm);
+          }
+        }
+      }
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
   public void deleteNewFormsFromPDS(List<FormDTO> forms) throws APIException {
-
     this.harmonizationDAO.evictCache();
-    for (Form form : DTOUtils.fromFormDTOs(forms)) {
-      this.harmonizationFormServiceDAO.deleteForm(form);
+    try {
+      this.harmonizationDAO.setDisabledCheckConstraints();
+
+      for (Form form : DTOUtils.fromFormDTOs(forms)) {
+        this.harmonizationFormServiceDAO.deleteRelatedEncounter(form);
+        this.harmonizationFormServiceDAO.deleteRelatedFormentryXsn(form);
+        this.harmonizationFormServiceDAO.deleteRelatedFormFilter(form);
+        this.harmonizationFormServiceDAO.deleteRelatedFormResource(form);
+        this.harmonizationFormServiceDAO.deleteRelatedHtmlForm(form);
+        this.harmonizationFormServiceDAO.deleteRelatedFormField(form);
+        this.harmonizationFormServiceDAO.deleteForm(form);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
-  private List<Form> removeElementsWithDifferentIDsAndUUIDs(
-      List<Form> mdsForms, List<Form> pdsForms) {
-    List<Form> auxMDS = new ArrayList<>();
-    for (Form mdsForm : mdsForms) {
-      for (Form pdsForm : pdsForms) {
-        if (mdsForm.getId().compareTo(pdsForm.getId()) != 0
-            && mdsForm.getUuid().contentEquals(pdsForm.getUuid())) {
-          auxMDS.add(mdsForm);
-        }
+  @Override
+  public void saveHtmlFormsWithDifferentFormNamesAndEqualHtmlFormUuid(
+      Map<String, List<HtmlForm>> data) {
+    this.harmonizationDAO.evictCache();
+
+    try {
+      this.harmonizationDAO.setDisabledCheckConstraints();
+      for (Entry<String, List<HtmlForm>> entry : data.entrySet()) {
+
+        HtmlForm mdsHtmlForm = entry.getValue().get(0);
+        HtmlForm pdsHtmlForm = entry.getValue().get(1);
+
+        this.harmonizationFormServiceDAO.updateHtmlForm(pdsHtmlForm, mdsHtmlForm);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
-    return auxMDS;
+  }
+
+  @Override
+  public void saveNewHtmlFormsFromMetadataServer(List<HtmlForm> htmlForms) {
+    this.harmonizationDAO.evictCache();
+
+    try {
+      this.harmonizationDAO.setDisabledCheckConstraints();
+      for (HtmlForm htmlForm : htmlForms) {
+        this.harmonizationFormServiceDAO.createHtmlForm(htmlForm);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        this.harmonizationDAO.setEnableCheckConstraints();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   private Map<String, List<Form>> findByWithDifferentNameAndSameUUIDAndID() {
-    List<Form> allMDS = harmonizationFormServiceDAO.findAllMetadataServerForms();
-    List<Form> allPDS = harmonizationFormServiceDAO.findAllProductionServerForms();
+    List<Form> allMDS = harmonizationFormServiceDAO.findDiferrencesByNameHavingSameIdAndUuidMDS();
+    List<Form> allPDS = harmonizationFormServiceDAO.findDiferrencesByNameHavingSameIdAndUuidPDS();
 
     Map<String, List<Form>> map = new TreeMap<>();
     for (Form mdsItem : allMDS) {
       for (Form pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
-            && mdsItem.getId() == pdsItem.getId()
+            && mdsItem.getId().equals(pdsItem.getId())
             && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
@@ -410,12 +443,13 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   }
 
   private Map<String, List<Form>> findByWithDifferentIDAndSameUUID() {
-    List<Form> allPDS = harmonizationFormServiceDAO.findAllProductionServerForms();
-    List<Form> allMDS = harmonizationFormServiceDAO.findAllMetadataServerForms();
+    List<Form> allPDS = harmonizationFormServiceDAO.findDiferrencesByIDsHavingSameUuidPDS();
+    List<Form> allMDS = harmonizationFormServiceDAO.findDiferrencesByIDsHavingSameUuidMDS();
     Map<String, List<Form>> map = new TreeMap<>();
     for (Form mdsItem : allMDS) {
       for (Form pdsItem : allPDS) {
-        if (mdsItem.getUuid().equals(pdsItem.getUuid()) && mdsItem.getId() != pdsItem.getId()) {
+        if (mdsItem.getUuid().equals(pdsItem.getUuid())
+            && !mdsItem.getId().equals(pdsItem.getId())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }
@@ -423,45 +457,35 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     return map;
   }
 
-  // private void updateToGivenId(EncounterType encounterType, Integer
-  // encounterTypeId, boolean
-  // swappable,
-  // List<Encounter> relatedEncounters, List<Form> relatedForms) {
-  // this.harmonizationFormServiceDAO.updateEncounterType(encounterTypeId,
-  // encounterType,
-  // swappable);
-  //
-  // for (Form form : relatedForms) {
-  // this.harmonizationFormServiceDAO.updateForm(form, encounterTypeId);
-  // }
-  // for (Encounter encounter : relatedEncounters) {
-  // this.harmonizationFormServiceDAO.updateEncounter(encounter, encounterTypeId);
-  // }
-  // }
+  private void updateRelatedMetadata(Form pdsForm, Form updated) {
+    this.harmonizationDAO.evictCache();
+    List<Encounter> relatedEncounters =
+        this.harmonizationFormServiceDAO.findEncountersByForm(pdsForm);
+    List<FormField> relatedFormFields =
+        this.harmonizationFormServiceDAO.findFormFieldsByForm(pdsForm);
+    List<FormResource> relatedFormResources =
+        this.harmonizationFormServiceDAO.findFormResourcesByForm(pdsForm);
+    List<FormentryXsn> relatedFormentryxsn =
+        this.harmonizationFormServiceDAO.findFormentryXsnByForm(pdsForm);
+    HtmlForm relatedHtmlForm = this.harmonizationFormServiceDAO.findHtmlFormByForm(pdsForm);
+    List<FormFilter> relatedFormFilter =
+        this.harmonizationFormServiceDAO.findFormFilterByForm(pdsForm);
 
-  private void updateToNextAvailableID(
-      Form form,
-      List<Encounter> relatedEncounters,
-      List<FormField> relatedFormFields,
-      List<FormResource> relatedFormResources) {
-    Form updated = this.harmonizationFormServiceDAO.updateToNextAvailableId(form);
-
-    // for (Encounter encounter : relatedEncounters) {
-    // this.harmonizationFormServiceDAO.updateEncounter(encounter,
-    // updated.getEncounterTypeId());
-    // }
-  }
-
-  private void seXDTORelatedData(List<FormDTO> dtos) {
-
-    for (FormDTO formDTO : dtos) {
-      if (formDTO.getForm().getEncounterType() != null) {
-        try {
-          formDTO.setEncounterType(
-              this.encounterService.getEncounterType(formDTO.getForm().getEncounterType().getId()));
-        } catch (ObjectNotFoundException e) {
-        }
-      }
+    for (Encounter encounter : relatedEncounters) {
+      this.harmonizationFormServiceDAO.updateEncounter(encounter, updated);
     }
+    for (FormField formField : relatedFormFields) {
+      this.harmonizationFormServiceDAO.updateFormField(formField, updated);
+    }
+    for (FormResource formResource : relatedFormResources) {
+      this.harmonizationFormServiceDAO.updateFormResource(formResource, updated);
+    }
+    for (FormFilter formFilter : relatedFormFilter) {
+      this.harmonizationFormServiceDAO.updateFormFilter(formFilter, updated);
+    }
+    for (FormentryXsn formentryXsn : relatedFormentryxsn) {
+      this.harmonizationFormServiceDAO.updateFormentryxsn(formentryXsn, updated);
+    }
+    this.harmonizationFormServiceDAO.updateHtmlForm(relatedHtmlForm, updated);
   }
 }

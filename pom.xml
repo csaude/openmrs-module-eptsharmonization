@@ -61,6 +61,11 @@
 				<type>pom</type>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>formentry</artifactId>
+				<version>5.0.7-SNAPSHOT</version>
+			</dependency>
 			<!-- End OpenMRS core -->
 		</dependencies>
 	</dependencyManagement>

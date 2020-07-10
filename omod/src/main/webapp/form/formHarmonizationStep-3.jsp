@@ -1,9 +1,9 @@
 <c:if
-	test="${isFirstStepHarmonizationCompleted && isUUIDsAndIDsHarmonized && not isNamesHarmonized}">
+	test="${isFirstStepFormHarmonizationCompleted && isUUIDsAndIDsFormHarmonized && not isNamesFormHarmonized}">
 
-	<c:if test="${ not empty differentNameAndSameUUIDAndID.items}">
+	<c:if test="${ not empty differentNameAndSameUUIDAndIDForm.items}">
 
-		<springform:form modelAttribute="differentNameAndSameUUIDAndID"
+		<springform:form modelAttribute="differentNameAndSameUUIDAndIDForm"
 			method="post" action="processHarmonizationStep3.form">
 			<b class="boxHeader"><spring:message
 					code="eptsharmonization.form.harmonize.differentNamesAndSameUUIDAndID" /></b>
@@ -15,23 +15,43 @@
 						<th><spring:message
 								code="eptsharmonization.form.mdserver.description" /></th>
 						<th><spring:message
+								code="eptsharmonization.encountertype.name" /></th>
+						<th><spring:message
 								code="eptsharmonization.form.pdserver.name" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.pdserver.description" /></th>
+						<th><spring:message
+								code="eptsharmonization.encountertype.name" /></th>
 						<th><spring:message code="general.id" /></th>
 						<th><spring:message code="general.uuid" /></th>
 						<th style="text-align: center; width: 10%;"><spring:message
 								code="eptsharmonization.proceedHarmonization" /></th>
 					</tr>
 					<c:forEach var="item"
-						items="${differentNameAndSameUUIDAndID.items}"
+						items="${differentNameAndSameUUIDAndIDForm.items}"
 						varStatus="itemsRow">
 						<tr class="confirm-each-row-harmonization">
-							<td valign="top">${item.value[0].encounterType.name}</td>
-							<td valign="top">${item.value[0].encounterType.description}</td>
-							<td valign="top">${item.value[1].encounterType.name}</td>
-							<td valign="top">${item.value[1].encounterType.description}</td>
-							<td valign="top">${item.value[0].encounterType.id}</td>
+							<td valign="top">${item.value[0].form.name}</td>
+							<td valign="top">${item.value[0].form.description}</td>
+							<c:choose>
+								<c:when test="${not empty item.value[0].form.encounterType.name}">
+									<td>${item.value[0].form.encounterType.name}</td>
+								</c:when>
+								<c:otherwise>
+									<td>N/A</td>
+								</c:otherwise>
+							</c:choose>
+							<td valign="top">${item.value[1].form.name}</td>
+							<td valign="top">${item.value[1].form.description}</td>
+							<c:choose>
+								<c:when test="${not empty item.value[1].form.encounterType.name}">
+									<td>${item.value[1].form.encounterType.name}</td>
+								</c:when>
+								<c:otherwise>
+									<td>N/A</td>
+								</c:otherwise>
+							</c:choose>
+							<td valign="top">${item.value[0].form.id}</td>
 							<td valign="top">${item.key}</td>
 							<td style="text-align: center;"><spring:bind
 									path="items[${itemsRow.index}].selected">
@@ -59,7 +79,7 @@
 			<div class="submit-btn" align="center">
 				<input type="submit"
 					value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
-					name="processHarmonizationStep2" id="btn-partialHarmonization" />
+					name="processHarmonizationStep2" id="btn-partialHarmonization-step3" />
 			</div>
 		</springform:form>
 	</c:if>
@@ -68,7 +88,7 @@
 
 $(document).ready(function () {
    
-   $("#btn-partialHarmonization").click(function (event) {
+   $("#btn-partialHarmonization-step3").click(function (event) {
    
       if(isFormValid()){
       	return true;
@@ -94,7 +114,7 @@ $(document).ready(function () {
 				item.classList.remove("errorTD");
 			}
 		});
-		var divErrorMsg = document.querySelector("#error_msg");
+		var divErrorMsg = document.querySelector("#error_msg_SelectAllToProceed");
 		if (atLeastOneNotSelected) {
 			divErrorMsg.hidden = "";
 		} else {

@@ -483,7 +483,7 @@
                <column name="retired_by" type="int" />
                <column name="date_retired" type="DATETIME" />
                <column name="retired_reason" type="varchar(255)" />
-               <column name="uuid" type="char(38)" />
+               <column name="uuid" type="CHAR(38)" />
           </createTable>
           <modifySql dbms="mssql">
                <replace replace="CHAR(38)"
@@ -525,7 +525,7 @@
                <column name="retired_by" type="int" />
                <column name="date_retired" type="DATETIME" />
                <column name="retired_reason" type="varchar(255)" />
-               <column name="uuid" type="char(38)" />
+               <column name="uuid" type="varchar(50)" />
           </createTable>
           <modifySql dbms="mssql">
                <replace replace="CHAR(38)"

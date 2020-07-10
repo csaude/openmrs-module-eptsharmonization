@@ -95,10 +95,9 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     dataImporter.importData("location-tags.xml");
     log.info(" _location_tag metadata imported");
 
-    // FIXME: uncomment before proceed commiting
-    //    log.info("Importing _concept metadata");
-    //    dataImporter.importData("concepts.xml");
-    //    log.info("_concept metadata imported");
+    log.info("Importing _concept metadata");
+    dataImporter.importData("concepts.xml");
+    log.info("_concept metadata imported");
 
     StringBuilder sb =
         new StringBuilder(

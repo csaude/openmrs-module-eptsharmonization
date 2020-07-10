@@ -11,12 +11,15 @@
  */
 package org.openmrs.module.eptsharmonization.api;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.Form;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.FormDTO;
+import org.openmrs.module.eptsharmonization.api.model.HtmlForm;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured
@@ -35,11 +38,7 @@ public interface HarmonizationFormService extends OpenmrsService {
 
   public List<FormDTO> findAllProductionFormsNotContainedInMetadataServer() throws APIException;
 
-  public List<FormDTO> findAllMetadataServerFormsPartialEqualsToProductionServer()
-      throws APIException;
-
-  public List<FormDTO> findAllProductionServerFormsPartialEqualsToMetadataServer()
-      throws APIException;
+  public List<Form> findAllFormsFromMetadataServer() throws APIException;
 
   public Map<String, List<FormDTO>> findAllFormsWithDifferentNameAndSameUUIDAndID()
       throws APIException;
@@ -56,7 +55,17 @@ public interface HarmonizationFormService extends OpenmrsService {
 
   public int getNumberOfAffectedFormResourses(Form form);
 
-  public List<Form> findPDSFormsNotExistsInMDServer() throws APIException;
+  public int getNumberOfAffectedFormFilters(Form form);
+
+  public int getNumberOfAffectedFormEntryXsn(Form form);
+
+  public Form findRelatedFormMetadataFromTablMDSForm(Form form);
+
+  public Form findRelatedFormMetadataFromTableForm(Form form);
+
+  public List<Form> findMDSFormsWithoutEncountersReferencesInPDServer();
+
+  public List<FormDTO> findUnusedProductionServerForms();
 
   public void saveFormsWithDifferentNames(Map<String, List<FormDTO>> forms) throws APIException;
 
@@ -65,7 +74,17 @@ public interface HarmonizationFormService extends OpenmrsService {
   public void saveFormsWithDifferentIDAndEqualUUID(Map<String, List<FormDTO>> forms)
       throws APIException;
 
-  public void saveManualMapping(Map<Form, Form> forms) throws APIException;
+  public void saveManualMapping(Map<Form, Form> forms)
+      throws UUIDDuplicationException, SQLException;
 
   public void deleteNewFormsFromPDS(List<FormDTO> forms) throws APIException;
+
+  public Map<String, List<HtmlForm>> findHtmlFormWithDifferentFormAndEqualUuid();
+
+  public List<HtmlForm> findHtmlFormMetadataServerNotPresentInProductionServer();
+
+  public void saveHtmlFormsWithDifferentFormNamesAndEqualHtmlFormUuid(
+      Map<String, List<HtmlForm>> data);
+
+  public void saveNewHtmlFormsFromMetadataServer(List<HtmlForm> htmlForms);
 }

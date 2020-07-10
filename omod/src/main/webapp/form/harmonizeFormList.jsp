@@ -12,12 +12,32 @@
 	<spring:message code="eptsharmonization.form.harmonize" />
 </h2>
 <br />
-<div id="error_msg" hidden="hidden">
-	<span> <spring:message
-			code="eptsharmonization.confirmAllHarmonization" /></span> <br />
+<c:if test="${not empty mdsFormsWithoutEncounterReferences}">
+	<div id="error_msg" style="padding: 8px; font-size: 16px; font-weight: bold; text-align: left;">
+		<b><span> <spring:message
+			code="eptsharmonization.form.processAllHarmonizationOfEncounterBeforeYouProceed" /></span> <br />
+		</b>
+	</div>
+</c:if>
+<div id="error_msg_invalidEncounterType" hidden="hidden">
+	<div id="error_msg">
+		<span> <spring:message
+			code="eptsharmonization.form.processAllHarmonizationOfEncounterBeforeYouProceed" /></span> <br />
+	</div>
 </div>
+<div id="error_msg_SelectAllToProceed" hidden="hidden">
+	<div id="error_msg">
+		<span> <spring:message
+			code="eptsharmonization.confirmAllHarmonization" /></span> <br />
+	</div>
+</div>
+<c:if test="${not empty errorProcessingManualMapping}">
+	<div id="error_msg">
+		<span>${errorProcessingManualMapping}</span>
+	</div>
+</c:if>
 <c:if test="${not empty harmonizedFormSummary}">
-	<div id="openmrs_msgForm">
+	<div id="openmrs_msg">
 		<b> <spring:message
 				code="eptsharmonization.summay.of.already.harmonized.mapping" /> :
 		</b><br />
@@ -27,7 +47,7 @@
 			<br />
 		</c:forEach>
 
-		<form method="post" action="harmonizeExportForms.form">
+		<form method="post" action="harmonizeFormExportLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
 					style="width: 8.6em; padding: 6px; font-size: 6pt;"
@@ -40,7 +60,7 @@
 </c:if>
 
 <c:if
-	test="${isFirstStepFormHarmonizationCompleted && isUUIDsAndIDsFormHarmonized && isNamesFormHarmonized && !hasSecondStepFormHarmonization}">
+	test="${isFirstStepFormHarmonizationCompleted && isUUIDsAndIDsFormHarmonized && isNamesFormHarmonized && !hasSecondStepFormHarmonization && hasFirstStepHtmlFormComplete && hasSecondStepHtmlFormComplete}">
 	<div id="openmrs_msg">
 		<b> <spring:message
 				code="eptsharmonization.form.harmonizationFinish" />
@@ -48,7 +68,22 @@
 	</div>
 </c:if>
 
-<%@ include file="formHarmonizationStep-1.jsp"%>
+<%@ include file="formHarmonizationStep-0.jsp"%>
 
+<c:if test="${empty mdsFormsWithoutEncounterReferences}">
+	<%@ include file="formHarmonizationStep-1.jsp"%>
+	<%@ include file="formHarmonizationStep-2.jsp"%>
+	<%@ include file="formHarmonizationStep-3.jsp"%>
+	
+		<c:if test="${not hasFirstStepHtmlFormComplete}">
+			<%@ include file="formHarmonizationStep-5.jsp"%>
+		</c:if>
+		
+		<c:if test="${hasFirstStepHtmlFormComplete && not hasSecondStepHtmlFormComplete}">
+			<%@ include file="formHarmonizationStep-6.jsp"%>
+		</c:if>
+		
+	<%@ include file="formHarmonizationStep-4.jsp"%>
+</c:if>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

@@ -127,10 +127,6 @@ public class EptsHarmonizationFormLoader {
               "retired_reason", getOptionalStringValue(row.getCell(16)), FormDataTypes.STRING));
       rowList.add(
           new FormData("uuid", getRequiredStringValue(row.getCell(17)), FormDataTypes.STRING));
-      // rowList.add(new FormData("template", getOptionalStringValue(row.getCell(7)),
-      // FormDataTypes.XML));
-      // rowList.add(new FormData("xslt", getOptionalStringValue(row.getCell(8)),
-      // FormDataTypes.XML));
 
       formData.add(rowList);
     }
@@ -150,6 +146,8 @@ public class EptsHarmonizationFormLoader {
 
       List<FormData> rowList = new ArrayList<>();
 
+      // TODO: Waiting for the final version of htmlformentry_html_form @Eurico is
+      // working on to have it organized
       int skipID = getRequiredNumericValue(row.getCell(0));
 
       if (skipID == 3
@@ -219,7 +217,8 @@ public class EptsHarmonizationFormLoader {
   private static Sheet getHtmlFormResource() throws IOException {
 
     InputStream excelFileToRead =
-        OpenmrsClassLoader.getInstance().getResourceAsStream("htmlformentry_html_form.xls");
+        OpenmrsClassLoader.getInstance()
+            .getResourceAsStream("htmlformentry_html_form_FGH_NAMACURRA.xls");
     XSSFWorkbook xssfWBook = new XSSFWorkbook(excelFileToRead);
 
     return xssfWBook.getSheetAt(0);
