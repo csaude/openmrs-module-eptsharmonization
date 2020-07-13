@@ -370,7 +370,7 @@ public class HarmonizePatientIdentifierTypesController {
 
     ByteArrayOutputStream outputStream =
         PatientIdentifierTypesHarmonizationCSVLog.exportPatientIdentifierTypeLogs(
-            defaultLocationName, list);
+            defaultLocationName, list, getNotSwappablePatientIdentifierTypes());
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",

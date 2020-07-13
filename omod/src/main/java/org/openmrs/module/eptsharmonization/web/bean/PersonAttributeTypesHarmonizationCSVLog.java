@@ -295,7 +295,9 @@ public class PersonAttributeTypesHarmonizationCSVLog {
   }
 
   public static ByteArrayOutputStream exportPersonAttributeTypeLogs(
-      String defaultLocationName, List<PersonAttributeTypeDTO> data) {
+      String defaultLocationName,
+      List<PersonAttributeTypeDTO> data,
+      List<PersonAttributeType> mdsPersonAttributeTypes) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -342,6 +344,32 @@ public class PersonAttributeTypesHarmonizationCSVLog {
           throw new APIException("Unable to write record to CSV: " + e.getMessage());
         }
       }
+
+      printer.println();
+      printer.println();
+      printer.print("Person Attribute Types From Metadata Server ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+
+      for (PersonAttributeType personAttributeType : mdsPersonAttributeTypes) {
+
+        try {
+          printer.print(
+              String.format(
+                  "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
+                  personAttributeType.getId(),
+                  personAttributeType.getName(),
+                  personAttributeType.getDescription(),
+                  personAttributeType.getUuid()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+
       printer.flush();
     } catch (Exception e) {
       e.printStackTrace();

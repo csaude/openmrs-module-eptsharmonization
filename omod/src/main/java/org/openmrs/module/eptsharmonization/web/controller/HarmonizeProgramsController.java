@@ -332,7 +332,8 @@ public class HarmonizeProgramsController {
     }
 
     ByteArrayOutputStream outputStream =
-        ProgramsHarmonizationCSVLog.exportProgramLogs(defaultLocationName, list);
+        ProgramsHarmonizationCSVLog.exportProgramLogs(
+            defaultLocationName, list, getNotSwappablePrograms());
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",

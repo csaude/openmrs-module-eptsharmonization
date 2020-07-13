@@ -355,7 +355,7 @@ public class HarmonizePersonAttributeTypesController {
 
     ByteArrayOutputStream outputStream =
         PersonAttributeTypesHarmonizationCSVLog.exportPersonAttributeTypeLogs(
-            defaultLocationName, list);
+            defaultLocationName, list, getNotSwappablePersonAttributeTypes());
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",

@@ -360,7 +360,8 @@ public class HarmonizeProgramWorkflowsController {
     }
 
     ByteArrayOutputStream outputStream =
-        ProgramWorkflowsHarmonizationCSVLog.exportProgramWorkflowsLogs(defaultLocationName, list);
+        ProgramWorkflowsHarmonizationCSVLog.exportProgramWorkflowsLogs(
+            defaultLocationName, list, getNotSwappableProgramWorkflows());
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",

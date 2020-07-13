@@ -377,7 +377,7 @@ public class HarmonizeProgramWorkflowStatesController {
 
     ByteArrayOutputStream outputStream =
         ProgramWorkflowStatesHarmonizationCSVLog.exportProgramWorkflowStatesLogs(
-            defaultLocationName, list);
+            defaultLocationName, list, getNotSwappableProgramWorkflowStates());
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
