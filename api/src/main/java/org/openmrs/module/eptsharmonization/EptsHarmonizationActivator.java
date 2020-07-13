@@ -147,12 +147,14 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
       log.error("Loading _htmlformentry_html_form entries", e);
       throw new RuntimeException(e);
     }
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `program_workflow_state` ADD COLUMN `swappable` boolean default false");
+    sb =
+        new StringBuilder(
+            "ALTER TABLE `program_workflow_state` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `patient_identifier_type` ADD COLUMN `swappable` boolean default false");
+    sb =
+        new StringBuilder(
+            "ALTER TABLE `patient_identifier_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     HarmonizationUtils.onModuleActivator();
@@ -199,12 +201,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_htmlformentry_html_form`");
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_program_workflow_state`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_patient_identifier_type`");
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_program_workflow_state`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_patient_identifier_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     if (columnExists("encounter_type", "swappable")) {
