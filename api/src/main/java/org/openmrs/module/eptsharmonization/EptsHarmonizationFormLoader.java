@@ -162,9 +162,13 @@ public class EptsHarmonizationFormLoader {
           || skipID == 39
           || skipID == 40
           || skipID == 44
-          || skipID == 58) {
+          || skipID == 58
+          || skipID == 63
+          || skipID == 64
+          || skipID == 65) {
         continue;
       }
+
       rowList.add(
           new FormData("id", getRequiredNumericValue(row.getCell(0)), FormDataTypes.NUMBER));
       rowList.add(
@@ -197,7 +201,6 @@ public class EptsHarmonizationFormLoader {
       rowList.add(
           new FormData(
               "retired_reason", getOptionalStringValue(row.getCell(13)), FormDataTypes.STRING));
-
       formData.add(rowList);
     }
     return filterNonNullValues(formData);
@@ -218,7 +221,7 @@ public class EptsHarmonizationFormLoader {
 
     InputStream excelFileToRead =
         OpenmrsClassLoader.getInstance()
-            .getResourceAsStream("htmlformentry_html_form_FGH_NAMACURRA.xls");
+            .getResourceAsStream("all-htmlformentry_html_form_13072020.xls");
     XSSFWorkbook xssfWBook = new XSSFWorkbook(excelFileToRead);
 
     return xssfWBook.getSheetAt(0);

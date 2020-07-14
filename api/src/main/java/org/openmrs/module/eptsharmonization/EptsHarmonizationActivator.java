@@ -165,6 +165,7 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
   }
 
   private void deletePreviousHarmonizationLoadedDDLAndLiquibase() {
+
     StringBuilder sb = new StringBuilder("DROP TABLE IF EXISTS `_encounter_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
@@ -199,12 +200,12 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("DROP TABLE IF EXISTS `_htmlformentry_html_form`");
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_program_workflow_state`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("DROP TABLE IF EXISTS `_patient_identifier_type`");
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_program_workflow_state`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `_patient_identifier_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     if (columnExists("encounter_type", "swappable")) {
@@ -237,21 +238,17 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
-    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200402-1806';");
     if (columnExists("program_workflow_state", "swappable")) {
-      sb = new StringBuilder();
-      sb.append("ALTER TABLE `program_workflow_state` DROP `swappable`");
+      sb = new StringBuilder("ALTER TABLE `program_workflow_state` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
     if (columnExists("patient_identifier_type", "swappable")) {
-      sb = new StringBuilder();
-      sb.append("ALTER TABLE `patient_identifier_type` DROP `swappable`");
+      sb = new StringBuilder("ALTER TABLE `patient_identifier_type` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
 
-    sb = new StringBuilder();
-    sb.append("delete from liquibasechangelog where ID ='20200402-1806';");
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200402-1806';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb = new StringBuilder("delete from liquibasechangelog where ID ='20200423-0840';");
@@ -289,8 +286,7 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
             "delete from liquibasechangelog where ID ='eptsharmonization_20200626-1520';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("delete from liquibasechangelog where ID ='20200706-0945';");
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200706-0945';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     sb =
@@ -298,8 +294,7 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
             "delete from liquibasechangelog where ID ='eptsharmonization_20200701-1657';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("delete from liquibasechangelog where ID ='20200708-0930';");
+    sb = new StringBuilder("delete from liquibasechangelog where ID ='20200708-0930';");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
   }
 
