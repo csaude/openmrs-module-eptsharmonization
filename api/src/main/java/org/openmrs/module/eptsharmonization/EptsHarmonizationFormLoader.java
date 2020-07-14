@@ -145,30 +145,6 @@ public class EptsHarmonizationFormLoader {
       Row row = (Row) rows.next();
 
       List<FormData> rowList = new ArrayList<>();
-
-      // TODO: Waiting for the final version of htmlformentry_html_form @Eurico is
-      // working on to have it organized
-      int skipID = getRequiredNumericValue(row.getCell(0));
-
-      if (skipID == 3
-          || skipID == 12
-          || skipID == 19
-          || skipID == 28
-          || skipID == 29
-          || skipID == 32
-          || skipID == 35
-          || skipID == 36
-          || skipID == 38
-          || skipID == 39
-          || skipID == 40
-          || skipID == 44
-          || skipID == 58
-          || skipID == 63
-          || skipID == 64
-          || skipID == 65) {
-        continue;
-      }
-
       rowList.add(
           new FormData("id", getRequiredNumericValue(row.getCell(0)), FormDataTypes.NUMBER));
       rowList.add(
