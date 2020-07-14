@@ -21,6 +21,7 @@ import org.openmrs.Visit;
 import org.openmrs.VisitType;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /** It is a default implementation of {@link HarmonizationVisitTypeService}. */
 @Transactional
@@ -47,6 +49,8 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
 
   private VisitService visitService;
 
+  private AdministrationService adminService;
+
   @Autowired
   public void setVisitService(VisitService visitService) {
     this.visitService = visitService;
@@ -60,6 +64,11 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
   @Autowired
   public void setHarmonizationVisitTypeDao(HarmonizationVisitTypeDao harmonizationVisitTypeDao) {
     this.harmonizationVisitTypeDao = harmonizationVisitTypeDao;
+  }
+
+  @Autowired
+  public void setAdminService(AdministrationService adminService) {
+    this.adminService = adminService;
   }
 
   @Override
@@ -239,7 +248,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
         List<VisitTypeDTO> list = mapVisitTypes.get(uuid);
         VisitType pdsVisitType = list.get(0).getVisitType();
         VisitType mdsVisitType = list.get(1).getVisitType();
-        Integer mdsVisitTypeId = pdsVisitType.getVisitTypeId();
 
         VisitType foundPDS = visitService.getVisitType(mdsVisitType.getId());
         if (foundPDS != null && !foundPDS.getUuid().equals(mdsVisitType.getUuid())) {
@@ -254,12 +262,15 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
                   mdsVisitType.getId(),
                   mdsVisitType.getUuid(),
                   mdsVisitType.getName(),
-                  mdsVisitTypeId));
+                  mdsVisitType.getVisitTypeId()));
         }
         List<Visit> relatedVisits = harmonizationVisitTypeDao.findVisitsByVisitType(pdsVisitType);
         // Get a fresh copy from the database.
         pdsVisitType = visitService.getVisitType(pdsVisitType.getVisitTypeId());
         overwriteVisitType(pdsVisitType, mdsVisitType, relatedVisits);
+
+        // Update global properties mapping if any.
+        updateGPWithNewVisitTypeId(pdsVisitType.getVisitTypeId(), mdsVisitType.getVisitTypeId());
       }
 
     } catch (Exception e) {
@@ -295,6 +306,8 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
           Integer nextId = harmonizationVisitTypeDao.getNextVisitTypeId();
           harmonizationVisitTypeDao.updateVisitType(
               pdsVisitType, nextId, UUID.randomUUID().toString());
+
+          updateGPWithNewVisitTypeId(pdsVisitType.getVisitTypeId(), nextId);
           for (Visit visit : relatedVisits) {
             this.harmonizationVisitTypeDao.updateVisit(visit, nextId);
           }
@@ -382,6 +395,9 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
     List<Visit> relatedVisits = harmonizationVisitTypeDao.findVisitsByVisitType(toBeMoved);
     Integer nextId = harmonizationVisitTypeDao.getNextVisitTypeId();
     updateToGivenId(toBeMoved, nextId, relatedVisits);
+
+    // Update the global property mapping if any
+    updateGPWithNewVisitTypeId(toBeMoved.getVisitTypeId(), nextId);
   }
 
   private void saveNewVisitTypeFromDTO(VisitTypeDTO visitTypeDTO) throws APIException {
@@ -403,7 +419,19 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
           this.harmonizationVisitTypeDao.findVisitsByVisitType(visitTypeFromDTO);
       Integer nextId = this.harmonizationVisitTypeDao.getNextVisitTypeId();
       this.updateToGivenId(found, nextId, relatedVisits);
+      updateGPWithNewVisitTypeId(found.getVisitTypeId(), nextId);
     }
     this.harmonizationVisitTypeDao.insertVisitType(visitTypeFromDTO);
+  }
+
+  private void updateGPWithNewVisitTypeId(Integer oldVisitTypeId, Integer newVisitTypeId) {
+    final String V_TO_E_GP = "visits.encounterTypeToVisitTypeMapping";
+    String gpValue = adminService.getGlobalProperty(V_TO_E_GP);
+    if (!StringUtils.isEmpty(gpValue)) {
+      String toReplace = ":" + oldVisitTypeId;
+      String replacement = ":" + newVisitTypeId;
+      gpValue = gpValue.replaceAll(toReplace, replacement);
+      adminService.setGlobalProperty(V_TO_E_GP, gpValue);
+    }
   }
 }
