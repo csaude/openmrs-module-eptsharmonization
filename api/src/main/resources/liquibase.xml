@@ -527,10 +527,6 @@
                <column name="retired_reason" type="varchar(255)" />
                <column name="uuid" type="varchar(50)" />
           </createTable>
-          <modifySql dbms="mssql">
-               <replace replace="CHAR(38)"
-                    with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
-          </modifySql>
      </changeSet>
 	
 	<changeSet author="Hamilton" id="20200706-0945">
