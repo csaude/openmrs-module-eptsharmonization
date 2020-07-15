@@ -159,48 +159,5 @@
 			</table>
 		</fieldset>
 		<br />
-		<br />
-		<div class="box">
-			<table cellspacing="0" border="0" style="width: 100%">
-				<tr>
-					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.program.from.metadataServer" /></th>
-					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.program.created.OnProductionServer" /></th>
-				</tr>
-				<tr>
-					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="general.name" /></th>
-					<th><spring:message code="general.description" /></th>
-					<th><spring:message code="general.uuid" /></th>
-					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="general.name" /></th>
-					<th><spring:message code="general.description" /></th>
-					<th><spring:message code="general.uuid" /></th>
-				</tr>
-				<c:forEach var="item" items="${notSwappableProgramsClone}"
-					varStatus="itemStatus">
-					<tr>
-						<td valign="top" align="center">${item.id}</td>
-						<td valign="top">${item.name}</td>
-						<td valign="top">${item.description}</td>
-						<td valign="top">${item.uuid}</td>
-						<c:choose>
-							<c:when
-								test="${not empty swappableProgramsClone[itemStatus.index]}">
-								<td>${swappableProgramsClone[itemStatus.index].id}</td>
-								<td>${swappableProgramsClone[itemStatus.index].name}</td>
-								<td>${swappableProgramsClone[itemStatus.index].description}</td>
-								<td>${swappableProgramsClone[itemStatus.index].uuid}</td>
-							</c:when>
-							<c:otherwise>
-								<td colspan="4"></td>
-							</c:otherwise>
-						</c:choose>
-					</tr>
-				</c:forEach>
-			</table>
-		</div>
-		<br />
 	</c:if>
 </c:if>

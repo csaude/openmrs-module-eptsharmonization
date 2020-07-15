@@ -2,11 +2,13 @@ package org.openmrs.module.eptsharmonization.web.delegate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.openmrs.Program;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
@@ -142,6 +144,7 @@ public class HarmonizeProgramsDelegate {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void updateProductionToExportList(HarmonizationData productionItemsToExport) {
 
     HarmonizationData newItemsToExport =
@@ -150,6 +153,11 @@ public class HarmonizeProgramsDelegate {
 
     List<HarmonizationItem> itemsToRemove =
         getConvertedData(DTOUtils.fromPrograms(EXECUTED_PROGRAMS_MANUALLY_CACHE)).getItems();
+
+    List<HarmonizationItem> items = productionItemsToExport.getItems();
+
+    BeanComparator comparator = new BeanComparator("value.program.id");
+    Collections.sort(items, comparator);
     productionItemsToExport.getItems().removeAll(itemsToRemove);
   }
 

@@ -7,12 +7,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.ProgramWorkflowState;
 import org.openmrs.api.context.Context;
@@ -456,22 +458,12 @@ public class HarmonizeProgramWorkflowStatesController {
 
   @ModelAttribute("swappableProgramWorkflowStates")
   public List<ProgramWorkflowStateDTO> getSwappableProgramWorkflowStates() {
-
-    List<ProgramWorkflowStateDTO> swappableProgramWorkflowStates = new ArrayList<>();
     List<ProgramWorkflowStateDTO> productionItemsToExport = getProductionItemsToExport();
     productionItemsToExport.addAll(
         HarmonizeProgramWorkflowStatesDelegate.PROGRAM_WORKFLOW_STATES_NOT_PROCESSED);
-    final List<ProgramWorkflowStateDTO> programWorkflowStates =
-        DTOUtils.fromProgramWorkflowStates(
-            this.harmonizationProgramWorkflowStateService.findAllSwappableProgramWorkflowStates());
-    for (ProgramWorkflowStateDTO programWorkflowState : programWorkflowStates) {
-      if (productionItemsToExport.contains(programWorkflowState)) {
-        swappableProgramWorkflowStates.add(programWorkflowState);
-      }
-    }
     harmonizationProgramWorkflowStateService.setProgramWorkflowAndConcept(
-        swappableProgramWorkflowStates, false);
-    return swappableProgramWorkflowStates;
+        productionItemsToExport, false);
+    return sortByName(productionItemsToExport);
   }
 
   @ModelAttribute("notSwappableProgramWorkflowStates")
@@ -481,10 +473,17 @@ public class HarmonizeProgramWorkflowStatesController {
             this.harmonizationProgramWorkflowStateService.findAllMDSProgramWorkflowStates());
     harmonizationProgramWorkflowStateService.setProgramWorkflowAndConcept(
         programWorkflowStates, true);
-    return programWorkflowStates;
+    return sortByName(programWorkflowStates);
   }
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + PROGRAM_WORKFLOWS_LIST + ".form");
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<ProgramWorkflowStateDTO> sortByName(List<ProgramWorkflowStateDTO> list) {
+    BeanComparator comparator = new BeanComparator("concept");
+    Collections.sort(list, comparator);
+    return list;
   }
 }

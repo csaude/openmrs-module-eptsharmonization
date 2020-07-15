@@ -6,12 +6,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
@@ -448,27 +450,26 @@ public class HarmonizePatientIdentifierTypesController {
 
   @ModelAttribute("swappablePatientIdentifierTypes")
   public List<PatientIdentifierType> getSwappablePatientIdentifierTypes() {
-    List<PatientIdentifierType> swappablePatientIdentifierTypes = new ArrayList<>();
     List<PatientIdentifierType> productionItemsToExport =
         DTOUtils.fromPatientIdentifierTypesDTOs(getProductionItemToExport());
     productionItemsToExport.addAll(
         HarmonizePatientIdentifierTypesDelegate.PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED);
-    final List<PatientIdentifierType> patientIdentifierTypes =
-        this.harmonizationPatientIdentifierTypeService.findAllSwappable();
-    for (PatientIdentifierType patientIdentifierType : patientIdentifierTypes) {
-      if (productionItemsToExport.contains(patientIdentifierType)) {
-        swappablePatientIdentifierTypes.add(patientIdentifierType);
-      }
-    }
-    return swappablePatientIdentifierTypes;
+    return sortByName(productionItemsToExport);
   }
 
   @ModelAttribute("notSwappablePatientIdentifierTypes")
   public List<PatientIdentifierType> getNotSwappablePatientIdentifierTypes() {
-    return this.harmonizationPatientIdentifierTypeService.findAllFromMDS();
+    return sortByName(this.harmonizationPatientIdentifierTypeService.findAllFromMDS());
   }
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + PATIENT_IDENTIFIER_TYPES_LIST + ".form");
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<PatientIdentifierType> sortByName(List<PatientIdentifierType> list) {
+    BeanComparator comparator = new BeanComparator("name");
+    Collections.sort(list, comparator);
+    return list;
   }
 }

@@ -6,12 +6,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Program;
 import org.openmrs.api.context.Context;
@@ -403,25 +405,24 @@ public class HarmonizeProgramsController {
 
   @ModelAttribute("swappablePrograms")
   public List<Program> getSwappablePrograms() {
-
-    List<Program> swappablePrograms = new ArrayList<>();
     List<Program> productionItemsToExport = DTOUtils.fromProgramDTOs(getProductionItemsToExport());
     productionItemsToExport.addAll(HarmonizeProgramsDelegate.PROGRAMS_NOT_PROCESSED);
-    final List<Program> programs = this.harmonizationProgramService.findAllSwappablePrograms();
-    for (Program program : programs) {
-      if (productionItemsToExport.contains(program)) {
-        swappablePrograms.add(program);
-      }
-    }
-    return swappablePrograms;
+    return sortByName(productionItemsToExport);
   }
 
   @ModelAttribute("notSwappablePrograms")
   public List<Program> getNotSwappablePrograms() {
-    return this.harmonizationProgramService.findAllMetadataPrograms();
+    return sortByName(this.harmonizationProgramService.findAllMetadataPrograms());
   }
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + PROGRAMS_LIST + ".form");
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Program> sortByName(List<Program> list) {
+    BeanComparator comparator = new BeanComparator("name");
+    Collections.sort(list, comparator);
+    return list;
   }
 }

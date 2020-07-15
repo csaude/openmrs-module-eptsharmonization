@@ -2,11 +2,13 @@ package org.openmrs.module.eptsharmonization.web.delegate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
@@ -152,6 +154,7 @@ public class HarmonizeProgramWorkflowsDelegate {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void updateProductionToExportList(HarmonizationData productionItemsToExport) {
 
     HarmonizationData newItemsToExport = getConvertedData(PROGRAM_WORKFLOWS_NOT_PROCESSED);
@@ -159,6 +162,11 @@ public class HarmonizeProgramWorkflowsDelegate {
 
     List<HarmonizationItem> itemsToRemove =
         getConvertedData(EXECUTED_PROGRAM_WORKFLOWS_MANUALLY_CACHE).getItems();
+
+    List<HarmonizationItem> items = productionItemsToExport.getItems();
+
+    BeanComparator comparator = new BeanComparator("value.programWorkflow.id");
+    Collections.sort(items, comparator);
     productionItemsToExport.getItems().removeAll(itemsToRemove);
   }
 

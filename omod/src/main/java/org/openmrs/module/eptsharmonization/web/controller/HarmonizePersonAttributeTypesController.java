@@ -6,12 +6,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
@@ -430,27 +432,28 @@ public class HarmonizePersonAttributeTypesController {
 
   @ModelAttribute("swappablePersonAttributeTypes")
   public List<PersonAttributeType> getSwappablePersonAttributeTypes() {
-    List<PersonAttributeType> swappablePersonAttributeTypes = new ArrayList<>();
     List<PersonAttributeType> productionItemsToExport =
         DTOUtils.fromPersonAttributeTypesDTOs(getProductionItemToExport());
     productionItemsToExport.addAll(
         HarmonizePersonAttributeTypeDelegate.PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED);
-    final List<PersonAttributeType> personAttributeTypes =
-        this.harmonizationPersonAttributeTypeService.findAllSwappablePersonAttributeTypes();
-    for (PersonAttributeType personAttributeType : personAttributeTypes) {
-      if (productionItemsToExport.contains(personAttributeType)) {
-        swappablePersonAttributeTypes.add(personAttributeType);
-      }
-    }
-    return swappablePersonAttributeTypes;
+
+    return sortByName(productionItemsToExport);
   }
 
   @ModelAttribute("notSwappablePersonAttributeTypes")
   public List<PersonAttributeType> getNotSwappablePersonAttributeTypes() {
-    return this.harmonizationPersonAttributeTypeService.findAllMetadataPersonAttributeTypes();
+    return sortByName(
+        this.harmonizationPersonAttributeTypeService.findAllMetadataPersonAttributeTypes());
   }
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + PERSON_ATTRIBUTE_TYPES_LIST + ".form");
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<PersonAttributeType> sortByName(List<PersonAttributeType> list) {
+    BeanComparator comparator = new BeanComparator("name");
+    Collections.sort(list, comparator);
+    return list;
   }
 }
