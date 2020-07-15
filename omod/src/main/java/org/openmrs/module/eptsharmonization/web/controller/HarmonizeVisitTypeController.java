@@ -421,9 +421,10 @@ public class HarmonizeVisitTypeController {
     Map<VisitTypeDTO, Integer> productionItemsToExport =
         (Map) session.getAttribute("mappableVisitTypes");
 
+    List<VisitType> existingVisitTypes = visitService.getAllVisitTypes();
     ByteArrayOutputStream outputStream =
         VisitTypeHarmonizationCSVLog.exportVisitTypeLogs(
-            defaultLocation, new ArrayList<>(productionItemsToExport.keySet()));
+            defaultLocation, new ArrayList<>(productionItemsToExport.keySet()), existingVisitTypes);
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",

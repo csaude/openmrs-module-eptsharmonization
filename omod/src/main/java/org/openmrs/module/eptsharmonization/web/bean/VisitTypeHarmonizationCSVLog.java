@@ -16,6 +16,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVStrategy;
 import org.openmrs.VisitType;
 import org.openmrs.api.APIException;
+import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 
 public class VisitTypeHarmonizationCSVLog {
@@ -287,7 +288,9 @@ public class VisitTypeHarmonizationCSVLog {
   }
 
   public static ByteArrayOutputStream exportVisitTypeLogs(
-      String defaultLocationName, List<VisitTypeDTO> data) {
+      String defaultLocationName,
+      List<VisitTypeDTO> visitTypesForReview,
+      List<VisitType> existingVisitTypes) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -315,29 +318,44 @@ public class VisitTypeHarmonizationCSVLog {
           "===============================================================================================================================");
       printer.println();
       printer.println();
+      List<VisitType> visitTypes = DTOUtils.fromVisitTypeDTOs(visitTypesForReview);
+      printVisitTypes(printer, visitTypes);
+      printer.println();
+      printer.println();
 
-      for (VisitTypeDTO dto : data) {
-
-        VisitType visitType = dto.getVisitType();
-        try {
-          printer.print(
-              String.format(
-                  "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
-                  visitType.getId(),
-                  visitType.getName(),
-                  visitType.getDescription(),
-                  visitType.getUuid()));
-          printer.println();
-        } catch (Exception e) {
-          e.printStackTrace();
-          throw new APIException("Unable to write record to CSV: " + e.getMessage());
-        }
-      }
+      printer.print("Existing Visit Types ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+      printer.println();
+      printVisitTypes(printer, existingVisitTypes);
       printer.flush();
     } catch (Exception e) {
       e.printStackTrace();
       throw new APIException("Unable to build OutputStream for CSV: " + e.getMessage());
     }
     return outputStream;
+  }
+
+  private static CSVPrinter printVisitTypes(CSVPrinter printer, List<VisitType> visitTypes) {
+    try {
+      printer.print("ID, NAME, DESCRIPTION, UUID");
+      printer.println();
+      for (VisitType visitType : visitTypes) {
+        printer.print(
+            String.format(
+                "%s, %s, %s, %s",
+                visitType.getId(),
+                visitType.getName(),
+                visitType.getDescription(),
+                visitType.getUuid()));
+        printer.println();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new APIException("Unable to write record to CSV: " + e.getMessage());
+    }
+    return printer;
   }
 }
