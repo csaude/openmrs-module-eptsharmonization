@@ -126,7 +126,7 @@ td {
 <c:if test="${not empty mappableVisitTypes}">
 	<br />
 	<b class="boxHeader"><spring:message
-			code="eptsharmonization.visitType.defineNewMappings" /></b>
+			code="eptsharmonization.visittype.defineNewMappings" /></b>
 	<fieldset>
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
