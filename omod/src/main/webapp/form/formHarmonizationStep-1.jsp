@@ -92,7 +92,7 @@
 		</c:if>
 			<div class="submit-btn" align="center">
 				<input type="submit"
-					value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
+					value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
 					name="processHarmonizationStep1"  id="btn-first-step-harmonization" />
 			</div>
 	</form>

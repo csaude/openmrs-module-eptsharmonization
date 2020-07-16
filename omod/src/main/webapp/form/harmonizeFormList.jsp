@@ -50,7 +50,7 @@
 		<form method="post" action="harmonizeFormExportLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
-					style="width: 8.6em; padding: 6px; font-size: 6pt;"
+					style="width: 14.10em; padding: 1px; font-size: 8pt;"
 					value='<spring:message code="eptsharmonization.form.harmonized.viewLog"/>'
 					name="harmonizeAllForms" />
 			</div>

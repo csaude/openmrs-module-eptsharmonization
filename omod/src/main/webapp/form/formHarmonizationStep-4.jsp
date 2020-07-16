@@ -243,7 +243,7 @@
 							<form method="post" action="processHarmonizationStep4.form">
 								<div class="submit-btn" align="center">
 									<input type="submit"
-										value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
+										value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
 										name="processHarmonizationStep4" />
 								</div>
 							</form>
