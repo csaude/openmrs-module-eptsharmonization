@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
@@ -25,6 +26,7 @@ import org.openmrs.Form;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
@@ -46,20 +48,23 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
   private EncounterService encounterService;
   private HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO;
 
+  private static final String ENCOUNTER_TYPE_TO_VISIT_TYPE_MAPPING_GLOBAL_PROPERTY =
+      "visits.encounterTypeToVisitTypeMapping";
+
   @Autowired
   public void setHarmonizationDAO(HarmonizationServiceDAO harmonizationDAO) {
     this.harmonizationDAO = harmonizationDAO;
   }
 
   @Autowired
-  public void setHarmonizationEncounterTypeServiceDAO(
-      HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO) {
-    this.harmonizationEncounterTypeServiceDAO = harmonizationEncounterTypeServiceDAO;
+  public void setEncounterService(EncounterService encounterService) {
+    this.encounterService = encounterService;
   }
 
   @Autowired
-  public void setEncounterService(EncounterService encounterService) {
-    this.encounterService = encounterService;
+  public void setHarmonizationEncounterTypeServiceDAO(
+      HarmonizationEncounterTypeServiceDAO harmonizationEncounterTypeServiceDAO) {
+    this.harmonizationEncounterTypeServiceDAO = harmonizationEncounterTypeServiceDAO;
   }
 
   @Override
@@ -415,6 +420,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
             this.harmonizationEncounterTypeServiceDAO.saveNotSwappableEncounterType(
                 mdsEncounterType);
           }
+          this.updateEncounterToVisitMappingGlobalPropertiy(foundPDS, mdsEncounterType);
         }
       }
     } finally {
@@ -481,8 +487,9 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       boolean swappable,
       List<Encounter> relatedEncounters,
       List<Form> relatedForms) {
-    this.harmonizationEncounterTypeServiceDAO.updateEncounterType(
-        encounterTypeId, encounterType, swappable);
+    EncounterType updated =
+        this.harmonizationEncounterTypeServiceDAO.updateEncounterType(
+            encounterTypeId, encounterType, swappable);
 
     for (Form form : relatedForms) {
       this.harmonizationEncounterTypeServiceDAO.updateForm(form, encounterTypeId);
@@ -490,6 +497,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     for (Encounter encounter : relatedEncounters) {
       this.harmonizationEncounterTypeServiceDAO.updateEncounter(encounter, encounterTypeId);
     }
+    this.updateEncounterToVisitMappingGlobalPropertiy(encounterType, updated);
   }
 
   private void updateToNextAvailableID(
@@ -502,6 +510,52 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     for (Encounter encounter : relatedEncounters) {
       this.harmonizationEncounterTypeServiceDAO.updateEncounter(
           encounter, updated.getEncounterTypeId());
+    }
+    this.updateEncounterToVisitMappingGlobalPropertiy(encounterType, updated);
+  }
+
+  private void updateEncounterToVisitMappingGlobalPropertiy(
+      EncounterType sourceEType, EncounterType targetEType) {
+    this.harmonizationDAO.evictCache();
+    String globalProperty =
+        Context.getAdministrationService()
+            .getGlobalProperty(ENCOUNTER_TYPE_TO_VISIT_TYPE_MAPPING_GLOBAL_PROPERTY);
+
+    StringTokenizer stringTokenizer = new StringTokenizer(globalProperty, ",");
+    boolean isTokenFound = false;
+    while (stringTokenizer.hasMoreElements()) {
+      String token = (String) stringTokenizer.nextElement();
+      String[] split = token.split(":");
+
+      if (sourceEType.getId().equals(Integer.valueOf(split[0].trim()))) {
+        isTokenFound = true;
+        break;
+      }
+    }
+    if (isTokenFound) {
+      String replacement = "";
+      stringTokenizer = new StringTokenizer(globalProperty, ",");
+
+      while (stringTokenizer.hasMoreElements()) {
+        String token = (String) stringTokenizer.nextElement();
+        String[] split = token.split(":");
+
+        if (sourceEType.getId().equals(Integer.valueOf(split[0].trim()))) {
+          split[0] = String.valueOf(targetEType.getId());
+        }
+        replacement +=
+            new StringBuilder()
+                .append(split[0].trim())
+                .append(":")
+                .append(split[1].trim())
+                .append(", ")
+                .toString();
+      }
+      if (!replacement.isEmpty()) {
+        replacement = replacement.substring(0, replacement.length() - 2);
+      }
+      Context.getAdministrationService()
+          .setGlobalProperty(ENCOUNTER_TYPE_TO_VISIT_TYPE_MAPPING_GLOBAL_PROPERTY, replacement);
     }
   }
 }
