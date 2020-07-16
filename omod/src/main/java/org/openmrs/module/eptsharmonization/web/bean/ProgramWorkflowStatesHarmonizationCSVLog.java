@@ -230,7 +230,7 @@ public class ProgramWorkflowStatesHarmonizationCSVLog {
           try {
             printer.print(
                 String.format(
-                    "ProgramWorkflowState ID:{%s}, STATE:'%s', FLOW:'%s', PROGRAM:'%s', UUID:%s  Updated to ProgramWorkflowState ID:{%s}, STATE:'%s', FLOW:'%s', PROGRAM:'%s', UUID:%s ",
+                    "ProgramWorkflowState ID:{%s}, STATE:'%s', FLOW:'%s', PROGRAM:'%s', UUID:%s  Updated to ProgramWorkflowState ID:{%s}, STATE:'%s', FLOW:'%s', PROGRAM:'%s', UUID:'%s' ",
                     pdsServer.getId(),
                     pdsServer.getConcept(),
                     pdsServer.getFlowConcept(),
@@ -304,7 +304,9 @@ public class ProgramWorkflowStatesHarmonizationCSVLog {
   }
 
   public static ByteArrayOutputStream exportProgramWorkflowStatesLogs(
-      String defaultLocationName, List<ProgramWorkflowStateDTO> data) {
+      String defaultLocationName,
+      List<ProgramWorkflowStateDTO> data,
+      List<ProgramWorkflowStateDTO> mdsProgramWorkflows) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -334,16 +336,43 @@ public class ProgramWorkflowStatesHarmonizationCSVLog {
       printer.println();
       printer.println();
 
-      for (ProgramWorkflowStateDTO programWorkflow : data) {
+      for (ProgramWorkflowStateDTO programWorkflowState : data) {
 
         try {
           printer.print(
               String.format(
-                  "ID:%s, PROGRAM:'%s', CONCEPT:'%s', UUID:%s",
-                  programWorkflow.getId(),
-                  programWorkflow.getFlowProgram(),
-                  programWorkflow.getConcept(),
-                  programWorkflow.getUuid()));
+                  "ID:%s, STATE:'%s', FLOW:'%s', PROGRAM:'%s', UUID:'%s'",
+                  programWorkflowState.getId(),
+                  programWorkflowState.getConcept(),
+                  programWorkflowState.getFlowConcept(),
+                  programWorkflowState.getFlowProgram(),
+                  programWorkflowState.getUuid()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+
+      printer.println();
+      printer.println();
+      printer.print("Program Workflow States From Metadata Server ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+
+      for (ProgramWorkflowStateDTO programWorkflowState : mdsProgramWorkflows) {
+
+        try {
+          printer.print(
+              String.format(
+                  "ID:%s, STATE:'%s', FLOW:'%s', PROGRAM:'%s', UUID:'%s'",
+                  programWorkflowState.getId(),
+                  programWorkflowState.getConcept(),
+                  programWorkflowState.getFlowConcept(),
+                  programWorkflowState.getFlowProgram(),
+                  programWorkflowState.getUuid()));
           printer.println();
         } catch (Exception e) {
           e.printStackTrace();

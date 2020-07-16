@@ -339,7 +339,9 @@ public class PatientIdentifierTypesHarmonizationCSVLog {
   }
 
   public static ByteArrayOutputStream exportPatientIdentifierTypeLogs(
-      String defaultLocationName, List<PatientIdentifierTypeDTO> data) {
+      String defaultLocationName,
+      List<PatientIdentifierTypeDTO> data,
+      List<PatientIdentifierType> mdsPatientIdentifierTypes) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -372,6 +374,31 @@ public class PatientIdentifierTypesHarmonizationCSVLog {
       for (PatientIdentifierTypeDTO dto : data) {
 
         PatientIdentifierType patientIdentifierType = dto.getPatientIdentifierType();
+        try {
+          printer.print(
+              String.format(
+                  "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
+                  patientIdentifierType.getId(),
+                  patientIdentifierType.getName(),
+                  patientIdentifierType.getDescription(),
+                  patientIdentifierType.getUuid()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+
+      printer.println();
+      printer.println();
+      printer.print("Patient Identifier Types From Metadata Server ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+
+      for (PatientIdentifierType patientIdentifierType : mdsPatientIdentifierTypes) {
+
         try {
           printer.print(
               String.format(

@@ -167,52 +167,5 @@
 			</table>
 		</fieldset>
 		<br />
-		<br />
-		<div class="box">
-			<table cellspacing="0" border="0" style="width: 100%">
-				<tr>
-					<th colspan="5" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.programworkflowstate.from.metadataServer" /></th>
-					<th colspan="5" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.programworkflowstate.created.OnProductionServer" /></th>
-				</tr>
-				<tr>
-					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="eptsharmonization.programworkflowstate.harmonize.concept" /></th>
-					<th><spring:message code="eptsharmonization.programworkflowstate.harmonize.flowConcept" /></th>
-					<th><spring:message code="eptsharmonization.programworkflowstate.harmonize.program" /></th>
-					<th><spring:message code="general.uuid" /></th>
-					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="eptsharmonization.programworkflowstate.harmonize.concept" /></th>
-					<th><spring:message code="eptsharmonization.programworkflowstate.harmonize.flowConcept" /></th>
-					<th><spring:message code="eptsharmonization.programworkflowstate.harmonize.program" /></th>
-					<th><spring:message code="general.uuid" /></th>
-				</tr>
-				<c:forEach var="item" items="${notSwappableProgramWorkflowStatesClone}"
-					varStatus="itemStatus">
-					<tr>
-						<td valign="top" align="center">${item.id}</td>
-						<td valign="top">${item.concept}</td>
-						<td valign="top">${item.flowConcept}</td>
-						<td valign="top">${item.flowProgram}</td>
-						<td valign="top">${item.uuid}</td>
-						<c:choose>
-							<c:when
-								test="${not empty swappableProgramWorkflowStatesClone[itemStatus.index]}">
-								<td>${swappableProgramWorkflowStatesClone[itemStatus.index].id}</td>
-								<td>${swappableProgramWorkflowStatesClone[itemStatus.index].concept}</td>
-								<td>${swappableProgramWorkflowStatesClone[itemStatus.index].flowConcept}</td>
-								<td>${swappableProgramWorkflowStatesClone[itemStatus.index].flowProgram}</td>
-								<td>${swappableProgramWorkflowStatesClone[itemStatus.index].uuid}</td>
-							</c:when>
-							<c:otherwise>
-								<td colspan="6"></td>
-							</c:otherwise>
-						</c:choose>
-					</tr>
-				</c:forEach>
-			</table>
-		</div>
-		<br />
 	</c:if>
 </c:if>

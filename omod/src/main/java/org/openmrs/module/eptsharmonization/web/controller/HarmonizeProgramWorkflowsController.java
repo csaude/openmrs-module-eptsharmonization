@@ -7,12 +7,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.api.context.Context;
@@ -360,7 +362,8 @@ public class HarmonizeProgramWorkflowsController {
     }
 
     ByteArrayOutputStream outputStream =
-        ProgramWorkflowsHarmonizationCSVLog.exportProgramWorkflowsLogs(defaultLocationName, list);
+        ProgramWorkflowsHarmonizationCSVLog.exportProgramWorkflowsLogs(
+            defaultLocationName, list, getNotSwappableProgramWorkflows());
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
@@ -444,21 +447,11 @@ public class HarmonizeProgramWorkflowsController {
 
   @ModelAttribute("swappableProgramWorkflows")
   public List<ProgramWorkflowDTO> getSwappableProgramWorkflows() {
-
-    List<ProgramWorkflowDTO> swappableProgramWorkflows = new ArrayList<>();
     List<ProgramWorkflowDTO> productionItemsToExport = getProductionItemsToExport();
     productionItemsToExport.addAll(
         HarmonizeProgramWorkflowsDelegate.PROGRAM_WORKFLOWS_NOT_PROCESSED);
-    final List<ProgramWorkflowDTO> programWorkflows =
-        DTOUtils.fromProgramWorkflows(
-            this.harmonizationProgramWorkflowService.findAllSwappableProgramWorkflows());
-    for (ProgramWorkflowDTO programWorkflow : programWorkflows) {
-      if (productionItemsToExport.contains(programWorkflow)) {
-        swappableProgramWorkflows.add(programWorkflow);
-      }
-    }
-    harmonizationProgramWorkflowService.setProgramAndConceptNames(swappableProgramWorkflows, false);
-    return swappableProgramWorkflows;
+    harmonizationProgramWorkflowService.setProgramAndConceptNames(productionItemsToExport, false);
+    return sortByName(productionItemsToExport);
   }
 
   @ModelAttribute("notSwappableProgramWorkflows")
@@ -467,10 +460,17 @@ public class HarmonizeProgramWorkflowsController {
         DTOUtils.fromProgramWorkflows(
             this.harmonizationProgramWorkflowService.findAllMetadataProgramWorkflows());
     harmonizationProgramWorkflowService.setProgramAndConceptNames(programWorkflows, true);
-    return programWorkflows;
+    return sortByName(programWorkflows);
   }
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + PROGRAM_WORKFLOWS_LIST + ".form");
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<ProgramWorkflowDTO> sortByName(List<ProgramWorkflowDTO> list) {
+    BeanComparator comparator = new BeanComparator("concept");
+    Collections.sort(list, comparator);
+    return list;
   }
 }

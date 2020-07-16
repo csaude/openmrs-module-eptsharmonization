@@ -286,7 +286,7 @@ public class ProgramsHarmonizationCSVLog {
   }
 
   public static ByteArrayOutputStream exportProgramLogs(
-      String defaultLocationName, List<ProgramDTO> data) {
+      String defaultLocationName, List<ProgramDTO> data, List<Program> mdsPrograms) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -323,6 +323,30 @@ public class ProgramsHarmonizationCSVLog {
               String.format(
                   "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
                   program.getId(), program.getName(), program.getDescription(), program.getUuid()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+
+      printer.println();
+      printer.println();
+      printer.print("Programs From Metadata Server ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+
+      for (Program programs : mdsPrograms) {
+        try {
+          printer.print(
+              String.format(
+                  "ID:%s, NAME:'%s', DESCRIPTION:'%s', UUID:%s",
+                  programs.getId(),
+                  programs.getName(),
+                  programs.getDescription(),
+                  programs.getUuid()));
           printer.println();
         } catch (Exception e) {
           e.printStackTrace();

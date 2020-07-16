@@ -291,7 +291,9 @@ public class ProgramWorkflowsHarmonizationCSVLog {
   }
 
   public static ByteArrayOutputStream exportProgramWorkflowsLogs(
-      String defaultLocationName, List<ProgramWorkflowDTO> data) {
+      String defaultLocationName,
+      List<ProgramWorkflowDTO> data,
+      List<ProgramWorkflowDTO> mdsProgramWorkflows) {
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -330,6 +332,31 @@ public class ProgramWorkflowsHarmonizationCSVLog {
                   programWorkflow.getProgram(),
                   programWorkflow.getConcept(),
                   programWorkflow.getUuid()));
+          printer.println();
+        } catch (Exception e) {
+          e.printStackTrace();
+          throw new APIException("Unable to write record to CSV: " + e.getMessage());
+        }
+      }
+
+      printer.println();
+      printer.println();
+      printer.print("Program Workflows From Metadata Server ");
+      printer.println();
+      printer.print(
+          "===============================================================================================================================");
+      printer.println();
+
+      for (ProgramWorkflowDTO programWorkflows : mdsProgramWorkflows) {
+
+        try {
+          printer.print(
+              String.format(
+                  "ID:%s, PROGRAM:'%s', CONCEPT:'%s', UUID:%s",
+                  programWorkflows.getId(),
+                  programWorkflows.getProgram(),
+                  programWorkflows.getConcept(),
+                  programWorkflows.getUuid()));
           printer.println();
         } catch (Exception e) {
           e.printStackTrace();

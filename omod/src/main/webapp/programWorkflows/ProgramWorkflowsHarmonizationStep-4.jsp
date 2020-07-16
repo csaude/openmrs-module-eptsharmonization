@@ -159,48 +159,5 @@
 			</table>
 		</fieldset>
 		<br />
-		<br />
-		<div class="box">
-			<table cellspacing="0" border="0" style="width: 100%">
-				<tr>
-					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.programworkflow.from.metadataServer" /></th>
-					<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
-				</tr>
-				<tr>
-					<th><spring:message code="general.id" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
-					<th><spring:message code="general.uuid" /></th>
-					<th><spring:message code="general.id" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
-					<th><spring:message code="general.uuid" /></th>
-				</tr>
-				<c:forEach var="item" items="${notSwappableProgramWorkflowsClone}"
-					varStatus="itemStatus">
-					<tr>
-						<td valign="top" align="center">${item.id}</td>
-						<td valign="top">${item.program}</td>
-						<td valign="top">${item.concept}</td>
-						<td valign="top">${item.uuid}</td>
-						<c:choose>
-							<c:when
-								test="${not empty swappableProgramWorkflowsClone[itemStatus.index]}">
-								<td>${swappableProgramWorkflowsClone[itemStatus.index].id}</td>
-								<td>${swappableProgramWorkflowsClone[itemStatus.index].program}</td>
-								<td>${swappableProgramWorkflowsClone[itemStatus.index].concept}</td>
-								<td>${swappableProgramWorkflowsClone[itemStatus.index].uuid}</td>
-							</c:when>
-							<c:otherwise>
-								<td colspan="4"></td>
-							</c:otherwise>
-						</c:choose>
-					</tr>
-				</c:forEach>
-			</table>
-		</div>
-		<br />
 	</c:if>
 </c:if>

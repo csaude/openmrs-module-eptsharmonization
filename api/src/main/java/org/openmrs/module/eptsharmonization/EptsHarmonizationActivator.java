@@ -147,12 +147,14 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
       log.error("Loading _htmlformentry_html_form entries", e);
       throw new RuntimeException(e);
     }
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `program_workflow_state` ADD COLUMN `swappable` boolean default false");
+    sb =
+        new StringBuilder(
+            "ALTER TABLE `program_workflow_state` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
-    sb = new StringBuilder();
-    sb.append("ALTER TABLE `patient_identifier_type` ADD COLUMN `swappable` boolean default false");
+    sb =
+        new StringBuilder(
+            "ALTER TABLE `patient_identifier_type` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
     HarmonizationUtils.onModuleActivator();

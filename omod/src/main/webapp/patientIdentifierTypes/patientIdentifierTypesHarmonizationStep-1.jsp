@@ -13,7 +13,7 @@
 						<th><spring:message code="general.id" /></th>
 						<th><spring:message code="general.name" /></th>
 						<th><spring:message code="general.description" /></th>
-						<th><spring:message code="eptsharmonization.format" /></th>
+						<th><spring:message code="eptsharmonization.patientidentifiertype.format" /></th>
 						<th><spring:message code="general.uuid" /></th>
 					</tr>
 					<c:forEach var="item" items="${newMDSPatientIdentifierTypes.items}">
@@ -40,7 +40,7 @@
 						<th><spring:message code="general.id" /></th>
 						<th><spring:message code="general.name" /></th>
 						<th><spring:message code="general.description" /></th>
-						<th><spring:message code="eptsharmonization.format" /></th>
+						<th><spring:message code="eptsharmonization.patientidentifiertype.format" /></th>
 						<th><spring:message code="general.uuid" /></th>
 					</tr>
 					<c:forEach var="item" items="${productionItemsToDelete}">
