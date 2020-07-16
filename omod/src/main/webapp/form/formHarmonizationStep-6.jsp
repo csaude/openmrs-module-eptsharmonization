@@ -1,6 +1,6 @@
 
 <c:if
-	test="${hasFirstStepHtmlFormComplete && not hasSecondStepHtmlFormComplete}">
+	test="${isFirstStepFormHarmonizationCompleted && isUUIDsAndIDsFormHarmonized && isNamesFormHarmonized && hasFirstStepHtmlFormComplete && not hasSecondStepHtmlFormComplete}">
 
 	<c:if test="${ not empty newHtmlFormFromMDS}">
 		<form method="post" action="processHarmonizationStep6.form">

@@ -1,5 +1,5 @@
 
-<c:if test="${not hasFirstStepHtmlFormComplete}">
+<c:if test="${isFirstStepFormHarmonizationCompleted && isUUIDsAndIDsFormHarmonized && isNamesFormHarmonized && not hasFirstStepHtmlFormComplete}">
 	<c:if test="${not empty htmlFormsWithDifferentFormAndEqualUuid.items}">
 		<form method="post" action="processHarmonizationStep5.form">
 			<br /> <b class="boxHeader"><spring:message
