@@ -428,9 +428,14 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
     final String V_TO_E_GP = "visits.encounterTypeToVisitTypeMapping";
     String gpValue = adminService.getGlobalProperty(V_TO_E_GP);
     if (!StringUtils.isEmpty(gpValue)) {
-      String toReplace = ":" + oldVisitTypeId;
-      String replacement = ":" + newVisitTypeId;
-      gpValue = gpValue.replaceAll(toReplace, replacement);
+      String toReplaceMiddle = ":" + oldVisitTypeId + "\\s*,";
+      String replacement = ":" + newVisitTypeId + ",";
+      gpValue = gpValue.replaceAll(toReplaceMiddle, replacement);
+
+      String toReplaceEnd = ":" + oldVisitTypeId + "\\s*$";
+      replacement = ":" + newVisitTypeId;
+      gpValue = gpValue.replaceAll(toReplaceEnd, replacement);
+
       adminService.setGlobalProperty(V_TO_E_GP, gpValue);
     }
   }
