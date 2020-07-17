@@ -641,4 +641,45 @@
 				with="UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID()" />
 		</modifySql>
 	</changeSet>
+	
+	 <changeSet author="Guimino" id="20200717-1020">
+          <preConditions onFail="MARK_RAN">
+               <not>
+                    <tableExists tableName="formfilter_form_filter" />
+               </not>
+          </preConditions>
+          <comment>
+               Create formfilter_form_filter table
+          </comment>
+          <createTable tableName="formfilter_form_filter">
+               <column autoIncrement="true" name="form_filter_id" type="int">
+                    <constraints nullable="false" primaryKey="true" />
+               </column>
+               <column name="form_id" type="int" />
+               <column name="uuid" type="varchar(50)" />
+          </createTable>
+     </changeSet>
+     
+     <changeSet author="Guimino" id="20200717-1027">
+          <preConditions onFail="MARK_RAN">
+               <not>
+                    <tableExists tableName="formfilter_filter_property" />
+               </not>
+          </preConditions>
+          <comment>
+               Create formfilter_filter_property table
+          </comment>
+          <createTable tableName="formfilter_filter_property">
+               <column autoIncrement="true" name="filter_property_id" type="int">
+                    <constraints nullable="false" primaryKey="true" />
+               </column>
+               <column name="form_filter_id" type="int" />
+               <column name="class_name" type="varchar(200)" />
+               <column name="properties" type="varchar(500)" />
+               <column name="filter_name" type="varchar(50)" />
+               <column name="filter_description" type="varchar(500)" />
+               <column name="uuid" type="varchar(50)" />
+          </createTable>
+     </changeSet>
+	
 </databaseChangeLog>

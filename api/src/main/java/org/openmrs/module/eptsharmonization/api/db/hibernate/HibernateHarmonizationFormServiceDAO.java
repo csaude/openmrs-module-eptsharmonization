@@ -37,7 +37,6 @@ import org.openmrs.api.db.FormDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationFormServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.FormFilter;
-import org.openmrs.module.eptsharmonization.api.model.FormentryXsn;
 import org.openmrs.module.eptsharmonization.api.model.HtmlForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -147,25 +146,6 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
     List<Object[]> list = query.list();
     for (Object[] object : list) {
       result.add(new FormFilter((Integer) object[0], (Integer) object[1]));
-    }
-    return result;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<FormentryXsn> findFormentryXsnByForm(Form form) throws DAOException {
-    this.harmonizationServiceDAO.evictCache();
-    final Query query =
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select f.formentry_xsn_id, f.form_id from formentry_xsn f where f.form_id ="
-                    + form.getFormId());
-
-    List<FormentryXsn> result = new ArrayList<>();
-    List<Object[]> list = query.list();
-    for (Object[] object : list) {
-      result.add(new FormentryXsn((Integer) object[0], (Integer) object[1]));
     }
     return result;
   }
@@ -616,6 +596,8 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
 
   @Override
   public void deleteRelatedFormFilter(Form form) throws DAOException {
+    this.harmonizationServiceDAO.evictCache();
+    this.deleteRelatedFormFilterPropery(form);
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
@@ -631,16 +613,6 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         .getCurrentSession()
         .createSQLQuery(
             String.format("delete from form_resource where form_id =%s ", form.getFormId()))
-        .executeUpdate();
-    this.sessionFactory.getCurrentSession().flush();
-  }
-
-  @Override
-  public void deleteRelatedFormentryXsn(Form form) throws DAOException {
-    this.sessionFactory
-        .getCurrentSession()
-        .createSQLQuery(
-            String.format("delete from formentry_xsn where form_id =%s ", form.getFormId()))
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
@@ -700,18 +672,8 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
     this.sessionFactory.getCurrentSession().flush();
   }
 
-  public void updateFormentryxsn(FormentryXsn formentryXsn, Form form) throws DAOException {
-    this.sessionFactory
-        .getCurrentSession()
-        .createSQLQuery(
-            String.format(
-                "update formentry_xsn set form_id =%s where formentry_xsn_id =%s ",
-                form.getFormId(), formentryXsn.getFormentryXsnId()))
-        .executeUpdate();
-    this.sessionFactory.getCurrentSession().flush();
-  }
-
   public void updateFormFilter(FormFilter formFilter, Form form) throws DAOException {
+
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
@@ -781,6 +743,19 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
       return convertToHtmlFormObjects(lst).get(0);
     }
     return null;
+  }
+
+  private void deleteRelatedFormFilterPropery(Form form) throws DAOException {
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                " delete from formfilter_filter_property where form_filter_id in(      "
+                    + "     select * from ( select fp.filter_property_id from formfilter_filter_property fp      "
+                    + "     join formfilter_form_filter f on (f.form_filter_id = fp.filter_property_id) where f.form_id = %s) a) ",
+                form.getFormId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
   }
 
   private Integer findRelatedEncounterTypeFromTableMDSForm(Form form) throws DAOException {

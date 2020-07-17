@@ -210,6 +210,18 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     sb = new StringBuilder("DROP TABLE IF EXISTS `_patient_identifier_type`");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
 
+    sb = new StringBuilder("DROP TABLE IF EXISTS `formentry_archive`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `formentry_error`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `formentry_queue`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    sb = new StringBuilder("DROP TABLE IF EXISTS `formentry_xsn`");
+    Context.getAdministrationService().executeSQL(sb.toString(), false);
+
     if (columnExists("encounter_type", "swappable")) {
       sb = new StringBuilder("ALTER TABLE `encounter_type` DROP `swappable`");
       Context.getAdministrationService().executeSQL(sb.toString(), false);

@@ -32,7 +32,6 @@ import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.FormDTO;
 import org.openmrs.module.eptsharmonization.api.model.FormFilter;
-import org.openmrs.module.eptsharmonization.api.model.FormentryXsn;
 import org.openmrs.module.eptsharmonization.api.model.HtmlForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -147,31 +146,6 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   public int getNumberOfAffectedEncounters(Form form) {
     this.harmonizationDAO.evictCache();
     return this.harmonizationFormServiceDAO.findEncountersByForm(form).size();
-  }
-
-  @Override
-  public int getNumberOfAffectedFormFields(Form form) {
-    this.harmonizationDAO.evictCache();
-    return this.harmonizationFormServiceDAO.findFormFieldsByForm(form).size();
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public int getNumberOfAffectedFormResourses(Form form) {
-    this.harmonizationDAO.evictCache();
-    return this.harmonizationFormServiceDAO.findFormResourcesByForm(form).size();
-  }
-
-  @Override
-  public int getNumberOfAffectedFormFilters(Form form) {
-    this.harmonizationDAO.evictCache();
-    return this.harmonizationFormServiceDAO.findFormFilterByForm(form).size();
-  }
-
-  @Override
-  public int getNumberOfAffectedFormEntryXsn(Form form) {
-    this.harmonizationDAO.evictCache();
-    return this.harmonizationFormServiceDAO.findFormentryXsnByForm(form).size();
   }
 
   @Override
@@ -362,7 +336,6 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
 
       for (Form form : DTOUtils.fromFormDTOs(forms)) {
         this.harmonizationFormServiceDAO.deleteRelatedEncounter(form);
-        this.harmonizationFormServiceDAO.deleteRelatedFormentryXsn(form);
         this.harmonizationFormServiceDAO.deleteRelatedFormFilter(form);
         this.harmonizationFormServiceDAO.deleteRelatedFormResource(form);
         this.harmonizationFormServiceDAO.deleteRelatedPDSHtmlForm(form);
@@ -465,8 +438,6 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.findFormFieldsByForm(pdsForm);
     List<FormResource> relatedFormResources =
         this.harmonizationFormServiceDAO.findFormResourcesByForm(pdsForm);
-    List<FormentryXsn> relatedFormentryxsn =
-        this.harmonizationFormServiceDAO.findFormentryXsnByForm(pdsForm);
     HtmlForm relatedHtmlForm = this.harmonizationFormServiceDAO.findPDSHtmlFormByForm(pdsForm);
     List<FormFilter> relatedFormFilter =
         this.harmonizationFormServiceDAO.findFormFilterByForm(pdsForm);
@@ -483,9 +454,7 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     for (FormFilter formFilter : relatedFormFilter) {
       this.harmonizationFormServiceDAO.updateFormFilter(formFilter, updated);
     }
-    for (FormentryXsn formentryXsn : relatedFormentryxsn) {
-      this.harmonizationFormServiceDAO.updateFormentryxsn(formentryXsn, updated);
-    }
+
     if (relatedHtmlForm != null) {
       this.harmonizationFormServiceDAO.updatePDSHtmlForm(relatedHtmlForm, updated);
     }
