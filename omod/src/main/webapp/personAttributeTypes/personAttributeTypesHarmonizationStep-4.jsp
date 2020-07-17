@@ -229,48 +229,6 @@
 				</c:if>
 				</fieldset>
 			</table>
-			<br /> <br />
-			<div class="box">
-				<table cellspacing="0" border="0" style="width: 100%">
-					<tr>
-						<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.personattributetype.from.metadataServer" /></th>
-						<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.personattributetype.created.OnProductionServer" /></th>
-					</tr>
-					<tr>
-						<th><spring:message code="general.id" /></th>
-						<th><spring:message code="general.name" /></th>
-						<th><spring:message code="general.description" /></th>
-						<th><spring:message code="general.uuid" /></th>
-						<th><spring:message code="general.id" /></th>
-						<th><spring:message code="general.name" /></th>
-						<th><spring:message code="general.description" /></th>
-						<th><spring:message code="general.uuid" /></th>
-					</tr>
-					<c:forEach var="item" items="${notSwappablePersonAttributeTypesClone}"
-						varStatus="itemStatus">
-						<tr>
-							<td valign="top" align="center">${item.id}</td>
-							<td valign="top">${item.name}</td>
-							<td valign="top">${item.description}</td>
-							<td valign="top">${item.uuid}</td>
-							<c:choose>
-								<c:when
-									test="${not empty swappablePersonAttributeTypesClone[itemStatus.index]}">
-									<td>${swappablePersonAttributeTypesClone[itemStatus.index].id}</td>
-									<td>${swappablePersonAttributeTypesClone[itemStatus.index].name}</td>
-									<td>${swappablePersonAttributeTypesClone[itemStatus.index].description}</td>
-									<td>${swappablePersonAttributeTypesClone[itemStatus.index].uuid}</td>
-								</c:when>
-								<c:otherwise>
-									<td colspan="4"></td>
-								</c:otherwise>
-							</c:choose>
-						</tr>
-					</c:forEach>
-				</table>
-			</div>
 			<br />
 	</c:if>
 </c:if>

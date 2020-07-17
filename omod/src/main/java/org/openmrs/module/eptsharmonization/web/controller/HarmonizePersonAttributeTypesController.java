@@ -19,7 +19,6 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
@@ -55,7 +54,7 @@ public class HarmonizePersonAttributeTypesController {
       HarmonizePersonAttributeTypesController.CONTROLLER_PATH + "/addPersonAttributeTypeMapping";
 
   public static final String ADD_PERSON_ATTRIBUTE_TYPE_FROM_MDS_MAPPING =
-      HarmonizePatientIdentifierTypesController.CONTROLLER_PATH
+      HarmonizePersonAttributeTypesController.CONTROLLER_PATH
           + "/addPersonAttributeTypeFromMDSMapping";
 
   public static final String REMOVE_PERSON_ATTRIBUTE_TYPE_MAPPING =
@@ -559,18 +558,14 @@ public class HarmonizePersonAttributeTypesController {
 
   @ModelAttribute("swappablePersonAttributeTypes")
   public List<PersonAttributeType> getSwappablePersonAttributeTypes() {
-    List<PersonAttributeType> productionItemsToExport =
-        DTOUtils.fromPersonAttributeTypesDTOs(getProductionItemToExport());
-    productionItemsToExport.addAll(
-        HarmonizePersonAttributeTypeDelegate.PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED);
-
-    return sortByName(productionItemsToExport);
+    return sortByName(
+        harmonizationPersonAttributeTypeService.findAllSwappablePersonAttributeTypes());
   }
 
   @ModelAttribute("notSwappablePersonAttributeTypes")
   public List<PersonAttributeType> getNotSwappablePersonAttributeTypes() {
     return sortByName(
-        this.harmonizationPersonAttributeTypeService.findAllMetadataPersonAttributeTypes());
+        this.harmonizationPersonAttributeTypeService.findAllNotSwappablePersonAttributeTypes());
   }
 
   @ModelAttribute("mdsPersonAttributeTypeNotHarmonizedYet")
