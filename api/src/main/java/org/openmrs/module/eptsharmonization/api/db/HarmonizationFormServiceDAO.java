@@ -45,7 +45,7 @@ public interface HarmonizationFormServiceDAO {
 
   public List<FormentryXsn> findFormentryXsnByForm(Form form) throws DAOException;
 
-  public HtmlForm findHtmlFormByForm(Form form) throws DAOException;
+  public HtmlForm findPDSHtmlFormByForm(Form form) throws DAOException;
 
   public Form updateForm(Form pdsForm, Form mdsForm, boolean swappable) throws DAOException;
 
@@ -71,7 +71,7 @@ public interface HarmonizationFormServiceDAO {
 
   public void deleteForm(Form form) throws DAOException;
 
-  public void deleteRelatedHtmlForm(Form form) throws DAOException;
+  public void deleteRelatedPDSHtmlForm(Form form) throws DAOException;
 
   public void deleteRelatedEncounter(Form form) throws DAOException;
 
@@ -93,7 +93,7 @@ public interface HarmonizationFormServiceDAO {
 
   public void updateFormFilter(FormFilter formFilter, Form form) throws DAOException;
 
-  public void updateHtmlForm(HtmlForm htmlForm, Form form) throws DAOException;
+  public void updatePDSHtmlForm(HtmlForm htmlForm, Form form) throws DAOException;
 
   public List<Form> findDiferrencesByIDsHavingSameUuidMDS() throws DAOException;
 
@@ -107,7 +107,7 @@ public interface HarmonizationFormServiceDAO {
 
   public Form setRelatedFormMetadataFromTableForm(Form form);
 
-  public void createHtmlForm(HtmlForm htmlForm) throws DAOException;
+  public void createHtmlFormPDS(HtmlForm htmlForm) throws DAOException;
 
   public void updateHtmlForm(HtmlForm pdsHtmlForm, HtmlForm mdsHtmlForm) throws DAOException;
 }

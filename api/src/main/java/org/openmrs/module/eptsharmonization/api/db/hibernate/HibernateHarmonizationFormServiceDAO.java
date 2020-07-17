@@ -171,7 +171,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
   }
 
   @Override
-  public HtmlForm findHtmlFormByForm(Form form) throws DAOException {
+  public HtmlForm findPDSHtmlFormByForm(Form form) throws DAOException {
     this.harmonizationServiceDAO.evictCache();
     Connection connection = sessionFactory.getCurrentSession().connection();
 
@@ -197,6 +197,41 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
                 rs.getInt("creator"),
                 new Date(rs.getDate("date_created").getTime()));
         htmlForm.setForm(form);
+      }
+      rs.close();
+      prepareStatement.close();
+      connection.close();
+    } catch (SQLException e) {
+      throw new RuntimeException(e.getCause());
+    }
+    return htmlForm;
+  }
+
+  private HtmlForm findPDSHtmlFormByUuid(String uuid) throws DAOException {
+    this.harmonizationServiceDAO.evictCache();
+    Connection connection = sessionFactory.getCurrentSession().connection();
+
+    String sql =
+        String.format(
+            "select f.id, f.form_id, f.xml_data, f.uuid, f.retired, f.creator, f.date_created from htmlformentry_html_form f where f.uuid = '%s' ",
+            uuid);
+    HtmlForm htmlForm = null;
+    try {
+      PreparedStatement prepareStatement = null;
+      ResultSet rs = null;
+
+      prepareStatement = connection.prepareStatement(sql);
+      rs = prepareStatement.executeQuery();
+      while (rs.next()) {
+        htmlForm =
+            new HtmlForm(
+                rs.getInt("id"),
+                rs.getInt("form_id"),
+                rs.getString("xml_data"),
+                rs.getString("uuid"),
+                rs.getBoolean("retired"),
+                rs.getInt("creator"),
+                new Date(rs.getDate("date_created").getTime()));
       }
       rs.close();
       prepareStatement.close();
@@ -368,7 +403,8 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
             .createSQLQuery(
                 "SELECT id, form_id, xml_data, uuid, retired, creator, date_created FROM _htmlformentry_html_form where EXISTS (select * from htmlformentry_html_form  "
                     + " where htmlformentry_html_form.form_id <> _htmlformentry_html_form.form_id and    "
-                    + " htmlformentry_html_form.uuid = _htmlformentry_html_form.uuid)                    ");
+                    + " htmlformentry_html_form.uuid = _htmlformentry_html_form.uuid) and _htmlformentry_html_form.form_id "
+                    + " in (select htmlformentry_html_form.form_id from htmlformentry_html_form where htmlformentry_html_form.form_id = _htmlformentry_html_form.form_id )                   ");
 
     return this.convertToHtmlFormObjects(query.list());
   }
@@ -481,11 +517,17 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
 
     HtmlForm mdsHtmlForm = this.getMDSHtmlForm(form);
     if (mdsHtmlForm != null) {
-      this.createHtmlForm(mdsHtmlForm);
+      HtmlForm pdsHtmlForm = this.findPDSHtmlFormByForm(form);
+
+      if (pdsHtmlForm == null) {
+        this.createHtmlFormPDS(mdsHtmlForm);
+      } else {
+        this.updatePDSHtmlForm(pdsHtmlForm, form);
+      }
     }
   }
 
-  public void createHtmlForm(HtmlForm htmlForm) throws DAOException {
+  public void createHtmlFormPDS(HtmlForm htmlForm) throws DAOException {
     this.harmonizationServiceDAO.evictCache();
 
     String insert =
@@ -553,7 +595,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
   }
 
   @Override
-  public void deleteRelatedHtmlForm(Form form) throws DAOException {
+  public void deleteRelatedPDSHtmlForm(Form form) throws DAOException {
     this.sessionFactory
         .getCurrentSession()
         .createSQLQuery(
@@ -680,14 +722,38 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
     this.sessionFactory.getCurrentSession().flush();
   }
 
-  public void updateHtmlForm(HtmlForm htmlForm, Form form) throws DAOException {
-    this.sessionFactory
-        .getCurrentSession()
-        .createSQLQuery(
-            String.format(
-                "update htmlformentry_html_form set form_id =%s where id =%s ",
-                form.getFormId(), htmlForm.getId()))
-        .executeUpdate();
+  public void updatePDSHtmlForm(HtmlForm htmlForm, Form form) throws DAOException {
+
+    HtmlForm pdsHtmlFormByUuid = this.findPDSHtmlFormByUuid(htmlForm.getUuid());
+
+    boolean updateUUid = false;
+
+    if ((pdsHtmlFormByUuid == null)
+        || (pdsHtmlFormByUuid != null
+            && (!htmlForm.getUuid().equals(pdsHtmlFormByUuid.getUuid()))
+            && htmlForm.getFormId().equals(pdsHtmlFormByUuid.getFormId()))) {
+      updateUUid = true;
+    }
+
+    if (updateUUid) {
+      this.sessionFactory
+          .getCurrentSession()
+          .createSQLQuery(
+              String.format(
+                  "update htmlformentry_html_form set form_id =%s, uuid =%s where id =%s ",
+                  form.getFormId(), htmlForm.getUuid(), htmlForm.getId()))
+          .executeUpdate();
+
+    } else {
+      this.sessionFactory
+          .getCurrentSession()
+          .createSQLQuery(
+              String.format(
+                  "update htmlformentry_html_form set form_id =%s where id =%s ",
+                  form.getFormId(), htmlForm.getId()))
+          .executeUpdate();
+    }
+
     this.sessionFactory.getCurrentSession().flush();
   }
 
