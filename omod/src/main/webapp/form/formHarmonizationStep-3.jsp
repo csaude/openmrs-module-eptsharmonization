@@ -78,7 +78,7 @@
 			<br />
 			<div class="submit-btn" align="center">
 				<input type="submit"
-					value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
+					value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
 					name="processHarmonizationStep2" id="btn-partialHarmonization-step3" />
 			</div>
 		</springform:form>

@@ -1,5 +1,5 @@
 
-<c:if test="${not hasFirstStepHtmlFormComplete}">
+<c:if test="${isFirstStepFormHarmonizationCompleted && isUUIDsAndIDsFormHarmonized && isNamesFormHarmonized && not hasFirstStepHtmlFormComplete}">
 	<c:if test="${not empty htmlFormsWithDifferentFormAndEqualUuid.items}">
 		<form method="post" action="processHarmonizationStep5.form">
 			<br /> <b class="boxHeader"><spring:message
@@ -42,7 +42,7 @@
 			<br />
 			<div class="submit-btn" align="center">
 				<input type="submit"
-					value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>' />
+					value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>' />
 			</div>
 		</form>
 	</c:if>

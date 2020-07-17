@@ -365,7 +365,7 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.deleteRelatedFormentryXsn(form);
         this.harmonizationFormServiceDAO.deleteRelatedFormFilter(form);
         this.harmonizationFormServiceDAO.deleteRelatedFormResource(form);
-        this.harmonizationFormServiceDAO.deleteRelatedHtmlForm(form);
+        this.harmonizationFormServiceDAO.deleteRelatedPDSHtmlForm(form);
         this.harmonizationFormServiceDAO.deleteRelatedFormField(form);
         this.harmonizationFormServiceDAO.deleteForm(form);
       }
@@ -412,7 +412,7 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     try {
       this.harmonizationDAO.setDisabledCheckConstraints();
       for (HtmlForm htmlForm : htmlForms) {
-        this.harmonizationFormServiceDAO.createHtmlForm(htmlForm);
+        this.harmonizationFormServiceDAO.createHtmlFormPDS(htmlForm);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -467,7 +467,7 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.findFormResourcesByForm(pdsForm);
     List<FormentryXsn> relatedFormentryxsn =
         this.harmonizationFormServiceDAO.findFormentryXsnByForm(pdsForm);
-    HtmlForm relatedHtmlForm = this.harmonizationFormServiceDAO.findHtmlFormByForm(pdsForm);
+    HtmlForm relatedHtmlForm = this.harmonizationFormServiceDAO.findPDSHtmlFormByForm(pdsForm);
     List<FormFilter> relatedFormFilter =
         this.harmonizationFormServiceDAO.findFormFilterByForm(pdsForm);
 
@@ -486,6 +486,8 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     for (FormentryXsn formentryXsn : relatedFormentryxsn) {
       this.harmonizationFormServiceDAO.updateFormentryxsn(formentryXsn, updated);
     }
-    this.harmonizationFormServiceDAO.updateHtmlForm(relatedHtmlForm, updated);
+    if (relatedHtmlForm != null) {
+      this.harmonizationFormServiceDAO.updatePDSHtmlForm(relatedHtmlForm, updated);
+    }
   }
 }

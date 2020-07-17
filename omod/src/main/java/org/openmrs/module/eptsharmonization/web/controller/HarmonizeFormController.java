@@ -280,14 +280,14 @@ public class HarmonizeFormController {
   public ModelAndView processHarmonizationStep5(
       @ModelAttribute("htmlFormsWithDifferentFormAndEqualUuid") HarmonizationData data) {
 
-    Map<String, List<HtmlForm>> list = new HashMap<>();
+    Map<String, List<HtmlForm>> map = new HashMap<>();
     for (HarmonizationItem item : data.getItems()) {
       List<HtmlForm> value = (List<HtmlForm>) item.getValue();
-      list.put((String) item.getKey(), value);
+      map.put((String) item.getKey(), value);
     }
-    this.harmonizationFormService.saveHtmlFormsWithDifferentFormNamesAndEqualHtmlFormUuid(list);
+    this.harmonizationFormService.saveHtmlFormsWithDifferentFormNamesAndEqualHtmlFormUuid(map);
     Builder logBuilder = new FormHarmonizationCSVLog.Builder(this.getDefaultLocation());
-    logBuilder.appendLogForHtmlFormStep1(list);
+    logBuilder.appendLogForHtmlFormStep1(map);
     logBuilder.build();
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
@@ -495,10 +495,27 @@ public class HarmonizeFormController {
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
+  //
+  // @ModelAttribute("productionItemsToDeleteForm")
+  // public List<FormDTO> getProductionItemsToDelete() {
+  // return this.harmonizationFormService.findUnusedProductionServerForms();
+  // }
 
   @ModelAttribute("productionItemsToDeleteForm")
   public List<FormDTO> getProductionItemsToDelete() {
-    return this.harmonizationFormService.findUnusedProductionServerForms();
+    List<FormDTO> productionItemsToDelete = new ArrayList<>();
+    List<FormDTO> onlyProductionForms =
+        this.harmonizationFormService.findAllProductionFormsNotContainedInMetadataServer();
+
+    for (FormDTO form : onlyProductionForms) {
+      final int numberOfAffectedEncounters =
+          this.harmonizationFormService.getNumberOfAffectedEncounters(form.getForm());
+
+      if (numberOfAffectedEncounters == 0) {
+        productionItemsToDelete.add(form);
+      }
+    }
+    return productionItemsToDelete;
   }
 
   public HarmonizationData getProductionItemsToExportForm() {

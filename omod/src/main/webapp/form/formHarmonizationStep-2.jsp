@@ -10,49 +10,38 @@
 			<fieldset>
 				<table cellspacing="0" border="0" style="width: 100%">
 					<tr>
-						<th style="text-align: left; width: 5%;"><spring:message
-								code="eptsharmonization.form.mdserver.id" /></th>
-						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.form.mdserver.name" /></th>
-						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.form.mdserver.description" /></th>
-						<th><spring:message
-								code="eptsharmonization.encountertype.name" /></th>
-						<th style="text-align: left; width: 5%;"><spring:message
-								code="eptsharmonization.form.pdserver.id" /></th>
-						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.form.pdserver.name" /></th>
-						<th style="text-align: left; width: 15%;"><spring:message
-								code="eptsharmonization.form.pdserver.description" /></th>
-						<th><spring:message
-								code="eptsharmonization.encountertype.name" /></th>
-						<th style="text-align: left; width: 10%;"><spring:message
-								code="general.uuid" /></th>
-						<th style="text-align: left; width: 5%;"><spring:message
-								code="eptsharmonization.form.harmonize.encounters" /></th>
-						<th style="text-align: center; width: 10%;"><spring:message
-								code="eptsharmonization.proceedHarmonization" /></th>
+						<th style="text-align: left; width: 5%;"><spring:message code="eptsharmonization.form.mdserver.id" /></th>
+						<th style="text-align: left; width: 10%;"><spring:message code="eptsharmonization.form.mdserver.name" /></th>
+						<th style="text-align: left; width: 10%;"><spring:message code="eptsharmonization.form.mdserver.description" /></th>
+						<th style="text-align: left; width: 10%;"><spring:message code="eptsharmonization.encountertype.name" /></th>
+						<th style="text-align: left; width: 5%;"><spring:message code="eptsharmonization.form.pdserver.id" /></th>
+						<th style="text-align: left; width: 10%;"><spring:message code="eptsharmonization.form.pdserver.name" /></th>
+						<th style="text-align: left; width: 10%;"><spring:message code="eptsharmonization.form.pdserver.description" /></th>
+						<th style="text-align: left; width: 10%;"><spring:message code="eptsharmonization.encountertype.name" /></th>
+						<th style="text-align: left; width: 10%;"><spring:message code="general.uuid" /></th>
+						<th style="text-align: left; width: 5%;"><spring:message code="eptsharmonization.form.harmonize.encounters" /></th>
+						<th style="text-align: center; width: 15%;"><spring:message code="eptsharmonization.proceedHarmonization" /></th>
 					</tr>
 					<c:forEach var="item" items="${differentIDsAndEqualUUIDForm.items}"
 						varStatus="itemsRow">
 						<tr class="confirm-each-row-harmonization">
 							<td valign="top" style="text-align: left; width: 5%;">${item.value[0].form.id}</td>
-							<td valign="top" style="text-align: left; width: 15%;">${item.value[0].form.name}</td>
-							<td valign="top" style="text-align: left; width: 15%;">${item.value[0].form.description}</td>
+							<td valign="top" style="text-align: left; width: 10%;">${item.value[0].form.name}</td>
+							<td valign="top" style="text-align: left; width: 10%;">${item.value[0].form.description}</td>
 							<c:choose>
 								<c:when test="${not empty item.value[0].form.encounterType.name}">
-									<td>${item.value[0].form.encounterType.name}</td>
+									<td valign="top" style="text-align: left; width: 10%;">${item.value[0].form.encounterType.name}</td>
 								</c:when>
 								<c:otherwise>
-									<td>N/A</td>
+									<td valign="top" style="text-align: left; width: 10%;">N/A</td>
 								</c:otherwise>
 							</c:choose>
 							<td valign="top" style="text-align: left; width: 5%;">${item.value[1].form.id}</td>
-							<td valign="top" style="text-align: left; width: 15%;">${item.value[1].form.name}</td>
-							<td valign="top" style="text-align: left; width: 15%;">${item.value[1].form.description}</td>
+							<td valign="top" style="text-align: left; width: 10%;">${item.value[1].form.name}</td>
+							<td valign="top" style="text-align: left; width: 10%;">${item.value[1].form.description}</td>
 							<c:choose>
 								<c:when test="${not empty item.value[1].form.encounterType.name}">
-									<td>${item.value[1].form.encounterType.name}</td>
+									<td valign="top" style="text-align: left; width: 10%;">${item.value[1].form.encounterType.name}</td>
 								</c:when>
 								<c:otherwise>
 									<td>N/A</td>
@@ -60,7 +49,7 @@
 							</c:choose>
 							<td valign="top" style="text-align: left; width: 10%;">${item.key}</td>
 							<td style="text-align: right; width: 5%;">${item.encountersCount}</td>
-							<td style="text-align: center; width: 10%;"><spring:bind
+							<td style="text-align: center; width: 15%;"><spring:bind
 									path="items[${itemsRow.index}].selected">
 									<input type="hidden"
 										name="_<c:out value="${status.expression}"/>">
@@ -85,7 +74,7 @@
 			<br />
 			<div class="submit-btn" align="center">
 				<input type="submit"
-					value='<spring:message code="eptsharmonization.form.btn.harmonizeNewFromMDS"/>'
+					value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
 					name="processHarmonizationStep2" id="btn-partialHarmonization-step2" />
 			</div>
 		</springform:form>
