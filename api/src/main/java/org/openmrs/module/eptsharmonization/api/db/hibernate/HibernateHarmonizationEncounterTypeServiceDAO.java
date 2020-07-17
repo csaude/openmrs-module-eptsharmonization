@@ -11,6 +11,7 @@
  */
 package org.openmrs.module.eptsharmonization.api.db.hibernate;
 
+import java.util.Calendar;
 import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -197,20 +198,21 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
   @Override
   public void saveNotSwappableEncounterType(EncounterType encounterType) throws DAOException {
     String insert =
-        String.format(
-            "insert into encounter_type (encounter_type_id, name, description, creator, date_created, retired, uuid, swappable) "
-                + " values (%s, '%s', '%s', %s, '%s', %s, '%s', %s)",
-            encounterType.getId(),
-            encounterType.getName(),
-            encounterType.getDescription(),
-            Context.getAuthenticatedUser().getId(),
-            encounterType.getDateCreated(),
-            encounterType.getRetired(),
-            encounterType.getUuid(),
-            false);
+        "insert into encounter_type (encounter_type_id, name, description, creator, date_created, retired, uuid, swappable) "
+            + " values (:encounterTypeId, :name, :description, :creator, :dateCreated, :retired, :uuid, :swappable)";
 
     Query query = sessionFactory.getCurrentSession().createSQLQuery(insert);
+
+    query.setInteger("encounterTypeId", encounterType.getId());
+    query.setString("name", encounterType.getName());
+    query.setString("description", encounterType.getDescription());
+    query.setInteger("creator", Context.getAuthenticatedUser().getId());
+    query.setDate("dateCreated", Calendar.getInstance().getTime());
+    query.setBoolean("retired", encounterType.isRetired());
+    query.setString("uuid", encounterType.getUuid());
+    query.setBoolean("swappable", false);
     query.executeUpdate();
+
     this.sessionFactory.getCurrentSession().flush();
   }
 
