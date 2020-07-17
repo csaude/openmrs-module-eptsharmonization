@@ -1,9 +1,11 @@
 package org.openmrs.module.eptsharmonization.api;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.APIException;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
 
 /**
@@ -58,7 +60,7 @@ public interface HarmonizationPersonAttributeTypeService {
       Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException;
 
   public void saveManualMapping(Map<PersonAttributeType, PersonAttributeType> personAttributeTypes)
-      throws APIException;
+      throws UUIDDuplicationException, SQLException;
 
   public void deleteNewPersonAttributeTypesFromPDS(
       List<PersonAttributeTypeDTO> personAttributeTypes) throws APIException;
