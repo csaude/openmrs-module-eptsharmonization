@@ -51,14 +51,6 @@ public interface HarmonizationFormService extends OpenmrsService {
 
   public int getNumberOfAffectedEncounters(Form form);
 
-  public int getNumberOfAffectedFormFields(Form form);
-
-  public int getNumberOfAffectedFormResourses(Form form);
-
-  public int getNumberOfAffectedFormFilters(Form form);
-
-  public int getNumberOfAffectedFormEntryXsn(Form form);
-
   public Form findRelatedFormMetadataFromTablMDSForm(Form form);
 
   public Form findRelatedFormMetadataFromTableForm(Form form);

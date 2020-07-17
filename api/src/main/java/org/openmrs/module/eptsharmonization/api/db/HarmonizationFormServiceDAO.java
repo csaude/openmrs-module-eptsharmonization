@@ -18,7 +18,6 @@ import org.openmrs.FormField;
 import org.openmrs.FormResource;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.eptsharmonization.api.model.FormFilter;
-import org.openmrs.module.eptsharmonization.api.model.FormentryXsn;
 import org.openmrs.module.eptsharmonization.api.model.HtmlForm;
 
 public interface HarmonizationFormServiceDAO {
@@ -42,8 +41,6 @@ public interface HarmonizationFormServiceDAO {
   public List<FormResource> findFormResourcesByForm(Form form) throws DAOException;
 
   public List<FormFilter> findFormFilterByForm(Form form) throws DAOException;
-
-  public List<FormentryXsn> findFormentryXsnByForm(Form form) throws DAOException;
 
   public HtmlForm findPDSHtmlFormByForm(Form form) throws DAOException;
 
@@ -79,8 +76,6 @@ public interface HarmonizationFormServiceDAO {
 
   public void deleteRelatedFormResource(Form form) throws DAOException;
 
-  public void deleteRelatedFormentryXsn(Form form) throws DAOException;
-
   public void deleteRelatedFormField(Form form) throws DAOException;
 
   public void updateEncounter(Encounter encounter, Form form) throws DAOException;
@@ -88,8 +83,6 @@ public interface HarmonizationFormServiceDAO {
   public void updateFormField(FormField formField, Form form) throws DAOException;
 
   public void updateFormResource(FormResource formResource, Form form) throws DAOException;
-
-  public void updateFormentryxsn(FormentryXsn formentryXsn, Form form) throws DAOException;
 
   public void updateFormFilter(FormFilter formFilter, Form form) throws DAOException;
 

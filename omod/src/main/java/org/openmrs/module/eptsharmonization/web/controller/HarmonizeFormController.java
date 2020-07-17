@@ -525,9 +525,7 @@ public class HarmonizeFormController {
     for (FormDTO form : onlyProductionForms) {
       final int numberOfAffectedEncounters =
           this.harmonizationFormService.getNumberOfAffectedEncounters(form.getForm());
-      final int numberOfAffectedFormFields =
-          this.harmonizationFormService.getNumberOfAffectedFormFields(form.getForm());
-      if (numberOfAffectedEncounters > 0 || numberOfAffectedFormFields > 0) {
+      if (numberOfAffectedEncounters > 0) {
         productionItemsToExportForm.add(form);
       }
     }

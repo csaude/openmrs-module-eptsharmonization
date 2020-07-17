@@ -58,10 +58,6 @@ public class HarmonizeFormDelegate {
         HarmonizationItem item = new HarmonizationItem(key, forms);
         item.setEncountersCount(
             this.harmonizationFormService.getNumberOfAffectedEncounters(forms.get(1).getForm()));
-        item.setFormFieldsCount(
-            this.harmonizationFormService.getNumberOfAffectedFormFields(forms.get(1).getForm()));
-        item.setFormResourceCount(
-            this.harmonizationFormService.getNumberOfAffectedFormResourses(forms.get(1).getForm()));
         if (!items.contains(item)) {
           items.add(item);
         }
