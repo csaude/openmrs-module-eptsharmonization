@@ -2,7 +2,6 @@ package org.openmrs.module.eptsharmonization.web.delegate;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class HarmonizePersonAttributeTypeDelegate {
   public static List<PersonAttributeType> EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE =
       new ArrayList<>();
   public static List<PersonAttributeType> PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED = new ArrayList<>();
-  private static List<PersonAttributeType> MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED =
+  public static List<PersonAttributeType> MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED =
       new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<PersonAttributeTypeDTO> personAttributeTypes) {
@@ -274,12 +273,5 @@ public class HarmonizePersonAttributeTypeDelegate {
       logBuilder.appendLogForPersonAttributeTypesWithDiferrentIdsAndEqualUUID(list);
       HarmonizePersonAttributeTypesController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  public List<PersonAttributeType> getMDSNotHarmonizedYet() {
-    Comparator<PersonAttributeType> comp = new BeanComparator("personAttributeTypeId");
-    Collections.sort(MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED, comp);
-    return MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED;
   }
 }
