@@ -11,11 +11,13 @@
  */
 package org.openmrs.module.eptsharmonization.api;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.Program;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 
 /**
@@ -67,7 +69,8 @@ public interface HarmonizationProgramService extends OpenmrsService {
   public void saveProgramsWithDifferentIDAndEqualUUID(Map<String, List<ProgramDTO>> programs)
       throws APIException;
 
-  public void saveManualMapping(Map<Program, Program> programs) throws APIException;
+  public void saveManualMapping(Map<Program, Program> programs)
+      throws UUIDDuplicationException, SQLException;
 
   public void deleteNewProgramsFromPDS(List<ProgramDTO> programs) throws APIException;
 

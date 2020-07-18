@@ -16,6 +16,12 @@
 	<span> <spring:message
 			code="eptsharmonization.confirmAllHarmonization" /></span> <br />
 </div>
+
+<c:if test="${not empty errorProcessingManualMapping}">
+	<div id="error_msg">
+		<span>${errorProcessingManualMapping}</span>
+	</div>
+</c:if>
 <c:if test="${not empty harmonizedProgramsSummary}">
 	<div id="openmrs_msg">
 		<b> <spring:message
