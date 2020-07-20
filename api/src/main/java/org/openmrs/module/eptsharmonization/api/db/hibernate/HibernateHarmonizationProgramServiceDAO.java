@@ -270,4 +270,9 @@ public class HibernateHarmonizationProgramServiceDAO implements HarmonizationPro
             .setString("uuidValue", uuid)
             .uniqueResult();
   }
+
+  @Override
+  public Program getProgramByUuid(String uuid) throws DAOException {
+    return this.programWorkflowDAO.getProgramByUuid(uuid);
+  }
 }
