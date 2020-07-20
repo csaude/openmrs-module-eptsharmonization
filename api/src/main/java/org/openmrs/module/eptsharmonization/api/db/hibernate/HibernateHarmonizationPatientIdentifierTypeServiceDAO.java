@@ -82,6 +82,13 @@ public class HibernateHarmonizationPatientIdentifierTypeServiceDAO
     return this.patientDAO.getPatientIdentifierType(patientIdentifierTypeId);
   }
 
+  @Override
+  public PatientIdentifierType getPatientIdentifierTypeByUuid(String patientIdentifierTypeUuid)
+      throws DAOException {
+    this.harmonizationServiceDAO.evictCache();
+    return patientDAO.getPatientIdentifierTypeByUuid(patientIdentifierTypeUuid);
+  }
+
   public boolean isSwappable(PatientIdentifierType patientIdentifierType) {
     return (boolean)
         this.sessionFactory
@@ -219,10 +226,23 @@ public class HibernateHarmonizationPatientIdentifierTypeServiceDAO
   }
 
   public PatientIdentifierType findMDSPatientIdentifierTypeByUuid(String uuid) throws DAOException {
+    this.harmonizationServiceDAO.evictCache();
     return (PatientIdentifierType)
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery("select * from _patient_identifier_type where uuid=:uuidValue")
+            .addEntity(PatientIdentifierType.class)
+            .setString("uuidValue", uuid)
+            .uniqueResult();
+  }
+
+  public PatientIdentifierType findPDSPatientIdentifierTypeByUuid(String uuid) throws DAOException {
+
+    this.harmonizationServiceDAO.evictCache();
+    return (PatientIdentifierType)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select * from patient_identifier_type where uuid=:uuidValue")
             .addEntity(PatientIdentifierType.class)
             .setString("uuidValue", uuid)
             .uniqueResult();

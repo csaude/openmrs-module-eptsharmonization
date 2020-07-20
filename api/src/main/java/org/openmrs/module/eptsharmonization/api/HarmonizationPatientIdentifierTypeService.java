@@ -1,9 +1,11 @@
 package org.openmrs.module.eptsharmonization.api;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.APIException;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.PatientIdentifierTypeDTO;
 
 /**
@@ -34,6 +36,10 @@ public interface HarmonizationPatientIdentifierTypeService {
 
   public List<PatientIdentifierType> findAllNotSwappable() throws APIException;
 
+  public PatientIdentifierType findMDSPatientIdentifierTypeByUuid(String uuid) throws APIException;
+
+  public PatientIdentifierType findPDSPatientIdentifierTypeByUuid(String uuid) throws APIException;
+
   public List<PatientIdentifierType> findAllSwappable() throws APIException;
 
   public List<PatientIdentifierType> findAllFromMDS() throws APIException;
@@ -54,7 +60,8 @@ public interface HarmonizationPatientIdentifierTypeService {
       Map<String, List<PatientIdentifierTypeDTO>> patientIdentifierTypes) throws APIException;
 
   public void saveManualMapping(
-      Map<PatientIdentifierType, PatientIdentifierType> patientIdentifierTypes) throws APIException;
+      Map<PatientIdentifierType, PatientIdentifierType> patientIdentifierTypes)
+      throws UUIDDuplicationException, SQLException;
 
   public void deleteNewFromPDS(List<PatientIdentifierTypeDTO> patientIdentifierTypes)
       throws APIException;

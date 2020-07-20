@@ -30,11 +30,18 @@ public interface HarmonizationPatientIdentifierTypeServiceDAO {
   public PatientIdentifierType getPatientIdentifierTypeById(Integer patientIdentifierTypeId)
       throws DAOException;
 
+  public PatientIdentifierType getPatientIdentifierTypeByUuid(String patientIdentifierTypeUuid)
+      throws DAOException;
+
   public boolean isSwappable(PatientIdentifierType patientIdentifierType) throws DAOException;
 
   public List<PatientIdentifierType> findAllSwappable() throws DAOException;
 
   public List<PatientIdentifierType> findAllNotSwappable() throws DAOException;
+
+  public PatientIdentifierType findMDSPatientIdentifierTypeByUuid(String uuid) throws DAOException;
+
+  public PatientIdentifierType findPDSPatientIdentifierTypeByUuid(String uuid) throws DAOException;
 
   public PatientIdentifierType updatePatientIdentifierType(
       Integer nextId, PatientIdentifierType patientIdentifierType, boolean swappable)
@@ -51,6 +58,4 @@ public interface HarmonizationPatientIdentifierTypeServiceDAO {
 
   public void deletePatientIdentifierType(PatientIdentifierType patientIdentifierType)
       throws DAOException;
-
-  public PatientIdentifierType findMDSPatientIdentifierTypeByUuid(String uuid) throws DAOException;
 }
