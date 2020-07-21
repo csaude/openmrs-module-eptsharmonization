@@ -27,7 +27,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationLocationAttributeTypeService;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationAttributeTypeDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationAttributeTypeDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
 
   private HarmonizationServiceDAO dao;
 
-  private HarmonizationLocationAttributeTypeDao harmonizationLocationAttributeTypeDao;
+  private HarmonizationLocationAttributeTypeDAO harmonizationLocationAttributeTypeDao;
 
   private LocationService locationService;
 
@@ -61,7 +61,7 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
 
   @Autowired
   public void setHarmonizationLocationAttributeTypeDao(
-      HarmonizationLocationAttributeTypeDao harmonizationLocationAttributeTypeDao) {
+      HarmonizationLocationAttributeTypeDAO harmonizationLocationAttributeTypeDao) {
     this.harmonizationLocationAttributeTypeDao = harmonizationLocationAttributeTypeDao;
   }
 
@@ -186,6 +186,16 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
       result.put(key, DTOUtils.fromLocationAttributeTypes(map.get(key)));
     }
     return result;
+  }
+
+  @Override
+  public LocationAttributeType findMDSLocationAttributeTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationLocationAttributeTypeDao.findMDSLocationAttributeTypeByUuid(uuid);
+  }
+
+  @Override
+  public LocationAttributeType findPDSLocationAttributeTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationLocationAttributeTypeDao.findPDSLocationAttributeTypeByUuid(uuid);
   }
 
   @Override
@@ -390,11 +400,14 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
       // Get related locationAttributes
       List<LocationAttribute> locationAttributes =
           getLocationAttributesAssociatedWithAttribute(pdsLocationAttributeType);
-      for (LocationAttribute locationAttribute : locationAttributes) {
-        harmonizationLocationAttributeTypeDao.updateLocationAttribute(
-            locationAttribute, mdsLocationAttributeType.getLocationAttributeTypeId());
-        locationService.purgeLocationAttributeType(pdsLocationAttributeType);
-      }
+      this.overwriteLocationAttributeType(
+          pdsLocationAttributeType, mdsLocationAttributeType, locationAttributes);
+
+      //			for (LocationAttribute locationAttribute : locationAttributes) {
+      //				harmonizationLocationAttributeTypeDao.updateLocationAttribute(locationAttribute,
+      //						mdsLocationAttributeType.getLocationAttributeTypeId());
+      //				locationService.purgeLocationAttributeType(pdsLocationAttributeType);
+      //			}
     }
   }
 

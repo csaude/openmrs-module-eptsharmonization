@@ -10,14 +10,14 @@ import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationAttributeTypeDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationAttributeTypeDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 5/26/20. */
-@Repository(HibernateHarmonizationLocationAttributeTypeDao.BEAN_NAME)
-public class HibernateHarmonizationLocationAttributeTypeDao
-    implements HarmonizationLocationAttributeTypeDao {
+@Repository(HibernateHarmonizationLocationAttributeTypeDAO.BEAN_NAME)
+public class HibernateHarmonizationLocationAttributeTypeDAO
+    implements HarmonizationLocationAttributeTypeDAO {
   public static final String BEAN_NAME =
       "eptsharmonization.hibernateHarmonizationLocationAttributeTypeDao";
   private SessionFactory sessionFactory;
@@ -121,6 +121,32 @@ public class HibernateHarmonizationLocationAttributeTypeDao
   }
 
   @Override
+  public LocationAttributeType findMDSLocationAttributeTypeByUuid(String uuid) throws DAOException {
+    clearAndFlushSession();
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select v.* from _location_attribute_type v where v.uuid = :uuid ")
+            .addEntity(LocationAttributeType.class);
+    query.setString("uuid", uuid);
+    return (LocationAttributeType) query.uniqueResult();
+  }
+
+  @Override
+  public LocationAttributeType findPDSLocationAttributeTypeByUuid(String uuid) throws DAOException {
+    clearAndFlushSession();
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select v.* from location_attribute_type v where v.uuid = :uuid ")
+            .addEntity(LocationAttributeType.class);
+    query.setString("uuid", uuid);
+    return (LocationAttributeType) query.uniqueResult();
+  }
+
+  @Override
   public LocationAttributeType updateLocationAttributeType(
       LocationAttributeType locationAttributeType, Integer nextId) throws DAOException {
     this.sessionFactory
@@ -189,30 +215,29 @@ public class HibernateHarmonizationLocationAttributeTypeDao
       throws DAOException {
     sessionFactory.getCurrentSession().evict(toOverwrite);
 
-    StringBuilder queryBuilder =
-        new StringBuilder("update location_attribute_type set location_attribute_type_id=:id, ")
-            .append(
-                "name=:name, description=:description, datatype=:dataType, datatype_config=:dataTypeConfig, ")
-            .append("preferred_handler=:preferredHandler, handler_config=:handlerConfig, ")
-            .append("min_occurs=:minOccurs, max_occurs=:maxOccurs, date_created=:dateCreated, ")
-            .append(
-                "retired=:retired, retire_reason=:retireReason where location_attribute_type_id=:currentId");
+    String update =
+        " update location_attribute_type set location_attribute_type_id=:id, name=:name, description=:description, datatype=:dataType, "
+            + "  datatype_config=:dataTypeConfig, preferred_handler=:preferredHandler, handler_config=:handlerConfig, "
+            + "  min_occurs=:minOccurs, max_occurs=:maxOccurs, date_created=:dateCreated, retired=:retired, retire_reason=:retireReason, "
+            + "  uuid =:uuid where location_attribute_type_id=:currentId";
 
     sessionFactory
         .getCurrentSession()
-        .createSQLQuery(queryBuilder.toString())
+        .createSQLQuery(update)
         .setInteger("id", toOverwriteWith.getLocationAttributeTypeId())
         .setString("name", toOverwriteWith.getName())
         .setString("description", toOverwriteWith.getDescription())
         .setString("dataType", toOverwriteWith.getDatatypeClassname())
         .setString("dataTypeConfig", toOverwriteWith.getDatatypeConfig())
         .setString("preferredHandler", toOverwriteWith.getPreferredHandlerClassname())
+        .setString("handlerConfig", toOverwriteWith.getHandlerConfig())
         .setInteger("minOccurs", toOverwriteWith.getMinOccurs())
         .setInteger("maxOccurs", toOverwriteWith.getMaxOccurs())
         .setInteger("currentId", toOverwrite.getLocationAttributeTypeId())
         .setDate("dateCreated", toOverwriteWith.getDateCreated())
         .setBoolean("retired", toOverwriteWith.isRetired())
         .setString("retireReason", toOverwriteWith.getRetireReason())
+        .setString("uuid", toOverwriteWith.getUuid())
         .executeUpdate();
     clearAndFlushSession();
 

@@ -6,13 +6,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.api.AdministrationService;
@@ -50,6 +53,8 @@ public class HarmonizeLocationAttributeTypeController {
       "/module/eptsharmonization/manualMappingLocationAttributeTypeHarmonization";
   public static final String ADD_LOCATION_ATTRIBUTE_TYPE_MAPPING =
       "/module/eptsharmonization/addLocationAttributeTypeMapping";
+  public static final String ADD_LOCATION_ATTRIBUTE_TYPE_FROM_MDS_MAPPING =
+      "/module/eptsharmonization/addLocationAttributeTypeFromMDSMapping";
   private static final String REMOVE_LOCATION_ATTRIBUTE_TYPE_MAPPING =
       "/module/eptsharmonization/removeLocationAttributeTypeMapping";
   private static final String EXPORT_LOCATION_ATTRIBUTE_TYPES_LOG =
@@ -256,17 +261,68 @@ public class HarmonizeLocationAttributeTypeController {
       }
     }
 
-    // Overwrite the remaining same UUID different IDs anyway shifting the already existing ones to
+    // Overwrite the remaining same UUID different IDs anyway shifting the already
+    // existing ones to
     // new ID and UUID.
-    // Because metadata always wins. If one needs to keep them they may be mapped or exported as new
+    // Because metadata always wins. If one needs to keep them they may be mapped or
+    // exported as new
     // suggesting to CRB
-    harmonizationLocationAttributeTypeService
-        .replacePDSLocationAttributeTypesWithSameUuidWithThoseFromMDS(sameIdAndUuidDifferentNames);
-    harmonizationLocationAttributeTypeService
-        .replacePDSLocationAttributeTypesWithSameUuidWithThoseFromMDS(sameUuidDifferentIds);
+
+    //    harmonizationLocationAttributeTypeService
+    //
+    // .replacePDSLocationAttributeTypesWithSameUuidWithThoseFromMDS(sameIdAndUuidDifferentNames);
+    //    harmonizationLocationAttributeTypeService
+    //        .replacePDSLocationAttributeTypesWithSameUuidWithThoseFromMDS(sameUuidDifferentIds);
 
     Map<LocationAttributeTypeDTO, Integer> mappableLocationAttributeTypes =
         getMappableLocationAttributeTypes(session);
+
+    if (!sameUuidDifferentIds.isEmpty() || !sameIdAndUuidDifferentNames.isEmpty()) {
+
+      List<LocationAttributeTypeDTO> availableMDSMappingTypes =
+          this.harmonizationLocationAttributeTypeService
+              .findAllMetadataLocationAttributeTypesNotInHarmonyWithProduction();
+
+      LocationAttributeTypeDTO addedMDSMappableLocationAttributeType =
+          (LocationAttributeTypeDTO) session.getAttribute("addedMDSMappableLocationAttributeType");
+      LocationAttributeType removedMDSMappableLocationAttributeType =
+          (LocationAttributeType) session.getAttribute("removedMDSMappableLocationAttributeType");
+
+      session.removeAttribute("addedMDSMappableLocationAttributeType");
+      session.removeAttribute("removedMDSMappableLocationAttributeType");
+      availableMDSMappingTypes.remove(addedMDSMappableLocationAttributeType);
+      if (removedMDSMappableLocationAttributeType != null) {
+        LocationAttributeTypeDTO dto =
+            new LocationAttributeTypeDTO(removedMDSMappableLocationAttributeType);
+        if (!availableMDSMappingTypes.contains(dto)) {
+          availableMDSMappingTypes.add(dto);
+        }
+      }
+      session.setAttribute("availableMDSMappingTypes", availableMDSMappingTypes);
+
+      for (Entry<String, List<LocationAttributeTypeDTO>> entry : sameUuidDifferentIds.entrySet()) {
+        mappableLocationAttributeTypes.put(entry.getValue().get(0), 1);
+      }
+      for (Entry<String, List<LocationAttributeTypeDTO>> entry :
+          sameIdAndUuidDifferentNames.entrySet()) {
+        mappableLocationAttributeTypes.put(entry.getValue().get(0), 1);
+      }
+      LocationAttributeTypeDTO addedMappableLocationAttributeType =
+          (LocationAttributeTypeDTO) session.getAttribute("addedMappableLocationAttributeType");
+      LocationAttributeType removedMappableLocationAttributeType =
+          (LocationAttributeType) session.getAttribute("removedMappableLocationAttributeType");
+      session.removeAttribute("addedMappableLocationAttributeType");
+      session.removeAttribute("removedMappableLocationAttributeType");
+
+      mappableLocationAttributeTypes.remove(addedMappableLocationAttributeType);
+      if (removedMappableLocationAttributeType != null) {
+        mappableLocationAttributeTypes.put(
+            new LocationAttributeTypeDTO(removedMappableLocationAttributeType), 1);
+      }
+      if (!mappableLocationAttributeTypes.isEmpty()) {
+        session.setAttribute("mappableLocationAttributeTypes", mappableLocationAttributeTypes);
+      }
+    }
 
     if (mappableLocationAttributeTypes != null && mappableLocationAttributeTypes.size() > 0) {
       List<LocationAttributeType> allLocationAttributeTypes =
@@ -274,16 +330,14 @@ public class HarmonizeLocationAttributeTypeController {
       List<LocationAttributeTypeDTO> toRemoveFromAll =
           new ArrayList<>(mappableLocationAttributeTypes.keySet());
       allLocationAttributeTypes.removeAll(DTOUtils.fromLocationAttributeTypeDTOs(toRemoveFromAll));
-      modelAndView.addObject(
+      this.sortByName(allLocationAttributeTypes);
+      session.setAttribute(
           "availableMappingTypes", DTOUtils.fromLocationAttributeTypes(allLocationAttributeTypes));
       session.setAttribute("mappableLocationAttributeTypes", mappableLocationAttributeTypes);
 
       // Copy mappables under a different name.
       session.setAttribute(
           "productionLocationAttributeTypesToExport", mappableLocationAttributeTypes);
-      modelAndView.addObject(
-          "mappableLocationAttributeTypesList",
-          new ArrayList<>(mappableLocationAttributeTypes.keySet()));
     } else {
       session.removeAttribute("mappableLocationAttributeTypes");
       session.removeAttribute("productionLocationAttributeTypesToExport");
@@ -293,7 +347,9 @@ public class HarmonizeLocationAttributeTypeController {
     // Write log to file.
     logBuilder.build();
 
-    if (mappableLocationAttributeTypes.size() == 0) {
+    if (mappableLocationAttributeTypes.size() == 0
+        && sameUuidDifferentIds.isEmpty()
+        && sameIdAndUuidDifferentNames.isEmpty()) {
       modelAndView.addObject("harmonizationCompleted", true);
     }
 
@@ -326,9 +382,10 @@ public class HarmonizeLocationAttributeTypeController {
     }
 
     LocationAttributeType pdsLocationAttributeType =
-        locationService.getLocationAttributeTypeByUuid((String) locationAttributeTypeBean.getKey());
+        this.harmonizationLocationAttributeTypeService.findPDSLocationAttributeTypeByUuid(
+            (String) locationAttributeTypeBean.getKey());
     LocationAttributeType mdsLocationAttributeType =
-        locationService.getLocationAttributeTypeByUuid(
+        this.harmonizationLocationAttributeTypeService.findPDSLocationAttributeTypeByUuid(
             (String) locationAttributeTypeBean.getValue());
 
     Map<LocationAttributeType, LocationAttributeType> manualLocationAttributeTypeMappings =
@@ -339,23 +396,72 @@ public class HarmonizeLocationAttributeTypeController {
       manualLocationAttributeTypeMappings = new HashMap<>();
     }
 
-    Map<LocationAttributeTypeDTO, Integer> removedMappableLocationAttributeTypes =
-        (Map) session.getAttribute("removedMappableLocationAttributeTypes");
-    if (removedMappableLocationAttributeTypes == null) {
-      removedMappableLocationAttributeTypes = new HashMap<>();
-    }
-
-    LocationAttributeTypeDTO associatedLocationAttributeTypeDTO =
-        new LocationAttributeTypeDTO(pdsLocationAttributeType);
-    removedMappableLocationAttributeTypes.put(
-        associatedLocationAttributeTypeDTO,
-        mappableLocationAttributeTypes.remove(associatedLocationAttributeTypeDTO));
+    mappableLocationAttributeTypes.remove(new LocationAttributeTypeDTO(pdsLocationAttributeType));
     manualLocationAttributeTypeMappings.put(pdsLocationAttributeType, mdsLocationAttributeType);
 
     session.setAttribute(
         "manualLocationAttributeTypeMappings", manualLocationAttributeTypeMappings);
     session.setAttribute(
-        "removedMappableLocationAttributeTypes", removedMappableLocationAttributeTypes);
+        "addedMappableLocationAttributeType",
+        new LocationAttributeTypeDTO(pdsLocationAttributeType));
+
+    return modelAndView;
+  }
+
+  @RequestMapping(value = ADD_LOCATION_ATTRIBUTE_TYPE_FROM_MDS_MAPPING, method = RequestMethod.POST)
+  public ModelAndView addLocationAttributeTypeFromMDSMapping(
+      HttpSession session,
+      @ModelAttribute("locationAttributeTypeBean")
+          LocationAttributeTypeBean locationAttributeTypeBean) {
+
+    Map<LocationAttributeTypeDTO, Integer> mappableLocationAttributeTypes =
+        getMappableLocationAttributeTypes(session);
+    ModelAndView modelAndView = getRedirectToMandatoryStep();
+
+    if (locationAttributeTypeBean.getKey() == null
+        || StringUtils.isEmpty(((String) locationAttributeTypeBean.getKey()))) {
+      modelAndView.addObject(
+          "errorRequiredPDSValue",
+          "eptsharmonization.error.locationAttributeTypeForMapping.required");
+      return modelAndView;
+    }
+    if (locationAttributeTypeBean.getValue() == null
+        || StringUtils.isEmpty(((String) locationAttributeTypeBean.getValue()))) {
+      modelAndView.addObject(
+          "errorRequiredMdsValue",
+          "eptsharmonization.error.locationAttributeTypeForMapping.required");
+      return modelAndView;
+    }
+
+    LocationAttributeType pdsLocationAttributeType =
+        this.harmonizationLocationAttributeTypeService.findPDSLocationAttributeTypeByUuid(
+            (String) locationAttributeTypeBean.getKey());
+    LocationAttributeType mdsLocationAttributeType =
+        this.harmonizationLocationAttributeTypeService.findMDSLocationAttributeTypeByUuid(
+            (String) locationAttributeTypeBean.getValue());
+
+    Map<LocationAttributeType, LocationAttributeType> manualLocationAttributeTypeMappings =
+        (Map<LocationAttributeType, LocationAttributeType>)
+            session.getAttribute("manualLocationAttributeTypeMappings");
+
+    if (manualLocationAttributeTypeMappings == null) {
+      manualLocationAttributeTypeMappings = new HashMap<>();
+    }
+
+    List<LocationAttributeTypeDTO> availableMDSMappingTypes =
+        (List<LocationAttributeTypeDTO>) session.getAttribute("availableMDSMappingTypes");
+    availableMDSMappingTypes.remove(new LocationAttributeTypeDTO(mdsLocationAttributeType));
+
+    mappableLocationAttributeTypes.remove(new LocationAttributeTypeDTO(pdsLocationAttributeType));
+    manualLocationAttributeTypeMappings.put(pdsLocationAttributeType, mdsLocationAttributeType);
+    session.setAttribute(
+        "manualLocationAttributeTypeMappings", manualLocationAttributeTypeMappings);
+    session.setAttribute(
+        "addedMappableLocationAttributeType",
+        new LocationAttributeTypeDTO(pdsLocationAttributeType));
+    session.setAttribute(
+        "addedMDSMappableLocationAttributeType",
+        new LocationAttributeTypeDTO(mdsLocationAttributeType));
 
     return modelAndView;
   }
@@ -365,37 +471,39 @@ public class HarmonizeLocationAttributeTypeController {
       HttpSession session,
       @RequestParam("productionServerLocationAttributeTypeUuID")
           String pdsLocationAttributeTypeUuid) {
-    Map<LocationAttributeTypeDTO, Integer> mappableLocationAttributeTypes =
-        getMappableLocationAttributeTypes(session);
+
+    LocationAttributeType pdsLocationAttributeType =
+        this.harmonizationLocationAttributeTypeService.findPDSLocationAttributeTypeByUuid(
+            pdsLocationAttributeTypeUuid);
+
     Map<LocationAttributeType, LocationAttributeType> manualLocationAttributeTypeMappings =
         (Map<LocationAttributeType, LocationAttributeType>)
             session.getAttribute("manualLocationAttributeTypeMappings");
 
-    Map<LocationAttributeTypeDTO, Integer> removedMappableLocationAttributeTypes =
-        (Map) session.getAttribute("removedMappableLocationAttributeTypes");
-
-    LocationAttributeTypeDTO locationAttributeTypeDTOFromRemoved = null;
-    for (LocationAttributeTypeDTO locationAttributeTypeDTO :
-        removedMappableLocationAttributeTypes.keySet()) {
-      if (locationAttributeTypeDTO.getUuid().equals(pdsLocationAttributeTypeUuid)) {
-        locationAttributeTypeDTOFromRemoved = locationAttributeTypeDTO;
-        break;
-      }
-    }
-
-    manualLocationAttributeTypeMappings.remove(
-        locationAttributeTypeDTOFromRemoved.getLocationAttributeType());
-    mappableLocationAttributeTypes.put(
-        locationAttributeTypeDTOFromRemoved,
-        removedMappableLocationAttributeTypes.get(locationAttributeTypeDTOFromRemoved));
+    LocationAttributeType mdsLocationAttributeType =
+        manualLocationAttributeTypeMappings.remove(pdsLocationAttributeType);
 
     if (manualLocationAttributeTypeMappings.isEmpty()) {
       session.removeAttribute("manualLocationAttributeTypeMappings");
     }
 
-    if (removedMappableLocationAttributeTypes.isEmpty()) {
-      session.removeAttribute("removedMappableLocationAttributeTypes");
+    List<LocationAttributeTypeDTO> availableMappingTypes =
+        (List<LocationAttributeTypeDTO>) session.getAttribute("availableMappingTypes");
+    boolean isMDSAlreadyInPDS = false;
+    for (LocationAttributeTypeDTO dto : availableMappingTypes) {
+      LocationAttributeType type = dto.getLocationAttributeType();
+      if (mdsLocationAttributeType.getUuid().equals(type.getUuid())
+          && mdsLocationAttributeType.getId().equals(type.getId())
+          && mdsLocationAttributeType.getName().contentEquals(type.getName())) {
+        isMDSAlreadyInPDS = true;
+        break;
+      }
     }
+
+    if (!isMDSAlreadyInPDS) {
+      session.setAttribute("removedMDSMappableLocationAttributeType", mdsLocationAttributeType);
+    }
+    session.setAttribute("removedMappableLocationAttributeType", pdsLocationAttributeType);
 
     return getRedirectToMandatoryStep();
   }
@@ -524,5 +632,12 @@ public class HarmonizeLocationAttributeTypeController {
       logBuilder = new LocationAttributeTypeHarmonizationCSVLog.Builder(defaultLocation);
     }
     return logBuilder;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<LocationAttributeType> sortByName(List<LocationAttributeType> list) {
+    BeanComparator comparator = new BeanComparator("name");
+    Collections.sort(list, comparator);
+    return list;
   }
 }

@@ -60,6 +60,10 @@ public interface HarmonizationLocationAttributeTypeService extends OpenmrsServic
   List<LocationAttributeTypeDTO> findAllProductionLocationAttributeTypesNotInHarmonyWithMetadata()
       throws APIException;
 
+  LocationAttributeType findMDSLocationAttributeTypeByUuid(String uuid) throws APIException;
+
+  LocationAttributeType findPDSLocationAttributeTypeByUuid(String uuid) throws APIException;
+
   void saveLocationAttributeTypesWithDifferentDetails(
       Map<String, List<LocationAttributeTypeDTO>> locationAttributeTypes) throws APIException;
 
