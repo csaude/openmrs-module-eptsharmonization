@@ -388,11 +388,9 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
                 pdSEncounterType.getId());
 
         if (mdsEncounterType.getUuid().equals(pdSEncounterType.getUuid())
-            && mdsEncounterType.getId().equals(pdSEncounterType.getId())) {
-          if (mdsEncounterType.getId().equals(pdSEncounterType.getId())
-              && mdsEncounterType.getName().equals(pdSEncounterType.getName())) {
-            return;
-          }
+            && mdsEncounterType.getId().equals(pdSEncounterType.getId())
+            && mdsEncounterType.getName().equalsIgnoreCase(pdSEncounterType.getName())) {
+          return;
         } else {
           List<Encounter> relatedEncounters =
               this.harmonizationEncounterTypeServiceDAO.findEncontersByEncounterTypeId(
@@ -410,7 +408,6 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
             this.harmonizationEncounterTypeServiceDAO.updateEncounter(
                 encounter, mdsEncounterType.getEncounterTypeId());
           }
-
           this.harmonizationEncounterTypeServiceDAO.deleteEncounterType(foundPDS);
 
           EncounterType foundMDSEncounterTypeByID =

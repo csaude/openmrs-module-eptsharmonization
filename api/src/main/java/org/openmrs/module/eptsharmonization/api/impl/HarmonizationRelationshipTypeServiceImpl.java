@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import org.openmrs.Relationship;
 import org.openmrs.RelationshipType;
@@ -27,6 +28,7 @@ import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationRelationshipTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationRelationshipTypeDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -358,22 +360,76 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
   @Override
   public void saveManualRelationshipTypeMappings(
       Map<RelationshipType, RelationshipType> manualRelationshipTypeMappings) throws APIException {
-    // Get Relationships related to mapped one.
-    for (Map.Entry<RelationshipType, RelationshipType> relationshipTypeMapping :
-        manualRelationshipTypeMappings.entrySet()) {
-      RelationshipType pdsRelationshipType = relationshipTypeMapping.getKey();
-      RelationshipType mdsRelationshipType = relationshipTypeMapping.getValue();
-      // Get related relationships
-      List<Relationship> relationships =
-          harmonizationRelationshipTypeDao.getRelashionshipsByType(pdsRelationshipType);
+    this.dao.evictCache();
 
-      this.overwriteRelationshipType(pdsRelationshipType, mdsRelationshipType, relationships);
+    try {
+      this.dao.setDisabledCheckConstraints();
 
-      // for (Relationship relationship : relationships) {
-      // harmonizationRelationshipTypeDao.updateRelationship(relationship,
-      // mdsRelationshipType.getRelationshipTypeId());
-      // personService.purgeRelationshipType(pdsRelationshipType);
-      // }
+      for (Entry<RelationshipType, RelationshipType> entry :
+          manualRelationshipTypeMappings.entrySet()) {
+
+        RelationshipType pdsRelationshipType = entry.getKey();
+        RelationshipType mdsRelationshipType = entry.getValue();
+
+        RelationshipType foundMDSRelationshipTypeByUuid =
+            this.harmonizationRelationshipTypeDao.findPDSRelationshipTypeByUuid(
+                mdsRelationshipType.getUuid());
+
+        if ((foundMDSRelationshipTypeByUuid != null
+                && !foundMDSRelationshipTypeByUuid.getId().equals(mdsRelationshipType.getId()))
+            && (!foundMDSRelationshipTypeByUuid.getId().equals(pdsRelationshipType.getId())
+                && !foundMDSRelationshipTypeByUuid
+                    .getUuid()
+                    .equals(pdsRelationshipType.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the RelationshipType '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdsRelationshipType.getaIsToB(),
+                  mdsRelationshipType.getaIsToB(),
+                  foundMDSRelationshipTypeByUuid.getaIsToB(),
+                  foundMDSRelationshipTypeByUuid.getId(),
+                  foundMDSRelationshipTypeByUuid.getUuid()));
+        }
+
+        if (mdsRelationshipType.getUuid().equals(pdsRelationshipType.getUuid())
+            && mdsRelationshipType.getId().equals(pdsRelationshipType.getId())
+            && mdsRelationshipType.getaIsToB().equalsIgnoreCase(pdsRelationshipType.getaIsToB())
+            && mdsRelationshipType.getbIsToA().equalsIgnoreCase(pdsRelationshipType.getbIsToA())) {
+          return;
+        } else {
+          this.dao.evictCache();
+          RelationshipType foundPDS =
+              this.personService.getRelationshipType(pdsRelationshipType.getId());
+
+          List<Relationship> relationships =
+              harmonizationRelationshipTypeDao.getRelashionshipsByType(foundPDS);
+
+          for (Relationship relationship : relationships) {
+            harmonizationRelationshipTypeDao.updateRelationship(
+                relationship, mdsRelationshipType.getRelationshipTypeId());
+          }
+          personService.purgeRelationshipType(pdsRelationshipType);
+
+          RelationshipType foundMDSRelationshipTypeID =
+              this.personService.getRelationshipType(mdsRelationshipType.getId());
+
+          if (foundMDSRelationshipTypeID == null) {
+            this.harmonizationRelationshipTypeDao.insertRelationshipType(mdsRelationshipType);
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      if (e instanceof APIException) throw (APIException) e;
+      throw new APIException(e.getMessage(), e);
+    } finally {
+      try {
+        dao.setEnableCheckConstraints();
+      } catch (Exception e) {
+        throw new APIException(e.getMessage(), e);
+      }
     }
   }
 

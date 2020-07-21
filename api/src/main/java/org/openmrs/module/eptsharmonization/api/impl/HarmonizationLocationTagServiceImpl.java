@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
@@ -27,6 +28,7 @@ import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationLocationTagService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationTagDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -347,21 +349,70 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
   @Override
   public void saveManualLocationTagMappings(Map<LocationTag, LocationTag> manualLocationTagMappings)
       throws APIException {
-    // Get Locations related to mapped one.
-    for (Map.Entry<LocationTag, LocationTag> locationTagMapping :
-        manualLocationTagMappings.entrySet()) {
-      LocationTag pdsLocationTag = locationTagMapping.getKey();
-      LocationTag mdsLocationTag = locationTagMapping.getValue();
-      // Get related locations
-      List<Location> locations = locationService.getLocationsByTag(pdsLocationTag);
 
-      this.overwriteLocationTag(pdsLocationTag, mdsLocationTag, locations);
-      // for (Location location : locations) {
-      // harmonizationLocationTagDao.updateLocation(location,
-      // pdsLocationTag.getLocationTagId(),
-      // mdsLocationTag.getLocationTagId());
-      // locationService.purgeLocationTag(pdsLocationTag);
-      // }
+    this.dao.evictCache();
+    try {
+      this.dao.setDisabledCheckConstraints();
+
+      for (Entry<LocationTag, LocationTag> entry : manualLocationTagMappings.entrySet()) {
+
+        LocationTag pdsLocationTag = entry.getKey();
+        LocationTag mdsLocationTag = entry.getValue();
+
+        LocationTag foundMDSLocationTagByUuid =
+            this.harmonizationLocationTagDao.findPDSLocationTagByUuid(mdsLocationTag.getUuid());
+
+        if ((foundMDSLocationTagByUuid != null
+                && !foundMDSLocationTagByUuid.getId().equals(mdsLocationTag.getId()))
+            && (!foundMDSLocationTagByUuid.getId().equals(pdsLocationTag.getId())
+                && !foundMDSLocationTagByUuid.getUuid().equals(pdsLocationTag.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the Encounter Type '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdsLocationTag.getName(),
+                  mdsLocationTag.getName(),
+                  foundMDSLocationTagByUuid.getName(),
+                  foundMDSLocationTagByUuid.getId(),
+                  foundMDSLocationTagByUuid.getUuid()));
+        }
+
+        if (mdsLocationTag.getUuid().equals(pdsLocationTag.getUuid())
+            && mdsLocationTag.getId().equals(pdsLocationTag.getId())
+            && mdsLocationTag.getName().equalsIgnoreCase(pdsLocationTag.getName())) {
+          return;
+
+        } else {
+          this.dao.evictCache();
+          LocationTag foundPDS = this.locationService.getLocationTag(pdsLocationTag.getId());
+
+          List<Location> locations = locationService.getLocationsByTag(foundPDS);
+
+          for (Location location : locations) {
+            harmonizationLocationTagDao.updateLocation(
+                location, foundPDS.getLocationTagId(), mdsLocationTag.getLocationTagId());
+          }
+          locationService.purgeLocationTag(foundPDS);
+
+          LocationTag foundMDSLocationTagByID =
+              this.locationService.getLocationTag(mdsLocationTag.getId());
+
+          if (foundMDSLocationTagByID == null) {
+            this.harmonizationLocationTagDao.insertLocationTag(mdsLocationTag);
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      if (e instanceof APIException) throw (APIException) e;
+      throw new APIException(e.getMessage(), e);
+    } finally {
+      try {
+        dao.setEnableCheckConstraints();
+      } catch (Exception e) {
+        throw new APIException(e.getMessage(), e);
+      }
     }
   }
 

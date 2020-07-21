@@ -254,20 +254,6 @@ public class HarmonizeRelationshipTypeController {
       }
     }
 
-    // Overwrite the remaining same UUID different IDs anyway shifting the already
-    // existing ones to
-    // new ID and UUID.
-    // Because metadata always wins. If one needs to keep them they may be mapped or
-    // exported as new
-    // suggesting to CRB
-
-    //
-    // harmonizationRelationshipTypeService.replacePDSRelationshipTypesWithSameUuidWithThoseFromMDS(
-    // sameIdAndUuidDifferentNames);
-    //
-    // harmonizationRelationshipTypeService.replacePDSRelationshipTypesWithSameUuidWithThoseFromMDS(
-    // sameUuidDifferentIds);
-
     Map<RelationshipTypeDTO, Integer> mappableRelationshipTypes =
         getMappableRelationshipTypes(session);
 
@@ -339,9 +325,14 @@ public class HarmonizeRelationshipTypeController {
     // Write log to file.
     logBuilder.build();
 
+    Map<RelationshipType, RelationshipType> manualRelationshipTypeMappings =
+        (Map<RelationshipType, RelationshipType>)
+            session.getAttribute("manualRelationshipTypeMappings");
+
     if (mappableRelationshipTypes.size() == 0
         && sameUuidDifferentIds.isEmpty()
-        && sameIdAndUuidDifferentNames.isEmpty()) {
+        && sameIdAndUuidDifferentNames.isEmpty()
+        && (manualRelationshipTypeMappings == null || manualRelationshipTypeMappings.isEmpty())) {
       modelAndView.addObject("harmonizationCompleted", true);
     }
 

@@ -243,18 +243,6 @@ public class HarmonizeVisitTypeController {
       }
     }
 
-    // Overwrite the remaining same UUID different IDs anyway shifting the already
-    // existing ones to
-    // new ID and UUID.
-    // Because metadata always wins. If one needs to keep them they may be mapped or
-    // exported as new
-    // suggesting to CRB
-
-    // harmonizationVisitTypeService.replacePDSVisitTypesWithSameUuidWithThoseFromMDS(
-    // sameIdAndUuidDifferentNames);
-    // harmonizationVisitTypeService.replacePDSVisitTypesWithSameUuidWithThoseFromMDS(
-    // sameUuidDifferentIds);
-
     Map<VisitTypeDTO, Integer> mappableVisitTypes = getMappableVisitTypes(session);
 
     if (!sameUuidDifferentIds.isEmpty() || !sameIdAndUuidDifferentNames.isEmpty()) {
@@ -318,9 +306,13 @@ public class HarmonizeVisitTypeController {
     // Write log to file.
     logBuilder.build();
 
+    Map<VisitType, VisitType> manualVisitTypeMappings =
+        (Map<VisitType, VisitType>) session.getAttribute("manualVisitTypeMappings");
+
     if ((mappableVisitTypes.size() == 0)
         && sameUuidDifferentIds.isEmpty()
-        && sameIdAndUuidDifferentNames.isEmpty()) {
+        && sameIdAndUuidDifferentNames.isEmpty()
+        && (manualVisitTypeMappings == null || manualVisitTypeMappings.isEmpty())) {
       modelAndView.addObject("harmonizationCompleted", true);
     }
 

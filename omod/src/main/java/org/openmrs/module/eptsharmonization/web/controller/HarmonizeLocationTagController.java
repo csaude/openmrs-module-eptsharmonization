@@ -245,17 +245,6 @@ public class HarmonizeLocationTagController {
       }
     }
 
-    // Overwrite the remaining same UUID different IDs anyway shifting the already
-    // existing ones to
-    // new ID and UUID.
-    // Because metadata always wins. If one needs to keep them they may be mapped or
-    // exported as new
-    // suggesting to CRB
-    //
-    //	harmonizationLocationTagService.replacePDSLocationTagsWithSameUuidWithThoseFromMDS(sameIdAndUuidDifferentNames);
-    //
-    //	harmonizationLocationTagService.replacePDSLocationTagsWithSameUuidWithThoseFromMDS(sameUuidDifferentIds);
-
     Map<LocationTagDTO, Integer> mappableLocationTags = getMappableLocationTags(session);
 
     if (!sameUuidDifferentIds.isEmpty() || !sameIdAndUuidDifferentNames.isEmpty()) {
@@ -320,9 +309,13 @@ public class HarmonizeLocationTagController {
     // Write log to file.
     logBuilder.build();
 
+    Map<LocationTag, LocationTag> manualLocationTagMappings =
+        (Map<LocationTag, LocationTag>) session.getAttribute("manualLocationTagMappings");
+
     if (mappableLocationTags.size() == 0
         && sameUuidDifferentIds.isEmpty()
-        && sameIdAndUuidDifferentNames.isEmpty()) {
+        && sameIdAndUuidDifferentNames.isEmpty()
+        && (manualLocationTagMappings == null || manualLocationTagMappings.isEmpty())) {
       modelAndView.addObject("harmonizationCompleted", true);
     }
 

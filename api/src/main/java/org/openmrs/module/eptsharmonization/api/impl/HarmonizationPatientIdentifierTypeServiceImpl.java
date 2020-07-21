@@ -384,8 +384,10 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
 
         if (mdsPatientIdentifierType.getUuid().equals(pdSPatientIdentifierType.getUuid())
             && mdsPatientIdentifierType.getId().equals(pdSPatientIdentifierType.getId())) {
-          if (mdsPatientIdentifierType.getId().equals(pdSPatientIdentifierType.getId())
-              && mdsPatientIdentifierType.getName().equals(pdSPatientIdentifierType.getName())) {
+
+          if (mdsPatientIdentifierType
+              .getName()
+              .equalsIgnoreCase(pdSPatientIdentifierType.getName())) {
             return;
           }
           foundPDS.setName(mdsPatientIdentifierType.getName());

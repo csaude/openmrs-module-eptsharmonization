@@ -261,19 +261,6 @@ public class HarmonizeLocationAttributeTypeController {
       }
     }
 
-    // Overwrite the remaining same UUID different IDs anyway shifting the already
-    // existing ones to
-    // new ID and UUID.
-    // Because metadata always wins. If one needs to keep them they may be mapped or
-    // exported as new
-    // suggesting to CRB
-
-    //    harmonizationLocationAttributeTypeService
-    //
-    // .replacePDSLocationAttributeTypesWithSameUuidWithThoseFromMDS(sameIdAndUuidDifferentNames);
-    //    harmonizationLocationAttributeTypeService
-    //        .replacePDSLocationAttributeTypesWithSameUuidWithThoseFromMDS(sameUuidDifferentIds);
-
     Map<LocationAttributeTypeDTO, Integer> mappableLocationAttributeTypes =
         getMappableLocationAttributeTypes(session);
 
@@ -347,9 +334,15 @@ public class HarmonizeLocationAttributeTypeController {
     // Write log to file.
     logBuilder.build();
 
+    Map<LocationAttributeType, LocationAttributeType> manualLocationAttributeTypeMappings =
+        (Map<LocationAttributeType, LocationAttributeType>)
+            session.getAttribute("manualLocationAttributeTypeMappings");
+
     if (mappableLocationAttributeTypes.size() == 0
         && sameUuidDifferentIds.isEmpty()
-        && sameIdAndUuidDifferentNames.isEmpty()) {
+        && sameIdAndUuidDifferentNames.isEmpty()
+        && (manualLocationAttributeTypeMappings == null
+            || manualLocationAttributeTypeMappings.isEmpty())) {
       modelAndView.addObject("harmonizationCompleted", true);
     }
 

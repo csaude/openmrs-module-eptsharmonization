@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import org.openmrs.Visit;
 import org.openmrs.VisitType;
@@ -29,6 +30,7 @@ import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationVisitTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationVisitTypeDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -353,31 +355,79 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
   @Override
   public void saveManualVisitTypeMappings(Map<VisitType, VisitType> manualVisitTypeMappings)
       throws APIException {
-    // Get Visits related to mapped one.
-    for (Map.Entry<VisitType, VisitType> visitTypeMapping : manualVisitTypeMappings.entrySet()) {
-      VisitType pdsVisitType = visitTypeMapping.getKey();
-      VisitType mdsVisitType = visitTypeMapping.getValue();
-      // Get related visits
-      List<Visit> visits =
-          visitService.getVisits(
-              Arrays.asList(pdsVisitType),
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              true,
-              true);
+    this.dao.evictCache();
+    try {
+      dao.setDisabledCheckConstraints();
 
-      this.overwriteVisitType(pdsVisitType, mdsVisitType, visits);
+      for (Entry<VisitType, VisitType> entry : manualVisitTypeMappings.entrySet()) {
 
-      //			for (Visit visit : visits) {
-      //				harmonizationVisitTypeDAO.updateVisit(visit, mdsVisitType.getVisitTypeId());
-      //				visitService.purgeVisitType(pdsVisitType);
-      //			}
+        VisitType pdsVisitType = entry.getKey();
+        VisitType mdsVisitType = entry.getValue();
+
+        VisitType foundMDSVisitByUuid =
+            this.harmonizationVisitTypeDAO.findPDSVisitTypeByUuid(mdsVisitType.getUuid());
+
+        if ((foundMDSVisitByUuid != null
+                && !foundMDSVisitByUuid.getId().equals(mdsVisitType.getId()))
+            && (!foundMDSVisitByUuid.getId().equals(pdsVisitType.getId())
+                && !foundMDSVisitByUuid.getUuid().equals(pdsVisitType.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the Visit Type '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdsVisitType.getName(),
+                  mdsVisitType.getName(),
+                  foundMDSVisitByUuid.getName(),
+                  foundMDSVisitByUuid.getId(),
+                  foundMDSVisitByUuid.getUuid()));
+        }
+
+        if (mdsVisitType.getUuid().equals(pdsVisitType.getUuid())
+            && mdsVisitType.getId().equals(pdsVisitType.getId())
+            && mdsVisitType.getName().equalsIgnoreCase(pdsVisitType.getName())) {
+          return;
+        } else {
+          this.dao.evictCache();
+          VisitType foundPDS = this.visitService.getVisitType(pdsVisitType.getId());
+
+          List<Visit> visits =
+              visitService.getVisits(
+                  Arrays.asList(foundPDS),
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null,
+                  true,
+                  true);
+
+          for (Visit visit : visits) {
+            harmonizationVisitTypeDAO.updateVisit(visit, mdsVisitType.getVisitTypeId());
+          }
+          visitService.purgeVisitType(pdsVisitType);
+          this.dao.evictCache();
+          VisitType foundMDSVisitTypeByID = this.visitService.getVisitType(mdsVisitType.getId());
+
+          if (foundMDSVisitTypeByID == null) {
+            this.harmonizationVisitTypeDAO.insertVisitType(mdsVisitType);
+          }
+          this.updateGPWithNewVisitTypeId(
+              pdsVisitType.getVisitTypeId(), foundMDSVisitTypeByID.getId());
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      if (e instanceof APIException) throw (APIException) e;
+      throw new APIException(e.getMessage(), e);
+    } finally {
+      try {
+        dao.setEnableCheckConstraints();
+      } catch (Exception e) {
+        throw new APIException(e.getMessage(), e);
+      }
     }
   }
 
