@@ -385,7 +385,7 @@ public class HarmonizeProgramWorkflowsController {
     if (manualHarmonizeProgramWorkflows == null) {
       manualHarmonizeProgramWorkflows = new HashMap<>();
     }
-    // TODO: This is not removing the items from list: may be related to cache?    
+    // TODO: This is not removing the items from list: may be related to cache?
     swappableProgramWorkflows.remove(pdsProgramWorkflow);
     manualHarmonizeProgramWorkflows.put(pdsProgramWorkflow, mdsProgramWorkflow);
     session.setAttribute("manualHarmonizeProgramWorkflows", manualHarmonizeProgramWorkflows);

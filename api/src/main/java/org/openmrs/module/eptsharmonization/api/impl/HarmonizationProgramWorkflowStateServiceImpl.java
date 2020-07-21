@@ -11,6 +11,7 @@
  */
 package org.openmrs.module.eptsharmonization.api.impl;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowStateService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationProgramWorkflowStateServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowStateDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -372,7 +374,7 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
   @Authorized({"Manage ProgramWorkflowState"})
   public void saveManualMapping(
       Map<ProgramWorkflowStateDTO, ProgramWorkflowStateDTO> mapProgramWorkflowStates)
-      throws APIException {
+      throws UUIDDuplicationException, SQLException {
     this.harmonizationDAO.evictCache();
     try {
 
@@ -380,8 +382,42 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
       for (Entry<ProgramWorkflowStateDTO, ProgramWorkflowStateDTO> entry :
           mapProgramWorkflowStates.entrySet()) {
 
-        ProgramWorkflowState pdsProgramWorkflowState = entry.getKey().getProgramWorkflowState();
-        ProgramWorkflowState mdsProgramWorkflowState = entry.getValue().getProgramWorkflowState();
+        ProgramWorkflowStateDTO pdsProgramWorkflowStateDTO = entry.getKey();
+        ProgramWorkflowStateDTO mdsProgramWorkflowStateDTO = entry.getValue();
+        ProgramWorkflowState pdsProgramWorkflowState =
+            pdsProgramWorkflowStateDTO.getProgramWorkflowState();
+        ProgramWorkflowState mdsProgramWorkflowState =
+            mdsProgramWorkflowStateDTO.getProgramWorkflowState();
+
+        ProgramWorkflowState foundMDSProgramWorkflowStateByUuid =
+            this.harmonizationProgramWorkflowStateServiceDAO.getProgramWorkflowStateByUuid(
+                mdsProgramWorkflowState.getUuid());
+
+        if ((foundMDSProgramWorkflowStateByUuid != null
+                && !foundMDSProgramWorkflowStateByUuid
+                    .getId()
+                    .equals(mdsProgramWorkflowState.getId()))
+            && (!foundMDSProgramWorkflowStateByUuid.getId().equals(pdsProgramWorkflowState.getId())
+                && !foundMDSProgramWorkflowStateByUuid
+                    .getUuid()
+                    .equals(pdsProgramWorkflowState.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the Program Workflow State '%s' to '%s' and '%s' to '%s'. There is one entry with PROGRAM='%s', CONCEPT='%s', ID='%s' an UUID='%s' ",
+                  pdsProgramWorkflowStateDTO.getFlowProgram(),
+                  mdsProgramWorkflowStateDTO.getFlowProgram(),
+                  pdsProgramWorkflowStateDTO.getConcept(),
+                  mdsProgramWorkflowStateDTO.getConcept(),
+                  harmonizationProgramWorkflowStateServiceDAO
+                      .getProgramWorkflow(foundMDSProgramWorkflowStateByUuid, false)
+                      .getProgram()
+                      .getName(),
+                  harmonizationProgramWorkflowStateServiceDAO.getConceptName(
+                      foundMDSProgramWorkflowStateByUuid, false),
+                  foundMDSProgramWorkflowStateByUuid.getId(),
+                  foundMDSProgramWorkflowStateByUuid.getUuid()));
+        }
 
         ProgramWorkflowState foundPDS =
             this.harmonizationProgramWorkflowStateServiceDAO.getProgramWorkflowStateById(
@@ -406,12 +442,6 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
               && mdsConceptId.equals(pdsConceptId)) {
             return;
           }
-          foundPDS.setProgramWorkflow(
-              harmonizationProgramWorkflowStateServiceDAO.getProgramWorkflow(
-                  mdsProgramWorkflowState, true));
-          foundPDS.setConcept(Context.getConceptService().getConcept(mdsConceptId));
-          this.harmonizationProgramWorkflowStateServiceDAO.updateProgramWorkflowState(foundPDS);
-
         } else {
           List<ConceptStateConversion> relatedConceptStateConversions =
               this.harmonizationProgramWorkflowStateServiceDAO
@@ -429,14 +459,20 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
                 programWorkflowState, mdsProgramWorkflowState.getProgramWorkflowStateId());
           }
           this.harmonizationProgramWorkflowStateServiceDAO.deleteProgramWorkflowState(foundPDS);
+
+          ProgramWorkflowState foundMDSProgramWorkflowStateByID =
+              this.harmonizationProgramWorkflowStateServiceDAO.getProgramWorkflowStateById(
+                  mdsProgramWorkflow.getId());
+          if (foundMDSProgramWorkflowStateByID == null) {
+            this.harmonizationProgramWorkflowStateServiceDAO.saveNotSwappableProgramWorkflowState(
+                mdsProgramWorkflowState);
+          }
         }
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
-      } catch (Exception e) {
+      } catch (SQLException e) {
         e.printStackTrace();
       }
     }

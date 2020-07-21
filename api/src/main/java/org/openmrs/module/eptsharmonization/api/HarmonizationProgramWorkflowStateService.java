@@ -11,12 +11,14 @@
  */
 package org.openmrs.module.eptsharmonization.api;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowStateDTO;
 
 /**
@@ -62,7 +64,7 @@ public interface HarmonizationProgramWorkflowStateService extends OpenmrsService
 
   public void saveManualMapping(
       Map<ProgramWorkflowStateDTO, ProgramWorkflowStateDTO> manualHarmonizeProgramWorkflowStates)
-      throws APIException;
+      throws UUIDDuplicationException, SQLException;
 
   public void deleteNewProgramWorkflowStatesFromPDS(
       List<ProgramWorkflowStateDTO> programWorkflowStates) throws APIException;

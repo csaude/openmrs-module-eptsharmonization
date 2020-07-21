@@ -22,6 +22,7 @@ import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
+import org.openmrs.api.db.ProgramWorkflowDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationProgramWorkflowStateServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,17 @@ public class HibernateHarmonizationProgramWorkflowStateServiceDAO
     implements HarmonizationProgramWorkflowStateServiceDAO {
 
   private SessionFactory sessionFactory;
+  private ProgramWorkflowDAO programWorkflowDAO;
   private HarmonizationServiceDAO harmonizationServiceDAO;
 
   @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
     this.sessionFactory = sessionFactory;
+  }
+
+  @Autowired
+  public void setProgramWorkflowDAO(ProgramWorkflowDAO programWorkflowDAO) {
+    this.programWorkflowDAO = programWorkflowDAO;
   }
 
   @Autowired
@@ -152,10 +159,7 @@ public class HibernateHarmonizationProgramWorkflowStateServiceDAO
                     "select concept_id from _program_workflow_state where program_workflow_state_id = :programWorkflowStateId ")
                 .setInteger("programWorkflowStateId", programWorkflowState.getId())
                 .uniqueResult()
-        : Context.getProgramWorkflowService()
-            .getStateByUuid(programWorkflowState.getUuid())
-            .getConcept()
-            .getId();
+        : getProgramWorkflowStateByUuid(programWorkflowState.getUuid()).getConcept().getId();
   }
 
   @SuppressWarnings("deprecation")
@@ -165,8 +169,7 @@ public class HibernateHarmonizationProgramWorkflowStateServiceDAO
     final Integer programWorkflowId =
         isFromMetadata
             ? getProgramWorkflowId(programWorkflowState)
-            : Context.getProgramWorkflowService()
-                .getStateByUuid(programWorkflowState.getUuid())
+            : getProgramWorkflowStateByUuid(programWorkflowState.getUuid())
                 .getProgramWorkflow()
                 .getId();
     return Context.getProgramWorkflowService().getWorkflow(programWorkflowId);
@@ -359,5 +362,10 @@ public class HibernateHarmonizationProgramWorkflowStateServiceDAO
             .addEntity(ProgramWorkflowState.class)
             .setString("uuidValue", uuid)
             .uniqueResult();
+  }
+
+  @Override
+  public ProgramWorkflowState getProgramWorkflowStateByUuid(String uuid) throws DAOException {
+    return this.programWorkflowDAO.getStateByUuid(uuid);
   }
 }
