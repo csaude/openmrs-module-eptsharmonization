@@ -11,6 +11,7 @@
  */
 package org.openmrs.module.eptsharmonization.api.impl;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPatientIdentifierTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationPatientIdentifierTypeServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.PatientIdentifierTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -166,6 +168,18 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
     List<PatientIdentifierType> findAllSwappable =
         this.harmonizationPatientIdentifierTypeServiceDAO.findAllSwappable();
     return findAllSwappable;
+  }
+
+  @Override
+  public PatientIdentifierType findMDSPatientIdentifierTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationPatientIdentifierTypeServiceDAO.findMDSPatientIdentifierTypeByUuid(
+        uuid);
+  }
+
+  @Override
+  public PatientIdentifierType findPDSPatientIdentifierTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationPatientIdentifierTypeServiceDAO.findPDSPatientIdentifierTypeByUuid(
+        uuid);
   }
 
   @Override
@@ -328,7 +342,7 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
   @Authorized({"Manage Patient Identifier Types"})
   public void saveManualMapping(
       Map<PatientIdentifierType, PatientIdentifierType> mapPatientIdentifierTypes)
-      throws APIException {
+      throws UUIDDuplicationException, SQLException {
     this.harmonizationDAO.evictCache();
     try {
 
@@ -338,6 +352,31 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
 
         PatientIdentifierType pdSPatientIdentifierType = entry.getKey();
         PatientIdentifierType mdsPatientIdentifierType = entry.getValue();
+
+        PatientIdentifierType foundMDSPatientIdentifierTypeByUuid =
+            this.harmonizationPatientIdentifierTypeServiceDAO.getPatientIdentifierTypeByUuid(
+                mdsPatientIdentifierType.getUuid());
+
+        if ((foundMDSPatientIdentifierTypeByUuid != null
+                && !foundMDSPatientIdentifierTypeByUuid
+                    .getId()
+                    .equals(mdsPatientIdentifierType.getId()))
+            && (!foundMDSPatientIdentifierTypeByUuid
+                    .getId()
+                    .equals(pdSPatientIdentifierType.getId())
+                && !foundMDSPatientIdentifierTypeByUuid
+                    .getUuid()
+                    .equals(pdSPatientIdentifierType.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the PatientIdentifierType '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdSPatientIdentifierType.getName(),
+                  mdsPatientIdentifierType.getName(),
+                  foundMDSPatientIdentifierTypeByUuid.getName(),
+                  foundMDSPatientIdentifierTypeByUuid.getId(),
+                  foundMDSPatientIdentifierTypeByUuid.getUuid()));
+        }
 
         PatientIdentifierType foundPDS =
             this.harmonizationPatientIdentifierTypeServiceDAO.getPatientIdentifierTypeById(
@@ -366,12 +405,12 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
       }
     }
   }

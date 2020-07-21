@@ -1,8 +1,10 @@
 package org.openmrs.module.eptsharmonization.web.delegate;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPatientIdentifierTypeService;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.PatientIdentifierTypeDTO;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationItem;
@@ -36,6 +39,8 @@ public class HarmonizePatientIdentifierTypesDelegate {
   public static List<PatientIdentifierType> EXECUTED_PATIENT_IDENTIFIER_TYPES_MANUALLY_CACHE =
       new ArrayList<>();
   public static List<PatientIdentifierType> PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED =
+      new ArrayList<>();
+  private static List<PatientIdentifierType> MDS_PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED =
       new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<PatientIdentifierTypeDTO> patientIdentifierTypes) {
@@ -247,6 +252,7 @@ public class HarmonizePatientIdentifierTypesDelegate {
         list.put((String) item.getKey(), value);
       } else {
         PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED.add(value.get(1).getPatientIdentifierType());
+        MDS_PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED.add(value.get(0).getPatientIdentifierType());
       }
     }
     if (!list.isEmpty()) {
@@ -286,6 +292,7 @@ public class HarmonizePatientIdentifierTypesDelegate {
         list.put((String) item.getKey(), value);
       } else {
         PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED.add(value.get(1).getPatientIdentifierType());
+        MDS_PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED.add(value.get(0).getPatientIdentifierType());
       }
     }
     if (!list.isEmpty()) {
@@ -300,7 +307,8 @@ public class HarmonizePatientIdentifierTypesDelegate {
   @SuppressWarnings("deprecation")
   public void processManualMapping(
       Map<PatientIdentifierType, PatientIdentifierType> manualHarmonizePatientIdentifierTypes,
-      Builder logBuilder) {
+      Builder logBuilder)
+      throws UUIDDuplicationException, SQLException {
 
     List<HarmonizationItem> differentDetailsItems = new ArrayList<>();
     List<HarmonizationItem> differentIDsItems = new ArrayList<>();
@@ -377,5 +385,12 @@ public class HarmonizePatientIdentifierTypesDelegate {
       logBuilder.build();
       HarmonizePatientIdentifierTypesController.IS_NAMES_DIFFERENCES_HARMONIZED = true;
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<PatientIdentifierType> getMDSNotHarmonizedYet() {
+    Comparator<PatientIdentifierType> comp = new BeanComparator("patientIdentifierTypeId");
+    Collections.sort(MDS_PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED, comp);
+    return MDS_PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED;
   }
 }

@@ -5,11 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,8 +19,8 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPatientIdentifierTypeService;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.PatientIdentifierTypeDTO;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
@@ -51,6 +53,10 @@ public class HarmonizePatientIdentifierTypesController {
   public static final String ADD_PATIENT_IDENTIFIER_TYPE_MAPPING =
       HarmonizePatientIdentifierTypesController.CONTROLLER_PATH
           + "/addPatientIdentifierTypeMapping";
+
+  public static final String ADD_PATIENT_IDENTIFIER_TYPE_FROM_MDS_MAPPING =
+      HarmonizePatientIdentifierTypesController.CONTROLLER_PATH
+          + "/addPatientIdentifierTypeFromMDSMapping";
 
   public static final String REMOVE_PATIENT_IDENTIFIER_TYPE_MAPPING =
       HarmonizePatientIdentifierTypesController.CONTROLLER_PATH
@@ -120,7 +126,6 @@ public class HarmonizePatientIdentifierTypesController {
       @RequestParam(required = false, value = "errorRequiredPDSValue")
           String errorRequiredPDSValue) {
 
-    // TODO: I did this fetch as a workaround to prevent having cached data
     newMDSPatientIdentifierTypes = getNewMDSPatientIdentifierTypes();
     differentIDsAndEqualUUID = this.getDifferentIDsAndEqualUUID();
     differentNameAndSameUUIDAndID = this.getDifferentNameAndSameUUIDAndID();
@@ -170,9 +175,8 @@ public class HarmonizePatientIdentifierTypesController {
       @ModelAttribute("differentDetailsAndSameNameUUIDAndID")
           HarmonizationData differentDetailsAndSameNameUUIDAndID) {
 
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new PatientIdentifierTypesHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder =
+        new PatientIdentifierTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
 
     delegate.processAddNewFromMetadataServer(newMDSPatientIdentifierTypes, logBuilder);
     delegate.processDeleteFromProductionServer(productionItemsToDelete, logBuilder);
@@ -192,9 +196,8 @@ public class HarmonizePatientIdentifierTypesController {
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new PatientIdentifierTypesHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder =
+        new PatientIdentifierTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
     delegate.processPatientIdentifierTypesWithDiferrentIdsAndEqualUUID(
         differentIDsAndEqualUUID, logBuilder);
     logBuilder.build();
@@ -213,9 +216,8 @@ public class HarmonizePatientIdentifierTypesController {
           HarmonizationData differentNameAndSameUUIDAndID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new PatientIdentifierTypesHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder =
+        new PatientIdentifierTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
     delegate.processUpdatePatientIdentifierTypesNames(differentNameAndSameUUIDAndID, logBuilder);
     logBuilder.build();
 
@@ -229,23 +231,52 @@ public class HarmonizePatientIdentifierTypesController {
 
   @SuppressWarnings("unchecked")
   @RequestMapping(value = PROCESS_HARMONIZATION_STEP4, method = RequestMethod.POST)
-  public ModelAndView processHarmonizationStep4(HttpSession session, HttpServletRequest request) {
+  public ModelAndView processHarmonizationStep4(
+      HttpSession session,
+      HttpServletRequest request,
+      @ModelAttribute("swappablePatientIdentifierTypes")
+          List<PatientIdentifierType> swappablePatientIdentifierTypes,
+      @ModelAttribute("mdsPatientIdentifierTypeNotHarmonizedYet")
+          List<PatientIdentifierType> mdsPatientIdentifierTypeNotHarmonizedYet)
+      throws Exception {
 
     Map<PatientIdentifierType, PatientIdentifierType> manualHarmonizePatientIdentifierTypes =
         (Map<PatientIdentifierType, PatientIdentifierType>)
             session.getAttribute("manualHarmonizePatientIdentifierTypes");
 
+    ModelAndView modelAndView = getRedirectModelAndView();
     if (manualHarmonizePatientIdentifierTypes != null
         && !manualHarmonizePatientIdentifierTypes.isEmpty()) {
-      String defaultLocationName =
-          Context.getAdministrationService().getGlobalProperty("default_location");
-      Builder logBuilder =
-          new PatientIdentifierTypesHarmonizationCSVLog.Builder(defaultLocationName);
-      delegate.processManualMapping(manualHarmonizePatientIdentifierTypes, logBuilder);
-      HarmonizePatientIdentifierTypesDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
-          "eptsharmonization.encounterType.newDefinedMapping");
+
+      try {
+
+        Builder logBuilder =
+            new PatientIdentifierTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
+
+        delegate.processManualMapping(manualHarmonizePatientIdentifierTypes, logBuilder);
+        HarmonizePatientIdentifierTypesDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
+            "eptsharmonization.encounterType.newDefinedMapping");
+
+      } catch (UUIDDuplicationException e) {
+
+        for (Entry<PatientIdentifierType, PatientIdentifierType> entry :
+            manualHarmonizePatientIdentifierTypes.entrySet()) {
+          if (!swappablePatientIdentifierTypes.contains(entry.getKey())) {
+            swappablePatientIdentifierTypes.add(entry.getKey());
+          }
+          if (!mdsPatientIdentifierTypeNotHarmonizedYet.contains(entry.getKey())) {
+            mdsPatientIdentifierTypeNotHarmonizedYet.add(entry.getValue());
+          }
+        }
+
+        modelAndView.addObject("errorProcessingManualMapping", e.getMessage());
+        return modelAndView;
+      } catch (SQLException e) {
+        e.printStackTrace();
+        throw new Exception(e);
+      }
     }
-    ModelAndView modelAndView = getRedirectModelAndView();
+
     modelAndView.addObject("openmrs_msg", "eptsharmonization.patientidentifiertype.harmonized");
 
     HarmonizePatientIdentifierTypesDelegate.EXECUTED_PATIENT_IDENTIFIER_TYPES_MANUALLY_CACHE =
@@ -265,26 +296,25 @@ public class HarmonizePatientIdentifierTypesController {
 
     ModelAndView modelAndView = this.getRedirectModelAndView();
 
-    if (harmonizationItem.getKey() == null
-        || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
-      modelAndView.addObject(
-          "errorRequiredPDSValue",
-          "eptsharmonization.error.patientIdentifierTypeForMapping.required");
-      return modelAndView;
-    }
     if (harmonizationItem.getValue() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getValue()))) {
       modelAndView.addObject(
-          "errorRequiredMdsValue",
-          "eptsharmonization.error.patientIdentifierTypeForMapping.required");
+          "errorRequiredMdsValue", "eptsharmonization.error.encounterForMapping.required");
+      return modelAndView;
+    }
+
+    if (harmonizationItem.getKey() == null
+        || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
+      modelAndView.addObject(
+          "errorRequiredPDSValue", "eptsharmonization.error.encounterForMapping.required");
       return modelAndView;
     }
 
     PatientIdentifierType pdsPatientIdentifierType =
-        this.harmonizationPatientIdentifierTypeService.findFromPDSByUuid(
+        this.harmonizationPatientIdentifierTypeService.findPDSPatientIdentifierTypeByUuid(
             (String) harmonizationItem.getKey());
     PatientIdentifierType mdsPatientIdentifierType =
-        this.harmonizationPatientIdentifierTypeService.findFromMDSByUuid(
+        this.harmonizationPatientIdentifierTypeService.findPDSPatientIdentifierTypeByUuid(
             (String) harmonizationItem.getValue());
 
     Map<PatientIdentifierType, PatientIdentifierType> manualHarmonizePatientIdentifierTypes =
@@ -302,15 +332,82 @@ public class HarmonizePatientIdentifierTypesController {
     return modelAndView;
   }
 
+  @SuppressWarnings("unchecked")
+  @RequestMapping(value = ADD_PATIENT_IDENTIFIER_TYPE_FROM_MDS_MAPPING, method = RequestMethod.POST)
+  public ModelAndView addPatientIdentifierTypeFromMDSMapping(
+      HttpSession session,
+      @ModelAttribute("swappablePatientIdentifierTypes")
+          List<PatientIdentifierType> swappablePatientIdentifierTypes,
+      @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
+      @ModelAttribute("mdsPatientIdentifierTypeNotHarmonizedYet")
+          List<PatientIdentifierType> mdsPatientIdentifierTypeNotHarmonizedYet) {
+
+    ModelAndView modelAndView = this.getRedirectModelAndView();
+
+    if (harmonizationItem.getValue() == null
+        || StringUtils.isEmpty(((String) harmonizationItem.getValue()))) {
+      modelAndView.addObject(
+          "errorRequiredMdsValueFromMDS", "eptsharmonization.error.encounterForMapping.required");
+      return modelAndView;
+    }
+
+    if (harmonizationItem.getKey() == null
+        || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
+      modelAndView.addObject(
+          "errorRequiredPDSValueFromMDS", "eptsharmonization.error.encounterForMapping.required");
+      return modelAndView;
+    }
+
+    PatientIdentifierType pdsPatientIdentifierType =
+        this.harmonizationPatientIdentifierTypeService.findPDSPatientIdentifierTypeByUuid(
+            (String) harmonizationItem.getKey());
+
+    PatientIdentifierType mdsPatientIdentifierType =
+        this.harmonizationPatientIdentifierTypeService.findMDSPatientIdentifierTypeByUuid(
+            (String) harmonizationItem.getValue());
+
+    Map<PatientIdentifierType, PatientIdentifierType> manualHarmonizePatientIdentifierTypes =
+        (Map<PatientIdentifierType, PatientIdentifierType>)
+            session.getAttribute("manualHarmonizePatientIdentifierTypes");
+
+    if (manualHarmonizePatientIdentifierTypes == null) {
+      manualHarmonizePatientIdentifierTypes = new HashMap<>();
+    }
+    swappablePatientIdentifierTypes.remove(pdsPatientIdentifierType);
+    manualHarmonizePatientIdentifierTypes.put(pdsPatientIdentifierType, mdsPatientIdentifierType);
+    session.setAttribute(
+        "manualHarmonizePatientIdentifierTypes", manualHarmonizePatientIdentifierTypes);
+
+    if (mdsPatientIdentifierTypeNotHarmonizedYet != null) {
+      boolean mdsIsPresent = false;
+      for (PatientIdentifierType patientIdentifierType : mdsPatientIdentifierTypeNotHarmonizedYet) {
+        if (patientIdentifierType.getUuid().contentEquals(mdsPatientIdentifierType.getUuid())
+            && patientIdentifierType.getName().equals(mdsPatientIdentifierType.getName())
+            && patientIdentifierType.getId().equals(mdsPatientIdentifierType.getId())) {
+          mdsIsPresent = true;
+          break;
+        }
+      }
+      if (mdsIsPresent) {
+        mdsPatientIdentifierTypeNotHarmonizedYet.remove(mdsPatientIdentifierType);
+      }
+    }
+    return modelAndView;
+  }
+
   @RequestMapping(value = REMOVE_PATIENT_IDENTIFIER_TYPE_MAPPING, method = RequestMethod.POST)
   public ModelAndView removePatientIdentifierTypeMapping(
       HttpSession session,
       @ModelAttribute("swappablePatientIdentifierTypes")
           List<PatientIdentifierType> swappablePatientIdentifierTypes,
+      @ModelAttribute("notSwappablePatientIdentifierTypes")
+          List<PatientIdentifierType> notSwappablePatientIdentifierTypes,
+      @ModelAttribute("mdsPatientIdentifierTypeNotHarmonizedYet")
+          List<PatientIdentifierType> mdsPatientIdentifierTypeNotHarmonizedYet,
       HttpServletRequest request) {
 
     PatientIdentifierType productionPatientIdentifierType =
-        this.harmonizationPatientIdentifierTypeService.findFromMDSByUuid(
+        this.harmonizationPatientIdentifierTypeService.findPDSPatientIdentifierTypeByUuid(
             request.getParameter("productionServerPatientIdentifierTypeUuID"));
 
     @SuppressWarnings("unchecked")
@@ -318,8 +415,35 @@ public class HarmonizePatientIdentifierTypesController {
         (Map<PatientIdentifierType, PatientIdentifierType>)
             session.getAttribute("manualHarmonizePatientIdentifierTypes");
 
+    PatientIdentifierType mdsPatientIdentifierType =
+        manualHarmonizePatientIdentifierTypes.get(productionPatientIdentifierType);
     manualHarmonizePatientIdentifierTypes.remove(productionPatientIdentifierType);
     swappablePatientIdentifierTypes.add(productionPatientIdentifierType);
+
+    if (notSwappablePatientIdentifierTypes != null) {
+
+      boolean mdsIsPresent = false;
+      for (PatientIdentifierType patientIdentifierType : notSwappablePatientIdentifierTypes) {
+        if (patientIdentifierType.getUuid().contentEquals(mdsPatientIdentifierType.getUuid())
+            && patientIdentifierType.getName().equals(mdsPatientIdentifierType.getName())
+            && patientIdentifierType.getId().equals(mdsPatientIdentifierType.getId())) {
+          mdsIsPresent = true;
+          break;
+        }
+      }
+      if (!mdsIsPresent
+          && mdsPatientIdentifierTypeNotHarmonizedYet != null
+          && !mdsPatientIdentifierTypeNotHarmonizedYet.contains(mdsPatientIdentifierType)) {
+        mdsPatientIdentifierTypeNotHarmonizedYet.add(mdsPatientIdentifierType);
+      }
+    }
+
+    if (mdsPatientIdentifierTypeNotHarmonizedYet != null) {
+      this.sortByName(mdsPatientIdentifierTypeNotHarmonizedYet);
+    }
+    if (swappablePatientIdentifierTypes != null) {
+      this.sortByName(swappablePatientIdentifierTypes);
+    }
 
     if (manualHarmonizePatientIdentifierTypes.isEmpty()) {
       session.removeAttribute("manualHarmonizePatientIdentifierTypes");
@@ -343,13 +467,11 @@ public class HarmonizePatientIdentifierTypesController {
     } catch (IOException ex) {
 
     }
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
         "attachment; fileName=patient_identifier_types_harmonization_"
-            + defaultLocationName
+            + this.getDefaultLocation()
             + "-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
@@ -362,8 +484,7 @@ public class HarmonizePatientIdentifierTypesController {
 
     HarmonizationData productionItemsToExport =
         (HarmonizationData) session.getAttribute("productionItemsToExport");
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getDefaultLocation();
 
     List<PatientIdentifierTypeDTO> list = new ArrayList<>();
     for (HarmonizationItem item : productionItemsToExport.getItems()) {
@@ -450,20 +571,21 @@ public class HarmonizePatientIdentifierTypesController {
 
   @ModelAttribute("swappablePatientIdentifierTypes")
   public List<PatientIdentifierType> getSwappablePatientIdentifierTypes() {
-    List<PatientIdentifierType> productionItemsToExport =
-        DTOUtils.fromPatientIdentifierTypesDTOs(getProductionItemToExport());
-    productionItemsToExport.addAll(
-        HarmonizePatientIdentifierTypesDelegate.PATIENT_IDENTIFIER_TYPES_NOT_PROCESSED);
-    return sortByName(productionItemsToExport);
+    return sortByName(this.harmonizationPatientIdentifierTypeService.findAllSwappable());
   }
 
   @ModelAttribute("notSwappablePatientIdentifierTypes")
   public List<PatientIdentifierType> getNotSwappablePatientIdentifierTypes() {
-    return sortByName(this.harmonizationPatientIdentifierTypeService.findAllFromMDS());
+    return sortByName(this.harmonizationPatientIdentifierTypeService.findAllNotSwappable());
   }
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + PATIENT_IDENTIFIER_TYPES_LIST + ".form");
+  }
+
+  @ModelAttribute("mdsPatientIdentifierTypeNotHarmonizedYet")
+  public List<PatientIdentifierType> getMDSPatientIdentifierTypeNotHarmonizedYet() {
+    return this.sortByName(this.delegate.getMDSNotHarmonizedYet());
   }
 
   @SuppressWarnings("unchecked")
@@ -471,5 +593,9 @@ public class HarmonizePatientIdentifierTypesController {
     BeanComparator comparator = new BeanComparator("name");
     Collections.sort(list, comparator);
     return list;
+  }
+
+  private String getDefaultLocation() {
+    return Context.getAdministrationService().getGlobalProperty("default_location");
   }
 }
