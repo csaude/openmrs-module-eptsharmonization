@@ -16,14 +16,14 @@ import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationTagDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationTagDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 5/26/20. */
-@Repository(HibernateHarmonizationLocationTagDao.BEAN_NAME)
-public class HibernateHarmonizationLocationTagDao implements HarmonizationLocationTagDao {
-  public static final String BEAN_NAME = "eptsharmonization.hibernateHarmonizationLocationTagDao";
+@Repository(HibernateHarmonizationLocationTagDAO.BEAN_NAME)
+public class HibernateHarmonizationLocationTagDAO implements HarmonizationLocationTagDAO {
+  public static final String BEAN_NAME = "eptsharmonization.hibernateHarmonizationLocationTagDAO";
   private SessionFactory sessionFactory;
 
   /** @param sessionFactory the sessionFactory to set */
@@ -109,6 +109,30 @@ public class HibernateHarmonizationLocationTagDao implements HarmonizationLocati
   }
 
   @Override
+  public LocationTag findMDSLocationTagByUuid(String uuid) throws DAOException {
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select v.* from _location_tag v where v.uuid = :uuid ")
+            .addEntity(LocationTag.class);
+    query.setString("uuid", uuid);
+    return (LocationTag) query.uniqueResult();
+  }
+
+  @Override
+  public LocationTag findPDSLocationTagByUuid(String uuid) throws DAOException {
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select v.* from location_tag v where v.uuid = :uuid ")
+            .addEntity(LocationTag.class);
+    query.setString("uuid", uuid);
+    return (LocationTag) query.uniqueResult();
+  }
+
+  @Override
   public Integer getNextLocationTagId() throws DAOException {
     Integer maxId =
         (Integer)
@@ -164,7 +188,7 @@ public class HibernateHarmonizationLocationTagDao implements HarmonizationLocati
         .getCurrentSession()
         .createSQLQuery(
             "update location_tag set location_tag_id=:id, name=:name, description=:description,"
-                + "date_created=:dateCreated, retired=:retired, retire_reason=:retireReason where location_tag_id=:currentId")
+                + "date_created=:dateCreated, retired=:retired, retire_reason=:retireReason, uuid =:uuid where location_tag_id=:currentId")
         .setInteger("id", toOverwriteWith.getLocationTagId())
         .setString("name", toOverwriteWith.getName())
         .setString("description", toOverwriteWith.getDescription())
@@ -172,6 +196,7 @@ public class HibernateHarmonizationLocationTagDao implements HarmonizationLocati
         .setDate("dateCreated", toOverwriteWith.getDateCreated())
         .setBoolean("retired", toOverwriteWith.isRetired())
         .setString("retireReason", toOverwriteWith.getRetireReason())
+        .setString("uuid", toOverwriteWith.getUuid())
         .executeUpdate();
     clearAndFlushSession();
   }

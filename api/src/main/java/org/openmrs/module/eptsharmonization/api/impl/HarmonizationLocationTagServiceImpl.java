@@ -25,7 +25,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationLocationTagService;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationTagDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationTagDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
 
   private HarmonizationServiceDAO dao;
 
-  private HarmonizationLocationTagDao harmonizationLocationTagDao;
+  private HarmonizationLocationTagDAO harmonizationLocationTagDao;
 
   private LocationService locationService;
 
@@ -58,7 +58,7 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
 
   @Autowired
   public void setHarmonizationLocationTagDao(
-      HarmonizationLocationTagDao harmonizationLocationTagDao) {
+      HarmonizationLocationTagDAO harmonizationLocationTagDao) {
     this.harmonizationLocationTagDao = harmonizationLocationTagDao;
   }
 
@@ -194,6 +194,16 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
   }
 
   @Override
+  public LocationTag findMDSLocationTagByUuid(String uuid) throws APIException {
+    return this.harmonizationLocationTagDao.findMDSLocationTagByUuid(uuid);
+  }
+
+  @Override
+  public LocationTag findPDSLocationTagByUuid(String uuid) throws APIException {
+    return this.harmonizationLocationTagDao.findPDSLocationTagByUuid(uuid);
+  }
+
+  @Override
   @Authorized({"Manage Location Types"})
   @Transactional
   public void saveNewLocationTagFromMetadata(LocationTagDTO locationTagDTO) throws APIException {
@@ -272,7 +282,7 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
       try {
         this.dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e);
       }
     }
   }
@@ -320,7 +330,7 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e);
       }
     }
   }
@@ -344,11 +354,14 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
       LocationTag mdsLocationTag = locationTagMapping.getValue();
       // Get related locations
       List<Location> locations = locationService.getLocationsByTag(pdsLocationTag);
-      for (Location location : locations) {
-        harmonizationLocationTagDao.updateLocation(
-            location, pdsLocationTag.getLocationTagId(), mdsLocationTag.getLocationTagId());
-        locationService.purgeLocationTag(pdsLocationTag);
-      }
+
+      this.overwriteLocationTag(pdsLocationTag, mdsLocationTag, locations);
+      // for (Location location : locations) {
+      // harmonizationLocationTagDao.updateLocation(location,
+      // pdsLocationTag.getLocationTagId(),
+      // mdsLocationTag.getLocationTagId());
+      // locationService.purgeLocationTag(pdsLocationTag);
+      // }
     }
   }
 

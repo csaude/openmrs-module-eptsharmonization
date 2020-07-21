@@ -1,22 +1,24 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 
-<openmrs:require privilege="Manage Location Tags"
-	otherwise="/login.htm"
+<openmrs:require privilege="Manage Location Tags" otherwise="/login.htm"
 	redirect="/module/eptsharmonization/harmonizeLocationTags.form" />
 
 <%@ include file="/WEB-INF/template/header.jsp"%>
 <%@ include file="template/localHeader.jsp"%>
 <script>
-	$j(document).ready(function () {
-	    $j('input[name=remove-mapping-button]').click(function(event) {
-	        var that = this;
-            var hiddenUuidValue = $j("<input />").attr("type", "hidden")
-                .attr("name", "productionServerLocationTagUuID")
-                .attr("value", that.id);
-            $j('#remove-mapping-form').append(hiddenUuidValue);
-            return true;
-		});
-    });
+	$j(document).ready(
+			function() {
+				$j('input[name=remove-mapping-button]').click(
+						function(event) {
+							var that = this;
+							var hiddenUuidValue = $j("<input />").attr("type",
+									"hidden").attr("name",
+									"productionServerLocationTagUuID").attr(
+									"value", that.id);
+							$j('#remove-mapping-form').append(hiddenUuidValue);
+							return true;
+						});
+			});
 </script>
 <style>
 p {
@@ -69,7 +71,9 @@ td {
 <br />
 <c:if test="${not empty harmonizedVTSummary}">
 	<div id="openmrs_msg">
-	   <b> <spring:message code="eptsharmonization.summay.of.already.harmonized.mapping" 	/> :</b><br />
+		<b> <spring:message
+				code="eptsharmonization.summay.of.already.harmonized.mapping" /> :
+		</b><br />
 		<c:forEach var="msg" items="${harmonizedVTSummary}">
 			<span> <spring:message code="${msg}" text="${msg}" />
 			</span>
@@ -78,9 +82,9 @@ td {
 		<form method="post" action="exportLocationTagsHarmonizationLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
-					   style="width: 8.6em; padding: 6px; font-size: 6pt;"
-					   value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
-					   name="harmonizeAllLocationTags" />
+					style="width: 8.6em; padding: 6px; font-size: 6pt;"
+					value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
+					name="harmonizeAllLocationTags" />
 			</div>
 		</form>
 	</div>
@@ -90,25 +94,25 @@ td {
 <c:if test="${not empty productionLocationTagsToExport}">
 	<br />
 	<b class="boxHeader"><spring:message
-		code="eptsharmonization.locationtag.harmonize.onlyOnPServer.inuse" /></b>
+			code="eptsharmonization.locationtag.harmonize.onlyOnPServer.inuse" /></b>
 	<form method="post" class="box" action="exportLocationTags.form">
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
-			<th><spring:message code="general.id" /></th>
-			<th><spring:message code="general.name" /></th>
-			<th><spring:message code="general.description" /></th>
-			<th><spring:message code="general.uuid" /></th>
-			<th><spring:message
-				code="eptsharmonization.locationtag.harmonize.affectedLocations" /></th>
-			<c:forEach var="entry" items="${productionLocationTagsToExport}">
-				<tr>
-					<td valign="top" align="center">${entry.key.id}</td>
-					<td valign="top">${entry.key.locationTag.name}</td>
-					<td valign="top">${entry.key.locationTag.description}</td>
-					<td valign="top">${entry.key.uuid}</td>
-					<td style="text-align: right;">${entry.value}</td>
-				</tr>
-			</c:forEach>
+				<th><spring:message code="general.id" /></th>
+				<th><spring:message code="general.name" /></th>
+				<th><spring:message code="general.description" /></th>
+				<th><spring:message code="general.uuid" /></th>
+				<th><spring:message
+						code="eptsharmonization.locationtag.harmonize.affectedLocations" /></th>
+				<c:forEach var="entry" items="${productionLocationTagsToExport}">
+					<tr>
+						<td valign="top" align="center">${entry.key.id}</td>
+						<td valign="top">${entry.key.locationTag.name}</td>
+						<td valign="top">${entry.key.locationTag.description}</td>
+						<td valign="top">${entry.key.uuid}</td>
+						<td style="text-align: right;">${entry.value}</td>
+					</tr>
+				</c:forEach>
 			<tr>
 				<td colspan="6">
 					<div class="submit-btn" align="center">
@@ -123,11 +127,11 @@ td {
 	<br />
 </c:if>
 
-<c:if test="${not empty mappableLocationTags}">
-	<br />
-	<b class="boxHeader"><spring:message
-			code="eptsharmonization.locationTag.defineNewMappings" /></b>
+<c:if test="${not empty availableMDSMappingTypes}">
 	<fieldset>
+		<legend>
+			<b><spring:message code="eptsharmonization.harmonizeBasedOnMDS" /></b>
+		</legend>
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
 				<th colspan="3" style="text-align: center; width: 45%;"><spring:message
@@ -136,152 +140,173 @@ td {
 						code="eptsharmonization.locationtag.created.OnProductionServer" /></th>
 				<th colspan="2" style="text-align: left; width: 10%;"></th>
 			</tr>
-			<form method="post" action="addLocationTagMapping.form">
+			<form method="post" action="addLocationTagFromMDSMapping.form">
 				<tr>
-					<td colspan="3" style="text-align: center; width: 45%;">
-						<spring:bind path="locationTagBean.value">
-						<select name="${status.expression}">
-							<option value=""><spring:message code="eptsharmonization.locationtag.select"/></option>
-							<c:forEach items="${availableMappingTypes}" var="type">
-								<option value="${type.uuid}">${type.locationTag.name}</option>
-							</c:forEach>
-						</select>
-						<c:if test="${not empty errorRequiredMdsValue}">
-									<span class="error"><spring:message
-											code="${errorRequiredMdsValue}"
-											text="${errorRequiredMdsValue}" /></span>
-						</c:if>
-						</spring:bind>
-					</td>
-					<td colspan="3" style="text-align: center; width: 45%;">
-						<spring:bind path="locationTagBean.key">
-						<select name="${status.expression}">
-							<option value=""><spring:message code="eptsharmonization.locationtag.select"/></option>
-							<c:forEach items="${mappableLocationTags}" var="entry">
-								<option value="${entry.key.uuid}">${entry.key.locationTag.name}</option>
-							</c:forEach>
-						</select>
-						<c:if test="${not empty errorRequiredPDSValue}">
-									<span class="error"> <spring:message
-											code="${errorRequiredPDSValue}"
-											text="${errorRequiredPDSValue}" />
-									</span>
-						</c:if>
-						</spring:bind>
-					</td>
+					<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+							path="locationTagBean.value">
+							<select name="${status.expression}">
+								<option value=""><spring:message
+										code="eptsharmonization.locationtag.select" /></option>
+								<c:forEach items="${availableMDSMappingTypes}" var="type">
+									<option value="${type.uuid}">${type.locationTag.name}</option>
+								</c:forEach>
+							</select>
+							<c:if test="${not empty errorRequiredMdsValue}">
+								<span class="error"><spring:message
+										code="${errorRequiredMdsValue}"
+										text="${errorRequiredMdsValue}" /></span>
+							</c:if>
+						</spring:bind></td>
+					<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+							path="locationTagBean.key">
+							<select name="${status.expression}">
+								<option value=""><spring:message
+										code="eptsharmonization.locationtag.select" /></option>
+								<c:forEach items="${mappableLocationTags}" var="entry">
+									<option value="${entry.key.uuid}">${entry.key.locationTag.name}</option>
+								</c:forEach>
+							</select>
+							<c:if test="${not empty errorRequiredPDSValue}">
+								<span class="error"> <spring:message
+										code="${errorRequiredPDSValue}"
+										text="${errorRequiredPDSValue}" />
+								</span>
+							</c:if>
+						</spring:bind></td>
 					<td colspan="2" style="text-align: left; width: 10%;">
-							<div class="submit-btn" align="left">
-								<input type="submit"
-									   style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
-									   value='<spring:message code="general.add"/>'
-									   name="addNewMapping" />
-							</div>
+						<div class="submit-btn" align="left">
+							<input type="submit"
+								style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
+								value='<spring:message code="general.add"/>'
+								name="addNewMapping" />
+						</div>
 					</td>
 				</tr>
 			</form>
-			<fieldset id="added-mappings-rows">
+		</table>
+	</fieldset>
+</c:if>
+<c:if
+	test="${not empty manualLocationTagMappings || not empty mappableLocationTags}">
+	<br />
+	<fieldset>
+		<legend>
+			<b><spring:message code="eptsharmonization.harmonizeWithinPDS" /></b>
+		</legend>
+		<table cellspacing="0" border="0" style="width: 100%">
+			<tr>
+				<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+						code="eptsharmonization.locationtag.copiedFrom.metadataServer" /></th>
+				<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+						code="eptsharmonization.locationtag.created.OnProductionServer" /></th>
+				<th colspan="2" style="text-align: left; width: 10%;"></th>
+			</tr>
+			<form method="post" action="addLocationTagMapping.form">
 				<tr>
-					<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.locationtag.from.metadataServer" /></th>
-					<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.locationtag.created.OnProductionServer" /></th>
-					<th colspan="2"></th>
+					<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+							path="locationTagBean.value">
+							<select name="${status.expression}">
+								<option value=""><spring:message
+										code="eptsharmonization.locationtag.select" /></option>
+								<c:forEach items="${availableMappingTypes}" var="type">
+									<option value="${type.uuid}">${type.locationTag.name}</option>
+								</c:forEach>
+							</select>
+							<c:if test="${not empty errorRequiredMdsValue}">
+								<span class="error"><spring:message
+										code="${errorRequiredMdsValue}"
+										text="${errorRequiredMdsValue}" /></span>
+							</c:if>
+						</spring:bind></td>
+					<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+							path="locationTagBean.key">
+							<select name="${status.expression}">
+								<option value=""><spring:message
+										code="eptsharmonization.locationtag.select" /></option>
+								<c:forEach items="${mappableLocationTags}" var="entry">
+									<option value="${entry.key.uuid}">${entry.key.locationTag.name}</option>
+								</c:forEach>
+							</select>
+							<c:if test="${not empty errorRequiredPDSValue}">
+								<span class="error"> <spring:message
+										code="${errorRequiredPDSValue}"
+										text="${errorRequiredPDSValue}" />
+								</span>
+							</c:if>
+						</spring:bind></td>
+					<td colspan="2" style="text-align: left; width: 10%;">
+						<div class="submit-btn" align="left">
+							<input type="submit"
+								style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
+								value='<spring:message code="general.add"/>'
+								name="addNewMapping" />
+						</div>
+					</td>
 				</tr>
-				<tr>
-					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="general.name" /></th>
-					<th><spring:message code="general.description" /></th>
-					<th><spring:message code="general.id" /></th>
-					<th><spring:message code="general.name" /></th>
-					<th><spring:message code="general.description" /></th>
-					<th colspan="2"></th>
-				</tr>
-				<c:if test="${not empty manualLocationTagMappings}">
-					<form id="remove-mapping-form" method="post" action="removeLocationTagMapping.form">
-						<c:forEach var="item" items="${manualLocationTagMappings}"
-								   varStatus="itemsRow">
-							<tr>
-								<td valign="top">${item.value.id}</td>
-								<td valign="top">${item.value.name}</td>
-								<td valign="top">${item.value.description}</td>
-								<td valign="top">${item.key.id}</td>
-								<td valign="top">${item.key.name}</td>
-								<td valign="top">${item.key.description}</td>
-								<td colspan="2">
-									<div class="submit-btn" align="left">
-										<input type="submit"
-												  id="${item.key.uuid}"
-												  style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
-												  value='<spring:message code="general.remove"/>'
-												  name="remove-mapping-button" />
-									</div>
-
-								</td>
-							</tr>
-						</c:forEach>
-					</form>
-					<tr>
-						<td colspan="8">
-							<form method="post" action="manualMappingLocationTagHarmonization.form">
-								<div class="submit-btn" align="center">
-									<input type="submit"
-										   value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
-										   name="processManualMaps" />
+			</form>
+		</table>
+	</fieldset>
+	<fieldset id="added-mappings-rows">
+		<table cellspacing="0" border="0" style="width: 100%">
+			<tr>
+				<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+						code="eptsharmonization.locationtag.from.metadataServer" /></th>
+				<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+						code="eptsharmonization.locationtag.created.OnProductionServer" /></th>
+				<th colspan="2"></th>
+			</tr>
+			<tr>
+				<th><spring:message code="general.id" /></th>
+				<th><spring:message code="general.name" /></th>
+				<th><spring:message code="general.description" /></th>
+				<th><spring:message code="general.id" /></th>
+				<th><spring:message code="general.name" /></th>
+				<th><spring:message code="general.description" /></th>
+				<th colspan="2"></th>
+			</tr>
+			<c:if test="${not empty manualLocationTagMappings}">
+				<form id="remove-mapping-form" method="post"
+					action="removeLocationTagMapping.form">
+					<c:forEach var="item" items="${manualLocationTagMappings}"
+						varStatus="itemsRow">
+						<tr>
+							<td valign="top">${item.value.id}</td>
+							<td valign="top">${item.value.name}</td>
+							<td valign="top">${item.value.description}</td>
+							<td valign="top">${item.key.id}</td>
+							<td valign="top">${item.key.name}</td>
+							<td valign="top">${item.key.description}</td>
+							<td colspan="2">
+								<div class="submit-btn" align="left">
+									<input type="submit" id="${item.key.uuid}"
+										style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
+										value='<spring:message code="general.remove"/>'
+										name="remove-mapping-button" />
 								</div>
-							</form>
-						</td>
-					</tr>
-				</c:if>
-			</fieldset>
+
+							</td>
+						</tr>
+					</c:forEach>
+				</form>
+				<tr>
+					<td colspan="8">
+						<form method="post"
+							action="manualMappingLocationTagHarmonization.form">
+							<div class="submit-btn" align="center">
+								<input type="submit"
+									value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
+									name="processManualMaps" />
+							</div>
+						</form>
+					</td>
+				</tr>
+			</c:if>
 		</table>
 	</fieldset>
 	<br />
-	<br />
-	<div class="box">
-		<table cellspacing="0" border="0" style="width: 100%">
-			<tr>
-				<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-						code="eptsharmonization.locationtag.from.metadataServer" /></th>
-				<th colspan="4" style="text-align: center; width: 45%;"><spring:message
-						code="eptsharmonization.locationtag.created.OnProductionServer" /></th>
-			</tr>
-			<tr>
-				<th><spring:message code="general.id" /></th>
-				<th><spring:message code="general.name" /></th>
-				<th><spring:message code="general.description" /></th>
-				<th><spring:message code="general.uuid" /></th>
-				<th><spring:message code="general.id" /></th>
-				<th><spring:message code="general.name" /></th>
-				<th><spring:message code="general.description" /></th>
-				<th><spring:message code="general.uuid" /></th>
-			</tr>
-			<c:forEach var="item" items="${availableMappingTypes}"
-					   varStatus="itemStatus">
-				<tr>
-					<td valign="top" align="center">${item.id}</td>
-					<td valign="top">${item.locationTag.name}</td>
-					<td valign="top">${item.locationTag.description}</td>
-					<td valign="top">${item.uuid}</td>
-					<c:choose>
-						<c:when test="${not empty mappableLocationTagsList && mappableLocationTagsList.size() gt itemStatus.index}">
-							<td>${mappableLocationTagsList[itemStatus.index].id}</td>
-							<td>${mappableLocationTagsList[itemStatus.index].locationTag.name}</td>
-							<td>${mappableLocationTagsList[itemStatus.index].locationTag.description}</td>
-							<td>${mappableLocationTagsList[itemStatus.index].uuid}</td>
-						</c:when>
-						<c:otherwise>
-							<td colspan="4"></td>
-						</c:otherwise>
-					</c:choose>
-				</tr>
-			</c:forEach>
-		</table>
-	</div>
-	<br />
 </c:if>
 
-<c:if
-		test="${harmonizationCompleted}">
+<c:if test="${harmonizationCompleted}">
 	<div id="openmrs_msg">
 		<b> <spring:message
 				code="eptsharmonization.locationtag.harmonizationFinish" />

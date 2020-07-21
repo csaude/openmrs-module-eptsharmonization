@@ -6,7 +6,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.api.db.DAOException;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 5/26/20. */
-public interface HarmonizationLocationTagDao {
+public interface HarmonizationLocationTagDAO {
   List<LocationTag> findAllMDSLocationTags() throws DAOException;
 
   List<Location> findLocationsByLocationTag(LocationTag locationTag) throws DAOException;
@@ -14,6 +14,10 @@ public interface HarmonizationLocationTagDao {
   Integer getCountOfLocationsByLocationTag(LocationTag locationTag) throws DAOException;
 
   List<LocationTag> findPDSLocationTagsNotExistsInMDServer() throws DAOException;
+
+  LocationTag findMDSLocationTagByUuid(String uuid) throws DAOException;
+
+  LocationTag findPDSLocationTagByUuid(String uuid) throws DAOException;
 
   boolean isSwappable(LocationTag locationTag) throws DAOException;
 

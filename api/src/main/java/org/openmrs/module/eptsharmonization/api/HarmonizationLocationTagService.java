@@ -54,6 +54,10 @@ public interface HarmonizationLocationTagService extends OpenmrsService {
 
   List<LocationTagDTO> findAllProductionLocationTagsNotInHarmonyWithMetadata() throws APIException;
 
+  LocationTag findMDSLocationTagByUuid(String uuid) throws APIException;
+
+  LocationTag findPDSLocationTagByUuid(String uuid) throws APIException;
+
   void saveLocationTagsWithDifferentNames(Map<String, List<LocationTagDTO>> locationTags)
       throws APIException;
 

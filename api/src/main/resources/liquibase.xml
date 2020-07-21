@@ -380,6 +380,8 @@
 			<column name="date_created" type="datetime" >
 				<constraints nullable="false"/>
 			</column>
+			 <column name="changed_by" type="int" />
+             <column name="date_changed" type="datetime" />
 			<column name="retired" type="BOOLEAN" defaultValueBoolean="false">
 				<constraints nullable="false"/>
 			</column>
