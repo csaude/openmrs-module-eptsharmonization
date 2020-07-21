@@ -414,8 +414,7 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
           if (foundMDSVisitTypeByID == null) {
             this.harmonizationVisitTypeDAO.insertVisitType(mdsVisitType);
           }
-          this.updateGPWithNewVisitTypeId(
-              pdsVisitType.getVisitTypeId(), foundMDSVisitTypeByID.getId());
+          this.updateGPWithNewVisitTypeId(pdsVisitType.getVisitTypeId(), mdsVisitType.getId());
         }
       }
     } catch (Exception e) {
