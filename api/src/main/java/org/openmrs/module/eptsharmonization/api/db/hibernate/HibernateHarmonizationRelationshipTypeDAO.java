@@ -8,15 +8,16 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Relationship;
 import org.openmrs.RelationshipType;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationRelationshipTypeDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationRelationshipTypeDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 5/26/20. */
-@Repository(HibernateHarmonizationRelationshipTypeDao.BEAN_NAME)
-public class HibernateHarmonizationRelationshipTypeDao implements HarmonizationRelationshipTypeDao {
+@Repository(HibernateHarmonizationRelationshipTypeDAO.BEAN_NAME)
+public class HibernateHarmonizationRelationshipTypeDAO implements HarmonizationRelationshipTypeDAO {
   public static final String BEAN_NAME =
       "eptsharmonization.hibernateHarmonizationRelationshipTypeDao";
   private SessionFactory sessionFactory;
@@ -69,6 +70,30 @@ public class HibernateHarmonizationRelationshipTypeDao implements HarmonizationR
                     + "and _relationship_type.b_is_to_a = relationship_type.b_is_to_a)")
             .addEntity(RelationshipType.class);
     return query.list();
+  }
+
+  @Override
+  public RelationshipType findMDSRelationshipTypeByUuid(String uuid) throws APIException {
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select r.* from _relationship_type r where r.uuid = :uuid ")
+            .addEntity(RelationshipType.class);
+    query.setString("uuid", uuid);
+    return (RelationshipType) query.uniqueResult();
+  }
+
+  @Override
+  public RelationshipType findPDSRelationshipTypeByUuid(String uuid) throws APIException {
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select r.* from relationship_type r where r.uuid = :uuid ")
+            .addEntity(RelationshipType.class);
+    query.setString("uuid", uuid);
+    return (RelationshipType) query.uniqueResult();
   }
 
   @Override
@@ -167,8 +192,8 @@ public class HibernateHarmonizationRelationshipTypeDao implements HarmonizationR
         .getCurrentSession()
         .createSQLQuery(
             "update relationship_type set relationship_type_id=:id, a_is_to_b=:aIsToB, b_is_to_a=:bIsToA, weight = :weight, "
-                + "preferred=:preferred, description=:description,date_created=:dateCreated, retired=:retired, retire_reason=:retireReason "
-                + "where relationship_type_id=:currentId")
+                + " preferred=:preferred, description=:description,date_created=:dateCreated, retired=:retired, retire_reason=:retireReason, uuid=:uuid "
+                + " where relationship_type_id=:currentId")
         .setInteger("id", toOverwriteWith.getRelationshipTypeId())
         .setString("aIsToB", toOverwriteWith.getaIsToB())
         .setString("bIsToA", toOverwriteWith.getbIsToA())
@@ -179,6 +204,7 @@ public class HibernateHarmonizationRelationshipTypeDao implements HarmonizationR
         .setDate("dateCreated", toOverwriteWith.getDateCreated())
         .setBoolean("retired", toOverwriteWith.isRetired())
         .setString("retireReason", toOverwriteWith.getRetireReason())
+        .setString("uuid", toOverwriteWith.getUuid())
         .executeUpdate();
     clearAndFlushSession();
 

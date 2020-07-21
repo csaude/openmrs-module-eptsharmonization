@@ -25,7 +25,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationRelationshipTypeService;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationRelationshipTypeDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationRelationshipTypeDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
 
   private HarmonizationServiceDAO dao;
 
-  private HarmonizationRelationshipTypeDao harmonizationRelationshipTypeDao;
+  private HarmonizationRelationshipTypeDAO harmonizationRelationshipTypeDao;
 
   private PersonService personService;
 
@@ -58,7 +58,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
 
   @Autowired
   public void setHarmonizationRelationshipTypeDao(
-      HarmonizationRelationshipTypeDao harmonizationRelationshipTypeDao) {
+      HarmonizationRelationshipTypeDAO harmonizationRelationshipTypeDao) {
     this.harmonizationRelationshipTypeDao = harmonizationRelationshipTypeDao;
   }
 
@@ -130,7 +130,8 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
     List<RelationshipType> mdsRelationshipTypes =
         harmonizationRelationshipTypeDao.findAllMDSRelationshipTypes();
     List<RelationshipType> pdsRelationshipTypes = personService.getAllRelationshipTypes(true);
-    HarmonizationUtils.removeAllHarmonizedElements(mdsRelationshipTypes, pdsRelationshipTypes);
+    HarmonizationUtils.removeAllRelationshipTypeHarmonizedElements(
+        mdsRelationshipTypes, pdsRelationshipTypes);
     return DTOUtils.fromRelationshipTypes(mdsRelationshipTypes);
   }
 
@@ -180,6 +181,16 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
   public int getNumberOfAffectedRelationships(RelationshipTypeDTO relationshipTypeDTO) {
     return harmonizationRelationshipTypeDao.getCountOfRelationshipsByRelationshipType(
         relationshipTypeDTO.getRelationshipType());
+  }
+
+  @Override
+  public RelationshipType findMDSRelationshipTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationRelationshipTypeDao.findMDSRelationshipTypeByUuid(uuid);
+  }
+
+  @Override
+  public RelationshipType findPDSRelationshipTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationRelationshipTypeDao.findPDSRelationshipTypeByUuid(uuid);
   }
 
   @Override
@@ -280,7 +291,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       try {
         this.dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -330,7 +341,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -355,11 +366,14 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       // Get related relationships
       List<Relationship> relationships =
           harmonizationRelationshipTypeDao.getRelashionshipsByType(pdsRelationshipType);
-      for (Relationship relationship : relationships) {
-        harmonizationRelationshipTypeDao.updateRelationship(
-            relationship, mdsRelationshipType.getRelationshipTypeId());
-        personService.purgeRelationshipType(pdsRelationshipType);
-      }
+
+      this.overwriteRelationshipType(pdsRelationshipType, mdsRelationshipType, relationships);
+
+      // for (Relationship relationship : relationships) {
+      // harmonizationRelationshipTypeDao.updateRelationship(relationship,
+      // mdsRelationshipType.getRelationshipTypeId());
+      // personService.purgeRelationshipType(pdsRelationshipType);
+      // }
     }
   }
 

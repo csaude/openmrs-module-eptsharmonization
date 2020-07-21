@@ -52,6 +52,10 @@ public interface HarmonizationRelationshipTypeService extends OpenmrsService {
   Map<String, List<RelationshipTypeDTO>> findAllRelationshipTypesWithDifferentIDAndSameUUID()
       throws APIException;
 
+  RelationshipType findMDSRelationshipTypeByUuid(String uuid) throws APIException;
+
+  RelationshipType findPDSRelationshipTypeByUuid(String uuid) throws APIException;
+
   int getNumberOfAffectedRelationships(RelationshipTypeDTO relationshipTypeDTO);
 
   List<RelationshipTypeDTO> findAllProductionRelationshipTypesNotInHarmonyWithMetadata()
