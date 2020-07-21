@@ -36,12 +36,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 6/2/20. */
 @Controller(HarmonizeVisitTypeController.CONTROLLER_NAME)
-@SessionAttributes({"removedMappableVisitTypes"})
 public class HarmonizeVisitTypeController {
   public static final String CONTROLLER_NAME = "eptsharmonization.harmonizeVisitTypeController";
   public static final String ANALYSIS_STEP = "/module/eptsharmonization/harmonizeVisitType";
@@ -69,6 +67,8 @@ public class HarmonizeVisitTypeController {
   private VisitService visitService;
   private AdministrationService adminService;
   private static VisitTypeHarmonizationCSVLog.Builder logBuilder;
+
+  private static List<VisitTypeDTO> VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL = new ArrayList<>();
 
   @Autowired
   public void setHarmonizationVisitTypeService(
@@ -157,6 +157,7 @@ public class HarmonizeVisitTypeController {
     return modelAndView;
   }
 
+  @SuppressWarnings("unchecked")
   @RequestMapping(
       value = MANDATORY_STEP,
       method = {RequestMethod.POST, RequestMethod.GET})
@@ -245,44 +246,32 @@ public class HarmonizeVisitTypeController {
 
     Map<VisitTypeDTO, Integer> mappableVisitTypes = getMappableVisitTypes(session);
 
-    if (!sameUuidDifferentIds.isEmpty() || !sameIdAndUuidDifferentNames.isEmpty()) {
+    if (VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
 
-      List<VisitTypeDTO> availableMDSMappingTypes =
-          this.harmonizationVisitTypeService.findAllMetadataVisitTypesNotInHarmonyWithProduction();
-      VisitTypeDTO addedMDSMappableVisitType =
-          (VisitTypeDTO) session.getAttribute("addedMDSMappableVisitType");
-      VisitType removedMDSMappableVisitType =
-          (VisitType) session.getAttribute("removedMDSMappableVisitType");
-      session.removeAttribute("addedMDSMappableVisitType");
-      session.removeAttribute("removedMDSMappableVisitType");
-      availableMDSMappingTypes.remove(addedMDSMappableVisitType);
-      if (removedMDSMappableVisitType != null) {
-        VisitTypeDTO visitTypeDTO = new VisitTypeDTO(removedMDSMappableVisitType);
-        if (!availableMDSMappingTypes.contains(visitTypeDTO)) {
-          availableMDSMappingTypes.add(visitTypeDTO);
+      for (Entry<String, List<VisitTypeDTO>> entry : sameIdAndUuidDifferentNames.entrySet()) {
+        VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL.add(entry.getValue().get(0));
+      }
+      for (Entry<String, List<VisitTypeDTO>> entry : sameUuidDifferentIds.entrySet()) {
+        VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL.add(entry.getValue().get(0));
+      }
+
+      if (!VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
+        for (VisitTypeDTO visitDTO : VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL) {
+          mappableVisitTypes.put(
+              visitDTO, this.harmonizationVisitTypeService.getNumberOfAffectedVisits(visitDTO));
         }
       }
-      session.setAttribute("availableMDSMappingTypes", availableMDSMappingTypes);
+    }
 
-      for (Entry<String, List<VisitTypeDTO>> entry : sameUuidDifferentIds.entrySet()) {
-        mappableVisitTypes.put(entry.getValue().get(0), 1);
-      }
-      for (Entry<String, List<VisitTypeDTO>> entry : sameIdAndUuidDifferentNames.entrySet()) {
-        mappableVisitTypes.put(entry.getValue().get(0), 1);
-      }
-      VisitTypeDTO addedMappableVisitType =
-          (VisitTypeDTO) session.getAttribute("addedMappableVisitType");
-      VisitType removedMappableVisitType =
-          (VisitType) session.getAttribute("removedMappableVisitType");
-      session.removeAttribute("addedMappableVisitType");
-      session.removeAttribute("removedMappableVisitType");
-
-      mappableVisitTypes.remove(addedMappableVisitType);
-      if (removedMappableVisitType != null) {
-        mappableVisitTypes.put(new VisitTypeDTO(removedMappableVisitType), 1);
-      }
-      if (!mappableVisitTypes.isEmpty()) {
-        session.setAttribute("mappableVisitTypes", mappableVisitTypes);
+    if (!VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
+      List<VisitTypeDTO> availableMDSMappingTypes =
+          (List<VisitTypeDTO>) session.getAttribute("availableMDSMappingTypes");
+      if (availableMDSMappingTypes == null) {
+        availableMDSMappingTypes =
+            this.harmonizationVisitTypeService
+                .findAllMetadataVisitTypesNotInHarmonyWithProduction();
+        this.sortByDTOName(availableMDSMappingTypes);
+        session.setAttribute("availableMDSMappingTypes", availableMDSMappingTypes);
       }
     }
 
@@ -294,12 +283,14 @@ public class HarmonizeVisitTypeController {
       session.setAttribute("availableMappingTypes", DTOUtils.fromVisitTypes(allVisitTypes));
 
       session.setAttribute("mappableVisitTypes", mappableVisitTypes);
-
-      // Copy mappables under a different name.
       session.setAttribute("productionVisitTypesToExport", mappableVisitTypes);
+      List<VisitTypeDTO> keySet = new ArrayList<>(mappableVisitTypes.keySet());
+      this.sortByDTOName(keySet);
+      session.setAttribute("mappablePDSVisitTypes", keySet);
     } else {
       session.removeAttribute("mappableVisitTypes");
       session.removeAttribute("productionVisitTypesToExport");
+      session.removeAttribute("mappablePDSVisitTypes");
     }
 
     modelAndView.addObject("harmonizedVTSummary", HARMONIZED_CACHED_SUMMARY);
@@ -358,8 +349,6 @@ public class HarmonizeVisitTypeController {
     mappableVisitTypes.remove(new VisitTypeDTO(pdsVisitType));
     manualVisitTypeMappings.put(pdsVisitType, mdsVisitType);
     session.setAttribute("manualVisitTypeMappings", manualVisitTypeMappings);
-    session.setAttribute("addedMappableVisitType", new VisitTypeDTO(pdsVisitType));
-    session.setAttribute("addedMDSMappableVisitType", new VisitTypeDTO(mdsVisitType));
 
     return modelAndView;
   }
@@ -399,7 +388,6 @@ public class HarmonizeVisitTypeController {
     mappableVisitTypes.remove(new VisitTypeDTO(pdsVisitType));
     manualVisitTypeMappings.put(pdsVisitType, mdsVisitType);
     session.setAttribute("manualVisitTypeMappings", manualVisitTypeMappings);
-    session.setAttribute("addedMappableVisitType", new VisitTypeDTO(pdsVisitType));
 
     return modelAndView;
   }
@@ -410,6 +398,9 @@ public class HarmonizeVisitTypeController {
 
     List<VisitTypeDTO> availableMappingTypes =
         (List<VisitTypeDTO>) session.getAttribute("availableMappingTypes");
+
+    Map<VisitTypeDTO, Integer> mappableVisitTypes = getMappableVisitTypes(session);
+    ModelAndView modelAndView = getRedirectToMandatoryStep();
 
     VisitType pdsVisitType =
         this.harmonizationVisitTypeService.findPDSVisitTypeByUuid(pdsVisitTypeUuid);
@@ -434,9 +425,19 @@ public class HarmonizeVisitTypeController {
     }
 
     if (!isMDSAlreadyInPDS) {
-      session.setAttribute("removedMDSMappableVisitType", mdsVisitType);
+      List<VisitTypeDTO> availableMDSMappingTypes =
+          (List<VisitTypeDTO>) session.getAttribute("availableMDSMappingTypes");
+      if (availableMDSMappingTypes != null) {
+        VisitTypeDTO visitTypeDTO = new VisitTypeDTO(mdsVisitType);
+        if (!availableMDSMappingTypes.contains(visitTypeDTO)) {
+          availableMDSMappingTypes.add(visitTypeDTO);
+          this.sortByDTOName(availableMDSMappingTypes);
+        }
+      }
     }
-    session.setAttribute("removedMappableVisitType", pdsVisitType);
+    VisitTypeDTO pdsDTO = new VisitTypeDTO(pdsVisitType);
+    mappableVisitTypes.put(
+        pdsDTO, this.harmonizationVisitTypeService.getNumberOfAffectedVisits(pdsDTO));
     return getRedirectToMandatoryStep();
   }
 
@@ -467,7 +468,8 @@ public class HarmonizeVisitTypeController {
 
     // Write to log file.
     logBuilder.build();
-
+    // clear the cache
+    VISIT_TYPES_MDS_MAPPING_CACHE_CONTROL = new ArrayList<>();
     return modelAndView;
   }
 
@@ -504,7 +506,7 @@ public class HarmonizeVisitTypeController {
       throws IOException {
 
     Map<VisitTypeDTO, Integer> productionItemsToExport =
-        (Map) session.getAttribute("mappableVisitTypes");
+        (Map) session.getAttribute("productionVisitTypesToExport");
 
     List<VisitType> existingVisitTypes = visitService.getAllVisitTypes();
     ByteArrayOutputStream outputStream =
@@ -540,9 +542,12 @@ public class HarmonizeVisitTypeController {
     if (mappableVisitTypes != null) {
       return mappableVisitTypes;
     }
+    mappableVisitTypes =
+        harmonizationVisitTypeService
+            .findAllUsedProductionVisitTypesNotSharingUuidWithAnyFromMetadata();
+    session.setAttribute("mappableVisitTypes", mappableVisitTypes);
 
-    return harmonizationVisitTypeService
-        .findAllUsedProductionVisitTypesNotSharingUuidWithAnyFromMetadata();
+    return mappableVisitTypes;
   }
 
   private ModelAndView getRedirectToMandatoryStep() {
@@ -559,6 +564,13 @@ public class HarmonizeVisitTypeController {
   @SuppressWarnings("unchecked")
   private List<VisitType> sortByName(List<VisitType> list) {
     BeanComparator comparator = new BeanComparator("name");
+    Collections.sort(list, comparator);
+    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<VisitTypeDTO> sortByDTOName(List<VisitTypeDTO> list) {
+    BeanComparator comparator = new BeanComparator("visitType.name");
     Collections.sort(list, comparator);
     return list;
   }

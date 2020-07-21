@@ -82,7 +82,7 @@ td {
 		<form method="post" action="exportVisitTypesHarmonizationLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
-					style="width: 8.6em; padding: 6px; font-size: 6pt;"
+					style="width: 14.10em; padding: 1px; font-size: 8pt;"
 					value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
 					name="harmonizeAllVisitTypes" />
 			</div>
@@ -162,8 +162,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.visittype.select" /></option>
-								<c:forEach items="${mappableVisitTypes}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.visitType.name}</option>
+								<c:forEach items="${mappablePDSVisitTypes}" var="type">
+									<option value="${type.uuid}">${type.visitType.name}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
@@ -188,7 +188,7 @@ td {
 	</fieldset>
 	<br />
 </c:if>
-<c:if test="${not empty manualVisitTypeMappings || not empty mappableVisitTypes}">
+<c:if test="${not empty manualVisitTypeMappings || not empty mappablePDSVisitTypes}">
 	<fieldset>
 		<legend>
 			<b><spring:message code="eptsharmonization.harmonizeWithinPDS" /></b>
@@ -223,8 +223,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.visittype.select" /></option>
-								<c:forEach items="${mappableVisitTypes}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.visitType.name}</option>
+								<c:forEach items="${mappablePDSVisitTypes}" var="type">
+									<option value="${type.uuid}">${type.visitType.name}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
