@@ -34,6 +34,8 @@ public interface HarmonizationProgramWorkflowServiceDAO {
 
   public ProgramWorkflow getProgramWorkflowById(Integer programWorkflowId) throws DAOException;
 
+  public ProgramWorkflow getProgramWorkflowByUuid(String uuid) throws DAOException;
+
   public boolean isSwappable(ProgramWorkflow programWorkflow) throws DAOException;
 
   public List<ProgramWorkflow> findAllSwappable() throws DAOException;
