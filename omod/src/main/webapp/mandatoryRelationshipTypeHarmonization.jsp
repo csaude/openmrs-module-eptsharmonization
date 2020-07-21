@@ -84,7 +84,7 @@ td {
 			action="exportRelationshipTypesHarmonizationLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
-					style="width: 8.6em; padding: 6px; font-size: 6pt;"
+					style="width: 14.10em; padding: 1px; font-size: 8pt;"
 					value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
 					name="harmonizeAllRelationshipTypes" />
 			</div>
@@ -170,8 +170,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.relationshiptype.select" /></option>
-								<c:forEach items="${mappableRelationshipTypes}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.relationshipType.aIsToB}:${entry.key.relationshipType.bIsToA}</option>
+								<c:forEach items="${mappablePDSRelationshipTypes}" var="type">
+									<option value="${type.uuid}">${type.relationshipType.aIsToB}:${type.relationshipType.bIsToA}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
@@ -195,7 +195,7 @@ td {
 	</fieldset>
 </c:if>
 <c:if
-	test="${not empty manualRelationshipTypeMappings || not empty mappableRelationshipTypes}">
+	test="${not empty manualRelationshipTypeMappings || not empty mappablePDSRelationshipTypes}">
 	<fieldset>
 		<legend>
 			<b><spring:message code="eptsharmonization.harmonizeWithinPDS" /></b>
@@ -230,8 +230,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.relationshiptype.select" /></option>
-								<c:forEach items="${mappableRelationshipTypes}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.relationshipType.aIsToB}:${entry.key.relationshipType.bIsToA}</option>
+								<c:forEach items="${mappablePDSRelationshipTypes}" var="type">
+									<option value="${type.uuid}">${type.relationshipType.aIsToB}:${type.relationshipType.bIsToA}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
