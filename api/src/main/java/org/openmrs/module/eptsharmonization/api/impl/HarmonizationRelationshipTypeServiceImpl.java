@@ -409,7 +409,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
             harmonizationRelationshipTypeDao.updateRelationship(
                 relationship, mdsRelationshipType.getRelationshipTypeId());
           }
-          personService.purgeRelationshipType(foundPDS);
+          this.harmonizationRelationshipTypeDao.deleteRelationshipType(foundPDS);
 
           RelationshipType foundMDSRelationshipTypeID =
               this.personService.getRelationshipType(mdsRelationshipType.getId());

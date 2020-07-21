@@ -29,6 +29,8 @@ public interface HarmonizationRelationshipTypeDAO {
   RelationshipType updateRelationshipType(RelationshipType relationshipType, Integer nextId)
       throws DAOException;
 
+  void deleteRelationshipType(RelationshipType relationshipType) throws DAOException;
+
   RelationshipType updateRelationshipType(RelationshipType relationshipType, String newUuid)
       throws DAOException;
 

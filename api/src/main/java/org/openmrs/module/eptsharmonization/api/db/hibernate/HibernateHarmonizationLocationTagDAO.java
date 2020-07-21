@@ -234,6 +234,18 @@ public class HibernateHarmonizationLocationTagDAO implements HarmonizationLocati
     clearAndFlushSession();
   }
 
+  @Override
+  public void deleteLocationTag(LocationTag locationTag) throws DAOException {
+    clearAndFlushSession();
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "delete from location_tag where location_tag_id =%s ", locationTag.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+  }
+
   private void clearAndFlushSession() {
     Context.clearSession();
     Context.flushSession();

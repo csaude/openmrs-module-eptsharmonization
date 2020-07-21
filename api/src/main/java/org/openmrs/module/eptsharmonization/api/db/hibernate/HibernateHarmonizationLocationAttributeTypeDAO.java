@@ -297,6 +297,20 @@ public class HibernateHarmonizationLocationAttributeTypeDAO
     clearAndFlushSession();
   }
 
+  @Override
+  public void deleteLocationAttributeType(LocationAttributeType locationAttributeType)
+      throws DAOException {
+    clearAndFlushSession();
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "delete from location_attribute_type where location_attribute_type_id =%s ",
+                locationAttributeType.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+  }
+
   private void clearAndFlushSession() {
     Context.clearSession();
     Context.flushSession();

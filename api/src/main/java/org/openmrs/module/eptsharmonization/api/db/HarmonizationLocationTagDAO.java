@@ -37,4 +37,6 @@ public interface HarmonizationLocationTagDAO {
       throws DAOException;
 
   void insertLocationTag(LocationTag locationTag) throws DAOException;
+
+  void deleteLocationTag(LocationTag locationTag) throws DAOException;
 }

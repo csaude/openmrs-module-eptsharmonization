@@ -43,4 +43,6 @@ public interface HarmonizationLocationAttributeTypeDAO {
       throws DAOException;
 
   void insertLocationAttributeType(LocationAttributeType locationAttributeType) throws DAOException;
+
+  void deleteLocationAttributeType(LocationAttributeType locationAttributeType) throws DAOException;
 }

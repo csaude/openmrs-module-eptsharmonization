@@ -407,7 +407,7 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
           for (Visit visit : visits) {
             harmonizationVisitTypeDAO.updateVisit(visit, mdsVisitType.getVisitTypeId());
           }
-          visitService.purgeVisitType(pdsVisitType);
+          this.harmonizationVisitTypeDAO.deleteVisitType(foundPDS);
           this.dao.evictCache();
           VisitType foundMDSVisitTypeByID = this.visitService.getVisitType(mdsVisitType.getId());
 

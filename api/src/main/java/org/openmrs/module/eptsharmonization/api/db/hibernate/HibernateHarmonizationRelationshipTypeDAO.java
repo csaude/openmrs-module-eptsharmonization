@@ -259,6 +259,19 @@ public class HibernateHarmonizationRelationshipTypeDAO implements HarmonizationR
     return (List<Relationship>) criteria.list();
   }
 
+  @Override
+  public void deleteRelationshipType(RelationshipType relationshipType) throws DAOException {
+    clearAndFlushSession();
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format(
+                "delete from relationship_type where relationship_type_id =%s ",
+                relationshipType.getRelationshipTypeId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+  }
+
   private void clearAndFlushSession() {
     Context.clearSession();
     Context.flushSession();

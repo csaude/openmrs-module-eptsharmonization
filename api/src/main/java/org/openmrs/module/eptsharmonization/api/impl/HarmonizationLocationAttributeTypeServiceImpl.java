@@ -447,7 +447,7 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
             harmonizationLocationAttributeTypeDao.updateLocationAttribute(
                 locationAttribute, mdsLocationAttributeType.getLocationAttributeTypeId());
           }
-          locationService.purgeLocationAttributeType(foundPDS);
+          this.harmonizationLocationAttributeTypeDao.deleteLocationAttributeType(foundPDS);
 
           LocationAttributeType foundMDSLocationAttributeTypeByID =
               this.locationService.getLocationAttributeType(mdsLocationAttributeType.getId());

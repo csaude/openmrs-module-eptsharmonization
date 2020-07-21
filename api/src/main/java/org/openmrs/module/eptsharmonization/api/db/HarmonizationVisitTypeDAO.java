@@ -35,4 +35,6 @@ public interface HarmonizationVisitTypeDAO {
   void updateVisit(Visit visit, Integer visitTypeId) throws DAOException;
 
   void insertVisitType(VisitType visitType) throws DAOException;
+
+  void deleteVisitType(VisitType visitType) throws DAOException;
 }

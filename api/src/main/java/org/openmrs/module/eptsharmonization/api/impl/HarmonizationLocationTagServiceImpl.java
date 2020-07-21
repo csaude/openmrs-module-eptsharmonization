@@ -392,7 +392,7 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
             harmonizationLocationTagDao.updateLocation(
                 location, foundPDS.getLocationTagId(), mdsLocationTag.getLocationTagId());
           }
-          locationService.purgeLocationTag(foundPDS);
+          this.harmonizationLocationTagDao.deleteLocationTag(foundPDS);
 
           LocationTag foundMDSLocationTagByID =
               this.locationService.getLocationTag(mdsLocationTag.getId());

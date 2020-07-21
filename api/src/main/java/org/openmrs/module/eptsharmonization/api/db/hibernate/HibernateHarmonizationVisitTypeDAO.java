@@ -223,6 +223,17 @@ public class HibernateHarmonizationVisitTypeDAO implements HarmonizationVisitTyp
     clearAndFlushSession();
   }
 
+  @Override
+  public void deleteVisitType(VisitType visitType) throws DAOException {
+    clearAndFlushSession();
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format("delete from visit_type where visit_type_id =%s ", visitType.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
+  }
+
   private void clearAndFlushSession() {
     Context.clearSession();
     Context.flushSession();
