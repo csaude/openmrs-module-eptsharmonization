@@ -348,14 +348,16 @@ public class HarmonizePersonAttributeTypesController {
     if (harmonizationItem.getValue() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getValue()))) {
       modelAndView.addObject(
-          "errorRequiredMdsValueFromMDS", "eptsharmonization.error.encounterForMapping.required");
+          "errorRequiredMdsValueFromMDS",
+          "eptsharmonization.error.personAttributeTypeForMapping.required");
       return modelAndView;
     }
 
     if (harmonizationItem.getKey() == null
         || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
       modelAndView.addObject(
-          "errorRequiredPDSValueFromMDS", "eptsharmonization.error.encounterForMapping.required");
+          "errorRequiredPDSValueFromMDS",
+          "eptsharmonization.error.personAttributeTypeForMapping.required");
       return modelAndView;
     }
 
@@ -570,7 +572,8 @@ public class HarmonizePersonAttributeTypesController {
 
   @ModelAttribute("mdsPersonAttributeTypeNotHarmonizedYet")
   public List<PersonAttributeType> getMDSPersonAttributeTypeNotHarmonizedYet() {
-    return this.sortByName(this.delegate.getMDSNotHarmonizedYet());
+    return this.sortByName(
+        HarmonizePersonAttributeTypeDelegate.MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED);
   }
 
   @SuppressWarnings("unchecked")
