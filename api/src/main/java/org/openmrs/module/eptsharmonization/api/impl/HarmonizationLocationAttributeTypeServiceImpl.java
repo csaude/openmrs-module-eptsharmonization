@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import org.openmrs.Location;
@@ -27,8 +28,9 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationLocationAttributeTypeService;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationAttributeTypeDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationLocationAttributeTypeDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,7 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
 
   private HarmonizationServiceDAO dao;
 
-  private HarmonizationLocationAttributeTypeDao harmonizationLocationAttributeTypeDao;
+  private HarmonizationLocationAttributeTypeDAO harmonizationLocationAttributeTypeDao;
 
   private LocationService locationService;
 
@@ -61,7 +63,7 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
 
   @Autowired
   public void setHarmonizationLocationAttributeTypeDao(
-      HarmonizationLocationAttributeTypeDao harmonizationLocationAttributeTypeDao) {
+      HarmonizationLocationAttributeTypeDAO harmonizationLocationAttributeTypeDao) {
     this.harmonizationLocationAttributeTypeDao = harmonizationLocationAttributeTypeDao;
   }
 
@@ -186,6 +188,16 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
       result.put(key, DTOUtils.fromLocationAttributeTypes(map.get(key)));
     }
     return result;
+  }
+
+  @Override
+  public LocationAttributeType findMDSLocationAttributeTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationLocationAttributeTypeDao.findMDSLocationAttributeTypeByUuid(uuid);
+  }
+
+  @Override
+  public LocationAttributeType findPDSLocationAttributeTypeByUuid(String uuid) throws APIException {
+    return this.harmonizationLocationAttributeTypeDao.findPDSLocationAttributeTypeByUuid(uuid);
   }
 
   @Override
@@ -382,18 +394,80 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
   public void saveManualLocationAttributeTypeMappings(
       Map<LocationAttributeType, LocationAttributeType> manualLocationAttributeTypeMappings)
       throws APIException {
-    // Get LocationAttributes related to mapped one.
-    for (Map.Entry<LocationAttributeType, LocationAttributeType> locationAttributeTypeMapping :
-        manualLocationAttributeTypeMappings.entrySet()) {
-      LocationAttributeType pdsLocationAttributeType = locationAttributeTypeMapping.getKey();
-      LocationAttributeType mdsLocationAttributeType = locationAttributeTypeMapping.getValue();
-      // Get related locationAttributes
-      List<LocationAttribute> locationAttributes =
-          getLocationAttributesAssociatedWithAttribute(pdsLocationAttributeType);
-      for (LocationAttribute locationAttribute : locationAttributes) {
-        harmonizationLocationAttributeTypeDao.updateLocationAttribute(
-            locationAttribute, mdsLocationAttributeType.getLocationAttributeTypeId());
-        locationService.purgeLocationAttributeType(pdsLocationAttributeType);
+
+    this.dao.evictCache();
+    try {
+      this.dao.setDisabledCheckConstraints();
+
+      for (Entry<LocationAttributeType, LocationAttributeType> entry :
+          manualLocationAttributeTypeMappings.entrySet()) {
+
+        LocationAttributeType pdsLocationAttributeType = entry.getKey();
+        LocationAttributeType mdsLocationAttributeType = entry.getValue();
+
+        LocationAttributeType foundMDSLocationAttributeTypeByUuid =
+            this.harmonizationLocationAttributeTypeDao.findPDSLocationAttributeTypeByUuid(
+                mdsLocationAttributeType.getUuid());
+
+        if ((foundMDSLocationAttributeTypeByUuid != null
+                && !foundMDSLocationAttributeTypeByUuid
+                    .getId()
+                    .equals(mdsLocationAttributeType.getId()))
+            && (!foundMDSLocationAttributeTypeByUuid
+                    .getId()
+                    .equals(pdsLocationAttributeType.getId())
+                && !foundMDSLocationAttributeTypeByUuid
+                    .getUuid()
+                    .equals(pdsLocationAttributeType.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the LocationAttributeType '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdsLocationAttributeType.getName(),
+                  mdsLocationAttributeType.getName(),
+                  foundMDSLocationAttributeTypeByUuid.getName(),
+                  foundMDSLocationAttributeTypeByUuid.getId(),
+                  foundMDSLocationAttributeTypeByUuid.getUuid()));
+        }
+
+        if (mdsLocationAttributeType.getUuid().equals(pdsLocationAttributeType.getUuid())
+            && mdsLocationAttributeType.getId().equals(pdsLocationAttributeType.getId())
+            && mdsLocationAttributeType
+                .getName()
+                .equalsIgnoreCase(pdsLocationAttributeType.getName())) {
+          return;
+        } else {
+
+          LocationAttributeType foundPDS =
+              this.locationService.getLocationAttributeType(pdsLocationAttributeType.getId());
+          List<LocationAttribute> locationAttributes =
+              getLocationAttributesAssociatedWithAttribute(foundPDS);
+
+          for (LocationAttribute locationAttribute : locationAttributes) {
+            harmonizationLocationAttributeTypeDao.updateLocationAttribute(
+                locationAttribute, mdsLocationAttributeType.getLocationAttributeTypeId());
+          }
+          this.harmonizationLocationAttributeTypeDao.deleteLocationAttributeType(foundPDS);
+
+          LocationAttributeType foundMDSLocationAttributeTypeByID =
+              this.locationService.getLocationAttributeType(mdsLocationAttributeType.getId());
+
+          if (foundMDSLocationAttributeTypeByID == null) {
+            this.harmonizationLocationAttributeTypeDao.insertLocationAttributeType(
+                mdsLocationAttributeType);
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      if (e instanceof APIException) throw (APIException) e;
+      throw new APIException(e.getMessage(), e);
+    } finally {
+      try {
+        dao.setEnableCheckConstraints();
+      } catch (Exception e) {
+        throw new APIException(e.getMessage(), e);
       }
     }
   }

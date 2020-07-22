@@ -10,14 +10,14 @@ import org.openmrs.Visit;
 import org.openmrs.VisitType;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationVisitTypeDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationVisitTypeDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 5/26/20. */
-@Repository(HibernateHarmonizationVisitTypeDao.BEAN_NAME)
-public class HibernateHarmonizationVisitTypeDao implements HarmonizationVisitTypeDao {
-  public static final String BEAN_NAME = "eptsharmonization.hibernateHarmonizationVisitTypeDao";
+@Repository(HibernateHarmonizationVisitTypeDAO.BEAN_NAME)
+public class HibernateHarmonizationVisitTypeDAO implements HarmonizationVisitTypeDAO {
+  public static final String BEAN_NAME = "eptsharmonization.hibernateHarmonizationVisitTypeDAO";
   private SessionFactory sessionFactory;
 
   /** @param sessionFactory the sessionFactory to set */
@@ -50,6 +50,30 @@ public class HibernateHarmonizationVisitTypeDao implements HarmonizationVisitTyp
     final Criteria criteria = visitsByVisitTypeCriteria(visitType);
     criteria.setProjection(Projections.rowCount());
     return ((Number) criteria.uniqueResult()).intValue();
+  }
+
+  @Override
+  public VisitType findMDSVisitTypeByUuid(String uuid) throws DAOException {
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select v.* from _visit_type v where v.uuid = :uuid ")
+            .addEntity(VisitType.class);
+    query.setString("uuid", uuid);
+    return (VisitType) query.uniqueResult();
+  }
+
+  @Override
+  public VisitType findPDSVisitTypeByUuid(String uuid) throws DAOException {
+    this.clearAndFlushSession();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery("select v.* from visit_type v where v.uuid = :uuid ")
+            .addEntity(VisitType.class);
+    query.setString("uuid", uuid);
+    return (VisitType) query.uniqueResult();
   }
 
   @Override
@@ -151,7 +175,7 @@ public class HibernateHarmonizationVisitTypeDao implements HarmonizationVisitTyp
         .getCurrentSession()
         .createSQLQuery(
             "update visit_type set visit_type_id=:id, name=:name, description=:description,"
-                + "date_created=:dateCreated, retired=:retired, retire_reason=:retireReason where visit_type_id=:currentId")
+                + "date_created=:dateCreated, retired=:retired, retire_reason=:retireReason, uuid=:uuid where visit_type_id=:currentId")
         .setInteger("id", toOverwriteWith.getVisitTypeId())
         .setString("name", toOverwriteWith.getName())
         .setString("description", toOverwriteWith.getDescription())
@@ -159,6 +183,7 @@ public class HibernateHarmonizationVisitTypeDao implements HarmonizationVisitTyp
         .setDate("dateCreated", toOverwriteWith.getDateCreated())
         .setBoolean("retired", toOverwriteWith.isRetired())
         .setString("retireReason", toOverwriteWith.getRetireReason())
+        .setString("uuid", toOverwriteWith.getUuid())
         .executeUpdate();
     clearAndFlushSession();
 
@@ -196,6 +221,17 @@ public class HibernateHarmonizationVisitTypeDao implements HarmonizationVisitTyp
         .setString("uuid", visitType.getUuid())
         .executeUpdate();
     clearAndFlushSession();
+  }
+
+  @Override
+  public void deleteVisitType(VisitType visitType) throws DAOException {
+    clearAndFlushSession();
+    this.sessionFactory
+        .getCurrentSession()
+        .createSQLQuery(
+            String.format("delete from visit_type where visit_type_id =%s ", visitType.getId()))
+        .executeUpdate();
+    this.sessionFactory.getCurrentSession().flush();
   }
 
   private void clearAndFlushSession() {

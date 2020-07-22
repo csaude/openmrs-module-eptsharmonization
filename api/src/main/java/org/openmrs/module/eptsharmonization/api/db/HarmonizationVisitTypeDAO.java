@@ -6,7 +6,7 @@ import org.openmrs.VisitType;
 import org.openmrs.api.db.DAOException;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 5/26/20. */
-public interface HarmonizationVisitTypeDao {
+public interface HarmonizationVisitTypeDAO {
   List<VisitType> findAllMDSVisitTypes() throws DAOException;
 
   List<Visit> findVisitsByVisitType(VisitType visitType) throws DAOException;
@@ -14,6 +14,10 @@ public interface HarmonizationVisitTypeDao {
   Integer getCountOfVisitsByVisitType(VisitType visitType) throws DAOException;
 
   List<VisitType> findPDSVisitTypesNotExistsInMDServer() throws DAOException;
+
+  VisitType findMDSVisitTypeByUuid(String uuid) throws DAOException;
+
+  VisitType findPDSVisitTypeByUuid(String uuid) throws DAOException;
 
   boolean isSwappable(VisitType visitType) throws DAOException;
 
@@ -31,4 +35,6 @@ public interface HarmonizationVisitTypeDao {
   void updateVisit(Visit visit, Integer visitTypeId) throws DAOException;
 
   void insertVisitType(VisitType visitType) throws DAOException;
+
+  void deleteVisitType(VisitType visitType) throws DAOException;
 }

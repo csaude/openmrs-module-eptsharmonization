@@ -176,6 +176,26 @@ public class HarmonizationUtils {
         && metadata1.getUuid().equals(metadata2.getUuid()));
   }
 
+  public static boolean isThePairHarmonized(
+      RelationshipType metadata1, RelationshipType metadata2) {
+
+    if (metadata1 == null || metadata2 == null) return false;
+    if (metadata1.getRelationshipTypeId() == null
+        || metadata2.getRelationshipTypeId() == null
+        || metadata1.getaIsToB() == null
+        || metadata2.getaIsToB() == null
+        || metadata1.getbIsToA() == null
+        || metadata2.getbIsToA() == null
+        || metadata1.getUuid() == null
+        || metadata2.getUuid() == null) {
+      return false;
+    }
+    return (metadata1.getId().equals(metadata2.getId())
+        && metadata1.getaIsToB().equalsIgnoreCase(metadata2.getaIsToB())
+        && metadata1.getbIsToA().equalsIgnoreCase(metadata2.getbIsToA())
+        && metadata1.getUuid().equals(metadata2.getUuid()));
+  }
+
   public static <T extends OpenmrsMetadata> void removeAllHarmonizedElements(
       Collection<T> collection1, Collection<T> collection2) {
     Iterator<T> iterator1 = collection1.iterator();
@@ -184,6 +204,22 @@ public class HarmonizationUtils {
       Iterator<T> iterator2 = collection2.iterator();
       while (iterator2.hasNext()) {
         T element2 = iterator2.next();
+        if (isThePairHarmonized(element1, element2)) {
+          iterator1.remove();
+          break;
+        }
+      }
+    }
+  }
+
+  public static void removeAllRelationshipTypeHarmonizedElements(
+      Collection<RelationshipType> collection1, Collection<RelationshipType> collection2) {
+    Iterator<RelationshipType> iterator1 = collection1.iterator();
+    while (iterator1.hasNext()) {
+      RelationshipType element1 = iterator1.next();
+      Iterator<RelationshipType> iterator2 = collection2.iterator();
+      while (iterator2.hasNext()) {
+        RelationshipType element2 = iterator2.next();
         if (isThePairHarmonized(element1, element2)) {
           iterator1.remove();
           break;

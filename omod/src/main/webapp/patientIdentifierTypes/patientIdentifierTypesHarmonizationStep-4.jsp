@@ -45,16 +45,86 @@
 	</form>
 	<br />
 
-	<c:if
-		test="${not empty swappablePatientIdentifierTypesClone && not empty notSwappablePatientIdentifierTypesClone}">
+	<c:if test="${not empty notSwappablePatientIdentifierTypesClone}">
+		<c:if test="${not empty mdsPatientIdentifierTypeNotHarmonizedYet}">
+			<fieldset>
+				<legend>
+					<b> <spring:message
+							code="eptsharmonization.harmonizeBasedOnMDS" /></b>
+				</legend>
+				<table cellspacing="0" border="0" style="width: 100%">
+					<tr>
+						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+								code="eptsharmonization.patientidentifiertype.from.metadataServer" /></th>
+						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+								code="eptsharmonization.patientidentifiertype.created.OnProductionServer" /></th>
+						<th colspan="2" style="text-align: left; width: 10%;"></th>
+					</tr>
+
+					<form method="post"
+						action="addPatientIdentifierTypeFromMDSMapping.form">
+						<tr>
+							<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+									path="harmonizationItem.value">
+									<select name="${status.expression}">
+										<option value="">Selecione</option>
+										<c:forEach items="${mdsPatientIdentifierTypeNotHarmonizedYet}"
+											var="type">
+											<option value="${type.uuid}"
+												<c:if test="${type.uuid == status.value}">selected</c:if>>${type.name}</option>
+										</c:forEach>
+									</select>
+									<c:if test="${not empty errorRequiredMdsValueFromMDS}">
+										<span class="error"><spring:message
+												code="${errorRequiredMdsValueFromMDS}"
+												text="${errorRequiredMdsValueFromMDS}" /></span>
+									</c:if>
+								</spring:bind></td>
+							<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+									path="harmonizationItem.key">
+									<select name="${status.expression}">
+										<option value="">Selecione</option>
+										<c:forEach items="${swappablePatientIdentifierTypes}"
+											var="type">
+											<option value="${type.uuid}"
+												<c:if test="${type.uuid == status.value}">selected</c:if>>${type.name}</option>
+										</c:forEach>
+									</select>
+									<c:if test="${not empty errorRequiredPDSValueFromMDS}">
+										<span class="error"> <spring:message
+												code="${errorRequiredPDSValueFromMDS}"
+												text="${errorRequiredPDSValueFromMDS}" />
+										</span>
+									</c:if>
+								</spring:bind></td>
+							<td colspan="2" style="text-align: left; width: 10%;"><c:choose>
+									<c:when test="${not empty swappablePatientIdentifierTypes}">
+										<div class="submit-btn" align="left">
+											<input type="submit"
+												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
+												value='<spring:message code="general.add"/>'
+												name="addNewMDSMapping" />
+										</div>
+									</c:when>
+									<c:otherwise>
+									</c:otherwise>
+								</c:choose></td>
+						</tr>
+					</form>
+				</table>
+			</fieldset>
+			<br>
+		</c:if>
+
 		<br />
-		<b class="boxHeader"><spring:message
-				code="eptsharmonization.patientidentifiertype.defineNewMappings" /></b>
 		<fieldset>
+			<legend>
+				<b> <spring:message code="eptsharmonization.harmonizeWithinPDS" /></b>
+			</legend>
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>
 					<th colspan="6" style="text-align: center; width: 45%;"><spring:message
-							code="eptsharmonization.patientidentifiertype.from.metadataServer" /></th>
+							code="eptsharmonization.patientidentifiertype.copiedFrom.metadataServer" /></th>
 					<th colspan="6" style="text-align: center; width: 45%;"><spring:message
 							code="eptsharmonization.patientidentifiertype.created.OnProductionServer" /></th>
 					<th colspan="2" style="text-align: left; width: 10%;"></th>

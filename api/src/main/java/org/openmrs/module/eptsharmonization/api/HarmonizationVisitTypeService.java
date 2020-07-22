@@ -47,6 +47,10 @@ public interface HarmonizationVisitTypeService extends OpenmrsService {
   Map<String, List<VisitTypeDTO>> findAllVisitTypesWithDifferentNameAndSameUUIDAndID()
       throws APIException;
 
+  VisitType findMDSVisitTypeByUuid(String uuid) throws APIException;
+
+  VisitType findPDSVisitTypeByUuid(String uuid) throws APIException;
+
   Map<String, List<VisitTypeDTO>> findAllVisitTypesWithDifferentIDAndSameUUID() throws APIException;
 
   int getNumberOfAffectedVisits(VisitTypeDTO visitTypeDTO);

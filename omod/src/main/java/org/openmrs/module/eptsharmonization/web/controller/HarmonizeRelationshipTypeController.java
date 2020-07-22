@@ -6,13 +6,18 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
+import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.RelationshipType;
 import org.openmrs.api.AdministrationService;
@@ -33,12 +38,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 6/2/20. */
 @Controller(HarmonizeRelationshipTypeController.CONTROLLER_NAME)
-@SessionAttributes({"removedMappableRelationshipTypes"})
 public class HarmonizeRelationshipTypeController {
   public static final String CONTROLLER_NAME =
       "eptsharmonization.harmonizeRelationshipTypeController";
@@ -49,6 +52,8 @@ public class HarmonizeRelationshipTypeController {
       "/module/eptsharmonization/manualMappingRelationshipTypeHarmonization";
   public static final String ADD_VISIT_TYPE_MAPPING =
       "/module/eptsharmonization/addRelationshipTypeMapping";
+  public static final String ADD_RELATION_TYPE_FROM_MDS_MAPPING =
+      "/module/eptsharmonization/addRelationshipTypeFromMDSMapping";
   private static final String REMOVE_VISIT_TYPE_MAPPING =
       "/module/eptsharmonization/removeRelationshipTypeMapping";
   private static final String EXPORT_VISIT_TYPES_LOG =
@@ -66,6 +71,9 @@ public class HarmonizeRelationshipTypeController {
   private PersonService personService;
   private AdministrationService adminService;
   private static RelationshipTypeHarmonizationCSVLog.Builder logBuilder;
+
+  private static List<RelationshipTypeDTO> RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL =
+      new ArrayList<>();
 
   @Autowired
   public void setHarmonizationRelationshipTypeService(
@@ -247,47 +255,80 @@ public class HarmonizeRelationshipTypeController {
       }
     }
 
-    // Overwrite the remaining same UUID different IDs anyway shifting the already existing ones to
-    // new ID and UUID.
-    // Because metadata always wins. If one needs to keep them they may be mapped or exported as new
-    // suggesting to CRB
-    harmonizationRelationshipTypeService.replacePDSRelationshipTypesWithSameUuidWithThoseFromMDS(
-        sameIdAndUuidDifferentNames);
-    harmonizationRelationshipTypeService.replacePDSRelationshipTypesWithSameUuidWithThoseFromMDS(
-        sameUuidDifferentIds);
-
     Map<RelationshipTypeDTO, Integer> mappableRelationshipTypes =
         getMappableRelationshipTypes(session);
+
+    if (RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
+
+      for (Entry<String, List<RelationshipTypeDTO>> entry :
+          sameIdAndUuidDifferentNames.entrySet()) {
+        RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL.add(entry.getValue().get(0));
+      }
+      for (Entry<String, List<RelationshipTypeDTO>> entry : sameUuidDifferentIds.entrySet()) {
+        RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL.add(entry.getValue().get(0));
+      }
+
+      if (!RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
+        for (RelationshipTypeDTO dto : RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL) {
+          mappableRelationshipTypes.put(
+              dto, this.harmonizationRelationshipTypeService.getNumberOfAffectedRelationships(dto));
+        }
+      }
+    }
+
+    if (!RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
+      List<RelationshipTypeDTO> availableMDSMappingRelationshipTypes =
+          (List<RelationshipTypeDTO>) session.getAttribute("availableMDSMappingRelationshipTypes");
+      if (availableMDSMappingRelationshipTypes == null) {
+        availableMDSMappingRelationshipTypes =
+            this.harmonizationRelationshipTypeService
+                .findAllMetadataRelationshipTypesNotInHarmonyWithProduction();
+        this.sortByDTOName(availableMDSMappingRelationshipTypes);
+        session.setAttribute(
+            "availableMDSMappingRelationshipTypes", availableMDSMappingRelationshipTypes);
+      }
+    }
 
     if (mappableRelationshipTypes != null && mappableRelationshipTypes.size() > 0) {
       List<RelationshipType> allRelationshipTypes = personService.getAllRelationshipTypes(true);
       List<RelationshipTypeDTO> toRemoveFromAll =
           new ArrayList<>(mappableRelationshipTypes.keySet());
       allRelationshipTypes.removeAll(DTOUtils.fromRelationshipTypeDTOs(toRemoveFromAll));
-      modelAndView.addObject(
+      this.sortByName(allRelationshipTypes);
+      session.setAttribute(
           "availableMappingTypes", DTOUtils.fromRelationshipTypes(allRelationshipTypes));
       session.setAttribute("mappableRelationshipTypes", mappableRelationshipTypes);
-
-      // Copy mappables under a different name.
       session.setAttribute("productionRelationshipTypesToExport", mappableRelationshipTypes);
-      modelAndView.addObject(
-          "mappableRelationshipTypesList", new ArrayList<>(mappableRelationshipTypes.keySet()));
+
+      List<RelationshipTypeDTO> keySet = new ArrayList<>(mappableRelationshipTypes.keySet());
+      this.sortByDTOName(keySet);
+      session.setAttribute("mappablePDSRelationshipTypes", keySet);
+
     } else {
       session.removeAttribute("mappableRelationshipTypes");
       session.removeAttribute("productionRelationshipTypesToExport");
+      session.removeAttribute("mappablePDSRelationshipTypes");
     }
 
     modelAndView.addObject("harmonizedVTSummary", HARMONIZED_CACHED_SUMMARY);
     // Write log to file.
     logBuilder.build();
 
-    if (mappableRelationshipTypes.size() == 0) {
+    Map<RelationshipType, RelationshipType> manualRelationshipTypeMappings =
+        (Map<RelationshipType, RelationshipType>)
+            session.getAttribute("manualRelationshipTypeMappings");
+
+    if (mappableRelationshipTypes.size() == 0
+        && sameUuidDifferentIds.isEmpty()
+        && sameIdAndUuidDifferentNames.isEmpty()
+        && (manualRelationshipTypeMappings == null || manualRelationshipTypeMappings.isEmpty())) {
       modelAndView.addObject("harmonizationCompleted", true);
     }
 
     return modelAndView;
   }
 
+  @SuppressWarnings("unchecked")
   @RequestMapping(value = ADD_VISIT_TYPE_MAPPING, method = RequestMethod.POST)
   public ModelAndView addRelationshipTypeMapping(
       HttpSession session,
@@ -311,9 +352,11 @@ public class HarmonizeRelationshipTypeController {
     }
 
     RelationshipType pdsRelationshipType =
-        personService.getRelationshipTypeByUuid((String) relationshipTypeBean.getKey());
+        this.harmonizationRelationshipTypeService.findPDSRelationshipTypeByUuid(
+            (String) relationshipTypeBean.getKey());
     RelationshipType mdsRelationshipType =
-        personService.getRelationshipTypeByUuid((String) relationshipTypeBean.getValue());
+        this.harmonizationRelationshipTypeService.findPDSRelationshipTypeByUuid(
+            (String) relationshipTypeBean.getValue());
 
     Map<RelationshipType, RelationshipType> manualRelationshipTypeMappings =
         (Map<RelationshipType, RelationshipType>)
@@ -323,58 +366,111 @@ public class HarmonizeRelationshipTypeController {
       manualRelationshipTypeMappings = new HashMap<>();
     }
 
-    Map<RelationshipTypeDTO, Integer> removedMappableRelationshipTypes =
-        (Map) session.getAttribute("removedMappableRelationshipTypes");
-    if (removedMappableRelationshipTypes == null) {
-      removedMappableRelationshipTypes = new HashMap<>();
-    }
-
-    RelationshipTypeDTO associatedRelationshipTypeDTO =
-        new RelationshipTypeDTO(pdsRelationshipType);
-    removedMappableRelationshipTypes.put(
-        associatedRelationshipTypeDTO,
-        mappableRelationshipTypes.remove(associatedRelationshipTypeDTO));
+    mappableRelationshipTypes.remove(new RelationshipTypeDTO(pdsRelationshipType));
     manualRelationshipTypeMappings.put(pdsRelationshipType, mdsRelationshipType);
-
     session.setAttribute("manualRelationshipTypeMappings", manualRelationshipTypeMappings);
-    session.setAttribute("removedMappableRelationshipTypes", removedMappableRelationshipTypes);
 
     return modelAndView;
   }
 
-  @RequestMapping(value = REMOVE_VISIT_TYPE_MAPPING, method = RequestMethod.POST)
-  public ModelAndView removeRelationshipTypeMapping(
+  @SuppressWarnings("unchecked")
+  @RequestMapping(value = ADD_RELATION_TYPE_FROM_MDS_MAPPING, method = RequestMethod.POST)
+  public ModelAndView addRelationTypeFromMDSMapping(
       HttpSession session,
-      @RequestParam("productionServerRelationshipTypeUuID") String pdsRelationshipTypeUuid) {
+      @ModelAttribute("relationshipTypeBean") RelationshipTypeBean relationShipTypeBean) {
+
     Map<RelationshipTypeDTO, Integer> mappableRelationshipTypes =
         getMappableRelationshipTypes(session);
+    ModelAndView modelAndView = getRedirectToMandatoryStep();
+
+    if (relationShipTypeBean.getKey() == null
+        || StringUtils.isEmpty(((String) relationShipTypeBean.getKey()))) {
+      modelAndView.addObject(
+          "errorRequiredPDSValue", "eptsharmonization.error.relationshipTypeForMapping.required");
+      return modelAndView;
+    }
+    if (relationShipTypeBean.getValue() == null
+        || StringUtils.isEmpty(((String) relationShipTypeBean.getValue()))) {
+      modelAndView.addObject(
+          "errorRequiredMdsValue", "eptsharmonization.error.relationshipTypeForMapping.required");
+      return modelAndView;
+    }
+
+    RelationshipType pdsRelationType =
+        this.harmonizationRelationshipTypeService.findPDSRelationshipTypeByUuid(
+            (String) relationShipTypeBean.getKey());
+    RelationshipType mdsRelationType =
+        this.harmonizationRelationshipTypeService.findMDSRelationshipTypeByUuid(
+            (String) relationShipTypeBean.getValue());
+
     Map<RelationshipType, RelationshipType> manualRelationshipTypeMappings =
         (Map<RelationshipType, RelationshipType>)
             session.getAttribute("manualRelationshipTypeMappings");
 
-    Map<RelationshipTypeDTO, Integer> removedMappableRelationshipTypes =
-        (Map) session.getAttribute("removedMappableRelationshipTypes");
+    if (manualRelationshipTypeMappings == null) {
+      manualRelationshipTypeMappings = new HashMap<>();
+    }
 
-    RelationshipTypeDTO relationshipTypeDTOFromRemoved = null;
-    for (RelationshipTypeDTO relationshipTypeDTO : removedMappableRelationshipTypes.keySet()) {
-      if (relationshipTypeDTO.getUuid().equals(pdsRelationshipTypeUuid)) {
-        relationshipTypeDTOFromRemoved = relationshipTypeDTO;
+    List<RelationshipTypeDTO> availableMDSMappingRelationshipTypes =
+        (List<RelationshipTypeDTO>) session.getAttribute("availableMDSMappingRelationshipTypes");
+    availableMDSMappingRelationshipTypes.remove(new RelationshipTypeDTO(mdsRelationType));
+
+    mappableRelationshipTypes.remove(new RelationshipTypeDTO(pdsRelationType));
+    manualRelationshipTypeMappings.put(pdsRelationType, mdsRelationType);
+    session.setAttribute("manualRelationshipTypeMappings", manualRelationshipTypeMappings);
+
+    return modelAndView;
+  }
+
+  @SuppressWarnings("unchecked")
+  @RequestMapping(value = REMOVE_VISIT_TYPE_MAPPING, method = RequestMethod.POST)
+  public ModelAndView removeRelationshipTypeMapping(
+      HttpSession session,
+      @RequestParam("productionServerRelationshipTypeUuID") String pdsRelationshipTypeUuid) {
+
+    List<RelationshipTypeDTO> availableMappingTypes =
+        (List<RelationshipTypeDTO>) session.getAttribute("availableMappingTypes");
+
+    Map<RelationshipTypeDTO, Integer> mappableRelationshipTypes =
+        getMappableRelationshipTypes(session);
+
+    RelationshipType pdsRelationShipType =
+        this.harmonizationRelationshipTypeService.findPDSRelationshipTypeByUuid(
+            pdsRelationshipTypeUuid);
+
+    Map<RelationshipType, RelationshipType> manualRelationshipTypeMappings =
+        (Map<RelationshipType, RelationshipType>)
+            session.getAttribute("manualRelationshipTypeMappings");
+
+    RelationshipType mdsRelationshipType =
+        manualRelationshipTypeMappings.remove(pdsRelationShipType);
+
+    boolean isMDSAlreadyInPDS = false;
+    for (RelationshipTypeDTO dto : availableMappingTypes) {
+      RelationshipType type = dto.getRelationshipType();
+      if (mdsRelationshipType.getUuid().equals(type.getUuid())
+          && mdsRelationshipType.getId().equals(type.getId())
+          && mdsRelationshipType.getaIsToB().contentEquals(type.getaIsToB())
+          && mdsRelationshipType.getbIsToA().contentEquals(type.getbIsToA())) {
+        isMDSAlreadyInPDS = true;
         break;
       }
     }
 
-    manualRelationshipTypeMappings.remove(relationshipTypeDTOFromRemoved.getRelationshipType());
+    if (!isMDSAlreadyInPDS) {
+      List<RelationshipTypeDTO> availableMDSMappingRelationshipTypes =
+          (List<RelationshipTypeDTO>) session.getAttribute("availableMDSMappingRelationshipTypes");
+      if (availableMDSMappingRelationshipTypes != null) {
+        RelationshipTypeDTO dto = new RelationshipTypeDTO(mdsRelationshipType);
+        if (!availableMDSMappingRelationshipTypes.contains(dto)) {
+          availableMDSMappingRelationshipTypes.add(dto);
+          this.sortByDTOName(availableMDSMappingRelationshipTypes);
+        }
+      }
+    }
+    RelationshipTypeDTO pdsDTO = new RelationshipTypeDTO(pdsRelationShipType);
     mappableRelationshipTypes.put(
-        relationshipTypeDTOFromRemoved,
-        removedMappableRelationshipTypes.get(relationshipTypeDTOFromRemoved));
-
-    if (manualRelationshipTypeMappings.isEmpty()) {
-      session.removeAttribute("manualRelationshipTypeMappings");
-    }
-
-    if (removedMappableRelationshipTypes.isEmpty()) {
-      session.removeAttribute("removedMappableRelationshipTypes");
-    }
+        pdsDTO, this.harmonizationRelationshipTypeService.getNumberOfAffectedRelationships(pdsDTO));
 
     return getRedirectToMandatoryStep();
   }
@@ -409,6 +505,8 @@ public class HarmonizeRelationshipTypeController {
 
     // Write to log file.
     logBuilder.build();
+
+    RELATIONSHIPTYPE_MDS_MAPPING_CACHE_CONTROL = new ArrayList<>();
 
     return modelAndView;
   }
@@ -446,7 +544,7 @@ public class HarmonizeRelationshipTypeController {
       throws IOException {
 
     Map<RelationshipTypeDTO, Integer> productionItemsToExport =
-        (Map) session.getAttribute("mappableRelationshipTypes");
+        (Map) session.getAttribute("productionRelationshipTypesToExport");
 
     ByteArrayOutputStream outputStream =
         RelationshipTypeHarmonizationCSVLog.exportRelationshipTypeLogs(
@@ -476,17 +574,18 @@ public class HarmonizeRelationshipTypeController {
   }
 
   private Map<RelationshipTypeDTO, Integer> getMappableRelationshipTypes(HttpSession session) {
-    Map<RelationshipTypeDTO, Integer> mappableRelationshipTypes = null;
-    if (session != null) {
-      mappableRelationshipTypes = (Map) session.getAttribute("mappableRelationshipTypes");
-    }
 
+    Map<RelationshipTypeDTO, Integer> mappableRelationshipTypes =
+        (Map) session.getAttribute("mappableRelationshipTypes");
     if (mappableRelationshipTypes != null) {
       return mappableRelationshipTypes;
     }
+    mappableRelationshipTypes =
+        harmonizationRelationshipTypeService
+            .findAllUsedProductionRelationshipTypesNotSharingUuidWithAnyFromMetadata();
+    session.setAttribute("mappableRelationshipTypes", mappableRelationshipTypes);
 
-    return harmonizationRelationshipTypeService
-        .findAllUsedProductionRelationshipTypesNotSharingUuidWithAnyFromMetadata();
+    return mappableRelationshipTypes;
   }
 
   private ModelAndView getRedirectToMandatoryStep() {
@@ -498,5 +597,25 @@ public class HarmonizeRelationshipTypeController {
       logBuilder = new RelationshipTypeHarmonizationCSVLog.Builder(defaultLocation);
     }
     return logBuilder;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<RelationshipType> sortByName(List<RelationshipType> list) {
+    ComparatorChain chain =
+        new ComparatorChain(
+            Arrays.asList(new BeanComparator("aIsToB"), new BeanComparator("bIsToA")));
+    Collections.sort(list, chain);
+    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<RelationshipTypeDTO> sortByDTOName(List<RelationshipTypeDTO> list) {
+    ComparatorChain chain =
+        new ComparatorChain(
+            Arrays.asList(
+                new BeanComparator("relationshipType.aIsToB"),
+                new BeanComparator("relationshipType.bIsToA")));
+    Collections.sort(list, chain);
+    return list;
   }
 }
