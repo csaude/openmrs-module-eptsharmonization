@@ -36,12 +36,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 6/2/20. */
 @Controller(HarmonizeLocationTagController.CONTROLLER_NAME)
-@SessionAttributes({"removedMappableLocationTags"})
 public class HarmonizeLocationTagController {
   public static final String CONTROLLER_NAME = "eptsharmonization.harmonizeLocationTagController";
   public static final String ANALYSIS_STEP = "/module/eptsharmonization/harmonizeLocationTag";
@@ -70,6 +68,8 @@ public class HarmonizeLocationTagController {
   private LocationService locationService;
   private AdministrationService adminService;
   private static LocationTagHarmonizationCSVLog.Builder logBuilder;
+
+  private static List<LocationTagDTO> LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL = new ArrayList<>();
 
   @Autowired
   public void setHarmonizationLocationTagService(
@@ -247,46 +247,31 @@ public class HarmonizeLocationTagController {
 
     Map<LocationTagDTO, Integer> mappableLocationTags = getMappableLocationTags(session);
 
-    if (!sameUuidDifferentIds.isEmpty() || !sameIdAndUuidDifferentNames.isEmpty()) {
+    if (LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
 
-      List<LocationTagDTO> availableMDSMappingTypes =
-          this.harmonizationLocationTagService
-              .findAllMetadataLocationTagsNotInHarmonyWithProduction();
+      for (Entry<String, List<LocationTagDTO>> entry : sameIdAndUuidDifferentNames.entrySet()) {
+        LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL.add(entry.getValue().get(0));
+      }
+      for (Entry<String, List<LocationTagDTO>> entry : sameUuidDifferentIds.entrySet()) {
+        LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL.add(entry.getValue().get(0));
+      }
 
-      LocationTagDTO addedMDSMappableLocationTag =
-          (LocationTagDTO) session.getAttribute("addedMDSMappableLocationTag");
-      LocationTag removedMDSMappableLocationTag =
-          (LocationTag) session.getAttribute("removedMDSMappableLocationTag");
-      session.removeAttribute("addedMDSMappableLocationTag");
-      session.removeAttribute("removedMDSMappableLocationTag");
-      availableMDSMappingTypes.remove(addedMDSMappableLocationTag);
-      if (removedMDSMappableLocationTag != null) {
-        LocationTagDTO dto = new LocationTagDTO(removedMDSMappableLocationTag);
-        if (!availableMDSMappingTypes.contains(dto)) {
-          availableMDSMappingTypes.add(dto);
+      if (!LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
+        for (LocationTagDTO dto : LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL) {
+          mappableLocationTags.put(
+              dto, this.harmonizationLocationTagService.getNumberOfAffectedLocations(dto));
         }
       }
-      session.setAttribute("availableMDSMappingTypes", availableMDSMappingTypes);
-
-      for (Entry<String, List<LocationTagDTO>> entry : sameUuidDifferentIds.entrySet()) {
-        mappableLocationTags.put(entry.getValue().get(0), 1);
-      }
-      for (Entry<String, List<LocationTagDTO>> entry : sameIdAndUuidDifferentNames.entrySet()) {
-        mappableLocationTags.put(entry.getValue().get(0), 1);
-      }
-      LocationTagDTO addedMappableLocationTag =
-          (LocationTagDTO) session.getAttribute("addedMappableLocationTag");
-      LocationTag removedMappableLocationTag =
-          (LocationTag) session.getAttribute("removedMappableLocationTag");
-      session.removeAttribute("addedMappableLocationTag");
-      session.removeAttribute("removedMappableLocationTag");
-
-      mappableLocationTags.remove(addedMappableLocationTag);
-      if (removedMappableLocationTag != null) {
-        mappableLocationTags.put(new LocationTagDTO(removedMappableLocationTag), 1);
-      }
-      if (!mappableLocationTags.isEmpty()) {
-        session.setAttribute("mappableLocationTags", mappableLocationTags);
+    }
+    if (!LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL.isEmpty()) {
+      List<LocationTagDTO> availableMDSMappingTypes =
+          (List<LocationTagDTO>) session.getAttribute("availableMDSMappingTypes");
+      if (availableMDSMappingTypes == null) {
+        availableMDSMappingTypes =
+            this.harmonizationLocationTagService
+                .findAllMetadataLocationTagsNotInHarmonyWithProduction();
+        this.sortByDTOName(availableMDSMappingTypes);
+        session.setAttribute("availableMDSMappingTypes", availableMDSMappingTypes);
       }
     }
 
@@ -297,12 +282,15 @@ public class HarmonizeLocationTagController {
       this.sortByName(allLocationTags);
       session.setAttribute("availableMappingTypes", DTOUtils.fromLocationTags(allLocationTags));
       session.setAttribute("mappableLocationTags", mappableLocationTags);
-
-      // Copy mappables under a different name.
       session.setAttribute("productionLocationTagsToExport", mappableLocationTags);
+
+      List<LocationTagDTO> keySet = new ArrayList<>(mappableLocationTags.keySet());
+      this.sortByDTOName(keySet);
+      session.setAttribute("mappablePDSLocationTags", keySet);
     } else {
       session.removeAttribute("mappableLocationTags");
       session.removeAttribute("productionLocationTagsToExport");
+      session.removeAttribute("mappablePDSLocationTags");
     }
 
     modelAndView.addObject("harmonizedVTSummary", HARMONIZED_CACHED_SUMMARY);
@@ -359,13 +347,12 @@ public class HarmonizeLocationTagController {
     mappableLocationTags.remove(new LocationTagDTO(pdsLocationTag));
     manualLocationTagMappings.put(pdsLocationTag, mdsLocationTag);
     session.setAttribute("manualLocationTagMappings", manualLocationTagMappings);
-    session.setAttribute("addedMappableLocationTag", new LocationTagDTO(pdsLocationTag));
 
     return modelAndView;
   }
 
   @RequestMapping(value = ADD_LOCATION_TAG_FROM_MDS_MAPPING, method = RequestMethod.POST)
-  public ModelAndView addVisitTypeFromMDSMapping(
+  public ModelAndView addLocationTagFromMDSMapping(
       HttpSession session, @ModelAttribute("locationTagBean") LocationTagBean locationTagBean) {
 
     Map<LocationTagDTO, Integer> mappableLocationTags = getMappableLocationTags(session);
@@ -405,8 +392,6 @@ public class HarmonizeLocationTagController {
     mappableLocationTags.remove(new LocationTagDTO(pdsLocationTag));
     manualLocationTagMappings.put(pdsLocationTag, mdsLocationTag);
     session.setAttribute("manualLocationTagMappings", manualLocationTagMappings);
-    session.setAttribute("addedMappableLocationTag", new LocationTagDTO(pdsLocationTag));
-    session.setAttribute("addedMDSMappableLocationTag", new LocationTagDTO(mdsLocationTag));
 
     return modelAndView;
   }
@@ -422,6 +407,8 @@ public class HarmonizeLocationTagController {
     List<LocationTagDTO> availableMappingTypes =
         (List<LocationTagDTO>) session.getAttribute("availableMappingTypes");
 
+    Map<LocationTagDTO, Integer> mappableLocationTags = getMappableLocationTags(session);
+
     Map<LocationTag, LocationTag> manualLocationTagMappings =
         (Map<LocationTag, LocationTag>) session.getAttribute("manualLocationTagMappings");
 
@@ -433,19 +420,28 @@ public class HarmonizeLocationTagController {
 
     boolean isMDSAlreadyInPDS = false;
     for (LocationTagDTO dto : availableMappingTypes) {
-      LocationTag visitType = dto.getLocationTag();
-      if (mdsLocationTag.getUuid().equals(visitType.getUuid())
-          && mdsLocationTag.getId().equals(visitType.getId())
-          && mdsLocationTag.getName().contentEquals(visitType.getName())) {
+      LocationTag locationTag = dto.getLocationTag();
+      if (mdsLocationTag.getUuid().equals(locationTag.getUuid())
+          && mdsLocationTag.getId().equals(locationTag.getId())
+          && mdsLocationTag.getName().contentEquals(locationTag.getName())) {
         isMDSAlreadyInPDS = true;
         break;
       }
     }
-
     if (!isMDSAlreadyInPDS) {
-      session.setAttribute("removedMDSMappableLocationTag", mdsLocationTag);
+      List<LocationTagDTO> availableMDSMappingTypes =
+          (List<LocationTagDTO>) session.getAttribute("availableMDSMappingTypes");
+      if (availableMDSMappingTypes != null) {
+        LocationTagDTO dto = new LocationTagDTO(mdsLocationTag);
+        if (!availableMDSMappingTypes.contains(dto)) {
+          availableMDSMappingTypes.add(dto);
+          this.sortByDTOName(availableMDSMappingTypes);
+        }
+      }
     }
-    session.setAttribute("removedMappableLocationTag", pdsLocationTag);
+    LocationTagDTO pdsDTO = new LocationTagDTO(pdsLocationTag);
+    mappableLocationTags.put(
+        pdsDTO, this.harmonizationLocationTagService.getNumberOfAffectedLocations(pdsDTO));
 
     return getRedirectToMandatoryStep();
   }
@@ -477,7 +473,7 @@ public class HarmonizeLocationTagController {
 
     // Write to log file.
     logBuilder.build();
-
+    LOCATION_TAG_MDS_MAPPING_CACHE_CONTROL = new ArrayList<>();
     return modelAndView;
   }
 
@@ -544,17 +540,16 @@ public class HarmonizeLocationTagController {
   }
 
   private Map<LocationTagDTO, Integer> getMappableLocationTags(HttpSession session) {
-    Map<LocationTagDTO, Integer> mappableLocationTags = null;
-    if (session != null) {
-      mappableLocationTags = (Map) session.getAttribute("mappableLocationTags");
-    }
-
+    Map<LocationTagDTO, Integer> mappableLocationTags =
+        (Map) session.getAttribute("mappableLocationTags");
     if (mappableLocationTags != null) {
       return mappableLocationTags;
     }
-
-    return harmonizationLocationTagService
-        .findAllUsedProductionLocationTagsNotSharingUuidWithAnyFromMetadata();
+    mappableLocationTags =
+        harmonizationLocationTagService
+            .findAllUsedProductionLocationTagsNotSharingUuidWithAnyFromMetadata();
+    session.setAttribute("mappableLocationTags", mappableLocationTags);
+    return mappableLocationTags;
   }
 
   private ModelAndView getRedirectToMandatoryStep() {
@@ -571,6 +566,13 @@ public class HarmonizeLocationTagController {
   @SuppressWarnings("unchecked")
   private List<LocationTag> sortByName(List<LocationTag> list) {
     BeanComparator comparator = new BeanComparator("name");
+    Collections.sort(list, comparator);
+    return list;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<LocationTagDTO> sortByDTOName(List<LocationTagDTO> list) {
+    BeanComparator comparator = new BeanComparator("locationTag.name");
     Collections.sort(list, comparator);
     return list;
   }

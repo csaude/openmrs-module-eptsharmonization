@@ -82,7 +82,7 @@ td {
 		<form method="post" action="exportLocationTagsHarmonizationLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
-					style="width: 8.6em; padding: 6px; font-size: 6pt;"
+					style="width: 14.10em; padding: 1px; font-size: 8pt;"
 					value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
 					name="harmonizeAllLocationTags" />
 			</div>
@@ -162,8 +162,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.locationtag.select" /></option>
-								<c:forEach items="${mappableLocationTags}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.locationTag.name}</option>
+								<c:forEach items="${mappablePDSLocationTags}" var="type">
+									<option value="${type.uuid}">${type.locationTag.name}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
@@ -187,7 +187,7 @@ td {
 	</fieldset>
 </c:if>
 <c:if
-	test="${not empty manualLocationTagMappings || not empty mappableLocationTags}">
+	test="${not empty manualLocationTagMappings || not empty mappablePDSLocationTags}">
 	<br />
 	<fieldset>
 		<legend>
@@ -223,8 +223,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.locationtag.select" /></option>
-								<c:forEach items="${mappableLocationTags}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.locationTag.name}</option>
+								<c:forEach items="${mappablePDSLocationTags}" var="type">
+									<option value="${type.uuid}">${type.locationTag.name}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
