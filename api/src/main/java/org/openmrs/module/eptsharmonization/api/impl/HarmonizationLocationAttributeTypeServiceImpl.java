@@ -247,12 +247,12 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
       dao.setDisabledCheckConstraints();
       saveNewLocationAttributeTypeFromDTO(locationAttributeTypeDTO);
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -268,12 +268,12 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
         saveNewLocationAttributeTypeFromDTO(locationAttributeTypeDTO);
       }
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -317,13 +317,13 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
       }
 
     } catch (Exception e) {
-      if (e instanceof APIException) throw (APIException) e;
+      if (e instanceof APIException) throw new APIException(e.getMessage(), e);
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -368,14 +368,12 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
         harmonizationLocationAttributeTypeDao.insertLocationAttributeType(mdsLocationAttributeType);
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -460,8 +458,6 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {

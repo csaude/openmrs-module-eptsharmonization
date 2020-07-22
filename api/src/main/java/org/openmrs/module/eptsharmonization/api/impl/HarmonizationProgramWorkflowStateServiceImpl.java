@@ -271,12 +271,12 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
             programWorkflowState);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -349,12 +349,12 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
             relatedPatientStates);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -473,7 +473,7 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (SQLException e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }

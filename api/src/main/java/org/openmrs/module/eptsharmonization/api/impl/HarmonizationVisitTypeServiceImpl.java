@@ -220,12 +220,12 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
       dao.setDisabledCheckConstraints();
       saveNewVisitTypeFromDTO(visitTypeDTO);
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -241,12 +241,12 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
         saveNewVisitTypeFromDTO(visitTypeDTO);
       }
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -286,7 +286,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
       }
 
     } catch (Exception e) {
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
@@ -332,8 +331,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
         harmonizationVisitTypeDAO.insertVisitType(mdsVisitType);
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
@@ -418,8 +415,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {

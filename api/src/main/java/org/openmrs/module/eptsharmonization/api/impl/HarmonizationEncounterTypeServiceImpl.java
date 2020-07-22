@@ -266,12 +266,12 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
         this.harmonizationEncounterTypeServiceDAO.saveNotSwappableEncounterType(encounterType);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -331,12 +331,12 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
         this.updateToGivenId(foundPDS, mdServerEncounterId, false, relatedEncounters, relatedForms);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -424,7 +424,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (SQLException e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }

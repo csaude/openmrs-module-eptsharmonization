@@ -220,12 +220,12 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       dao.setDisabledCheckConstraints();
       saveNewRelationshipTypeFromDTO(relationshipTypeDTO);
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -241,12 +241,12 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
         saveNewRelationshipTypeFromDTO(relationshipTypeDTO);
       }
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -287,7 +287,6 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       }
 
     } catch (Exception e) {
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
@@ -336,8 +335,6 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
         harmonizationRelationshipTypeDao.insertRelationshipType(mdsRelationshipType);
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
@@ -421,8 +418,6 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
