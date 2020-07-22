@@ -363,27 +363,14 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
           this.updateToNextAvailableID(
               foundMDS, relatedConceptStateConversions, relatedProgramWorkflowStates);
         }
-
-        ProgramWorkflow foundPDS =
-            this.harmonizationProgramWorkflowServiceDAO.getProgramWorkflowById(
-                pdSProgramWorkflow.getId());
-        if (!this.harmonizationProgramWorkflowServiceDAO.isSwappable(foundPDS)) {
-          throw new APIException(
-              String.format(
-                  "Cannot update the Production Server ProgramWorkflow with ID {%s}, UUID {%s}, PROGRAM {%s} and CONCEPT {%s}. This ProgramWorkflow is a Reference from an ProgramWorkflow of Metadata Server",
-                  foundPDS.getId(),
-                  foundPDS.getUuid(),
-                  list.get(1).getProgram(),
-                  list.get(1).getConcept()));
-        }
         List<ConceptStateConversion> relatedConceptStateConversions =
             this.harmonizationProgramWorkflowServiceDAO
-                .findConceptStateConversionsByProgramWorkflowId(foundPDS.getId());
+                .findConceptStateConversionsByProgramWorkflowId(pdSProgramWorkflow.getId());
         List<ProgramWorkflowState> relatedProgramWorkflowStates =
             this.harmonizationProgramWorkflowServiceDAO
-                .findProgramWorkflowStatesByProgramWorkflowId(foundPDS.getId());
+                .findProgramWorkflowStatesByProgramWorkflowId(pdSProgramWorkflow.getId());
         this.updateToGivenId(
-            foundPDS,
+            pdSProgramWorkflow,
             mdServerProgramWorkflowId,
             false,
             relatedConceptStateConversions,

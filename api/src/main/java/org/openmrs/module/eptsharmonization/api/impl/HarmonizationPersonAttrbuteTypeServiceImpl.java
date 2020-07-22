@@ -303,20 +303,11 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
           this.updateToNextAvailableID(foundMDS, relatedPersonAttributes);
         }
 
-        PersonAttributeType foundPDS =
-            this.harmonizationPersonAttributeTypeServiceDAO.getPersonAttributeTypeById(
-                pdSPersonAttributeType.getId());
-        if (!this.harmonizationPersonAttributeTypeServiceDAO.isSwappable(foundPDS)) {
-          throw new APIException(
-              String.format(
-                  "Cannot update the Production Server Person Attribute Type with ID {%s}, UUID {%s} and NAME {%s}. This Person Attribute Type is a Reference from an Person Attribute Type of Metadata Server",
-                  foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
-        }
         List<PersonAttribute> relatedPersonAttributes =
             this.harmonizationPersonAttributeTypeServiceDAO
-                .findPersonAttributesByPersonAttributeTypeId(foundPDS.getId());
+                .findPersonAttributesByPersonAttributeTypeId(pdSPersonAttributeType.getId());
         this.updateToGivenId(
-            foundPDS, mdServerPersonAttributeTypeId, false, relatedPersonAttributes);
+            pdSPersonAttributeType, mdServerPersonAttributeTypeId, false, relatedPersonAttributes);
       }
     } catch (Exception e) {
       throw new APIException(e.getMessage(), e);

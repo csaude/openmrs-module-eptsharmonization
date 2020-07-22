@@ -280,20 +280,12 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
               this.harmonizationProgramServiceDAO.findProgramWorkflowsByProgramId(foundMDS.getId());
           this.updateToNextAvailableID(foundMDS, relatedPatientPrograms, relatedProgramWorkflows);
         }
-
-        Program foundPDS = this.harmonizationProgramServiceDAO.getProgramById(pdSProgram.getId());
-        if (!this.harmonizationProgramServiceDAO.isSwappable(foundPDS)) {
-          throw new APIException(
-              String.format(
-                  "Cannot update the Production Server Program with ID {%s}, UUID {%s} and NAME {%s}. This Program is a Reference from an Program of Metadata Server",
-                  foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
-        }
         List<PatientProgram> relatedPatientPrograms =
-            this.harmonizationProgramServiceDAO.findPatientProgramsByProgramId(foundPDS.getId());
+            this.harmonizationProgramServiceDAO.findPatientProgramsByProgramId(pdSProgram.getId());
         List<ProgramWorkflow> relatedProgramWorkflows =
-            this.harmonizationProgramServiceDAO.findProgramWorkflowsByProgramId(foundPDS.getId());
+            this.harmonizationProgramServiceDAO.findProgramWorkflowsByProgramId(pdSProgram.getId());
         this.updateToGivenId(
-            foundPDS, mdServerProgramId, false, relatedPatientPrograms, relatedProgramWorkflows);
+            pdSProgram, mdServerProgramId, false, relatedPatientPrograms, relatedProgramWorkflows);
       }
     } catch (Exception e) {
       throw new APIException(e.getMessage(), e);

@@ -299,21 +299,14 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
                   .findPatientIdentifiersByPatientIdentifierTypeId(foundMDS.getId());
           this.updateToNextAvailableID(foundMDS, relatedPatientIdentifiers);
         }
-
-        PatientIdentifierType foundPDS =
-            this.harmonizationPatientIdentifierTypeServiceDAO.getPatientIdentifierTypeById(
-                pdSPatientIdentifierType.getId());
-        if (!this.harmonizationPatientIdentifierTypeServiceDAO.isSwappable(foundPDS)) {
-          throw new APIException(
-              String.format(
-                  "Cannot update the Production Server Patient Identifier Type with ID {%s}, UUID {%s} and NAME {%s}. This Patient Identifier Type is a Reference from an Patient Identifier Type of Metadata Server",
-                  foundPDS.getId(), foundPDS.getUuid(), foundPDS.getName()));
-        }
         List<PatientIdentifier> relatedPatientIdentifiers =
             this.harmonizationPatientIdentifierTypeServiceDAO
-                .findPatientIdentifiersByPatientIdentifierTypeId(foundPDS.getId());
+                .findPatientIdentifiersByPatientIdentifierTypeId(pdSPatientIdentifierType.getId());
         this.updateToGivenId(
-            foundPDS, mdServerPatientIdentifierTypeId, false, relatedPatientIdentifiers);
+            pdSPatientIdentifierType,
+            mdServerPatientIdentifierTypeId,
+            false,
+            relatedPatientIdentifiers);
       }
     } catch (Exception e) {
       throw new APIException(e.getMessage(), e);
