@@ -14,15 +14,15 @@ import org.openmrs.ConceptName;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.DAOException;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationConceptDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationConceptDAO;
 import org.openmrs.module.eptsharmonization.api.model.ConceptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /** @uthor Willa Mhawila<a.mhawila@gmail.com> on 7/1/20. */
-@Repository(HibernateHarmonizationConceptDao.BEAN_NAME)
-public class HibernateHarmonizationConceptDao implements HarmonizationConceptDao {
-  public static final String BEAN_NAME = "eptsharmonization.hibernateHarmonizationConceptDao";
+@Repository(HibernateHarmonizationConceptDAO.BEAN_NAME)
+public class HibernateHarmonizationConceptDAO implements HarmonizationConceptDAO {
+  public static final String BEAN_NAME = "eptsharmonization.hibernateHarmonizationConceptDAO";
   private SessionFactory sessionFactory;
   private ConceptService conceptService;
 

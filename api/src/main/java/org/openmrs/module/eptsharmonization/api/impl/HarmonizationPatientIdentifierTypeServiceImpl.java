@@ -254,12 +254,12 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
             patientIdentifierType);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -316,12 +316,12 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
             foundPDS, mdServerPatientIdentifierTypeId, false, relatedPatientIdentifiers);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -407,12 +407,12 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
         }
       }
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }

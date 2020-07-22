@@ -213,12 +213,12 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
       dao.setDisabledCheckConstraints();
       saveNewLocationTagFromDTO(locationTagDTO);
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -234,12 +234,12 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
         saveNewLocationTagFromDTO(locationTagDTO);
       }
     } catch (Exception e) {
-      throw new APIException(e);
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -278,13 +278,12 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
       }
 
     } catch (Exception e) {
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -325,14 +324,12 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
         harmonizationLocationTagDao.insertLocationTag(mdsLocationTag);
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {
         dao.setEnableCheckConstraints();
       } catch (Exception e) {
-        throw new APIException(e);
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -404,8 +401,6 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
-      if (e instanceof APIException) throw (APIException) e;
       throw new APIException(e.getMessage(), e);
     } finally {
       try {

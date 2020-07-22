@@ -314,12 +314,12 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
             programWorkflow);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -390,12 +390,12 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
             relatedProgramWorkflowStates);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -505,7 +505,7 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (SQLException e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }

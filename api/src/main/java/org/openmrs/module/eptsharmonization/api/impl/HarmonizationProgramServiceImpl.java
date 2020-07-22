@@ -237,12 +237,12 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
         this.harmonizationProgramServiceDAO.saveNotSwappableProgram(program);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -296,12 +296,12 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
             foundPDS, mdServerProgramId, false, relatedPatientPrograms, relatedProgramWorkflows);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -382,7 +382,7 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (SQLException e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }

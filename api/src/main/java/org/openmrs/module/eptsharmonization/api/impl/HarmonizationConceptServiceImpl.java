@@ -4,7 +4,7 @@ import java.util.List;
 import org.openmrs.api.APIException;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationConceptService;
-import org.openmrs.module.eptsharmonization.api.db.HarmonizationConceptDao;
+import org.openmrs.module.eptsharmonization.api.db.HarmonizationConceptDAO;
 import org.openmrs.module.eptsharmonization.api.model.ConceptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class HarmonizationConceptServiceImpl extends BaseOpenmrsService
     implements HarmonizationConceptService {
   public static final String BEAN_NAME = "eptsharmonization.harmonizationConceptService";
-  private HarmonizationConceptDao harmonizationConceptDao;
+  private HarmonizationConceptDAO harmonizationConceptDao;
 
   @Autowired
-  public void setHarmonizationConceptDao(HarmonizationConceptDao harmonizationConceptDao) {
+  public void setHarmonizationConceptDao(HarmonizationConceptDAO harmonizationConceptDao) {
     this.harmonizationConceptDao = harmonizationConceptDao;
   }
 

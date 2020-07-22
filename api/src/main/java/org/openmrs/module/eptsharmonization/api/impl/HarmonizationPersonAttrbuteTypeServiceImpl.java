@@ -258,12 +258,12 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
             personAttributeType);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -319,12 +319,12 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
             foundPDS, mdServerPersonAttributeTypeId, false, relatedPersonAttributes);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -413,7 +413,7 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (SQLException e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }

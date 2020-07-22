@@ -212,12 +212,12 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.saveNotSwappableForm(form);
       }
     } catch (Exception e) {
-      throw new RuntimeException("Error Saving new Forms From MDSersver", e.getCause());
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -261,12 +261,12 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         updateRelatedMetadata(foundPDS, updated);
       }
     } catch (Exception e) {
-      throw new RuntimeException(e.getCause());
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -323,7 +323,7 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (SQLException e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -343,12 +343,12 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.deleteForm(form);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -368,12 +368,12 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.updateHtmlForm(pdsHtmlForm, mdsHtmlForm);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
@@ -388,12 +388,12 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.createHtmlFormPDS(htmlForm);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new APIException(e.getMessage(), e);
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
       } catch (Exception e) {
-        e.printStackTrace();
+        throw new APIException(e.getMessage(), e);
       }
     }
   }
