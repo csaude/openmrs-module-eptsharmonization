@@ -34,6 +34,8 @@ public interface HarmonizationPersonAttributeTypeServiceDAO {
   public PersonAttributeType getPersonAttributeTypeById(Integer personAttributeTypeId)
       throws DAOException;
 
+  public PersonAttributeType getPersonAttributeTypeByUuid(String uuid) throws DAOException;
+
   public boolean isSwappable(PersonAttributeType personAttributeType) throws DAOException;
 
   public List<PersonAttributeType> findAllSwappable() throws DAOException;

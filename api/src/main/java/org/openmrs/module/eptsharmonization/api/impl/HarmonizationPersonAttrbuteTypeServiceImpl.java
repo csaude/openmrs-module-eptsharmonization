@@ -356,6 +356,29 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
         PersonAttributeType pdSPersonAttributeType = entry.getKey();
         PersonAttributeType mdsPersonAttributeType = entry.getValue();
 
+        PersonAttributeType foundMDSPersonAttributeTypeByUuid =
+            this.harmonizationPersonAttributeTypeServiceDAO.getPersonAttributeTypeByUuid(
+                mdsPersonAttributeType.getUuid());
+
+        if ((foundMDSPersonAttributeTypeByUuid != null
+                && !foundMDSPersonAttributeTypeByUuid
+                    .getId()
+                    .equals(mdsPersonAttributeType.getId()))
+            && (!foundMDSPersonAttributeTypeByUuid.getId().equals(pdSPersonAttributeType.getId())
+                && !foundMDSPersonAttributeTypeByUuid
+                    .getUuid()
+                    .equals(pdSPersonAttributeType.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the Person Attribute Type '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdSPersonAttributeType.getName(),
+                  mdsPersonAttributeType.getName(),
+                  foundMDSPersonAttributeTypeByUuid.getName(),
+                  foundMDSPersonAttributeTypeByUuid.getId(),
+                  foundMDSPersonAttributeTypeByUuid.getUuid()));
+        }
+
         PersonAttributeType foundPDS =
             this.harmonizationPersonAttributeTypeServiceDAO.getPersonAttributeTypeById(
                 pdSPersonAttributeType.getId());
@@ -366,10 +389,6 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
               && mdsPersonAttributeType.getName().equals(pdSPersonAttributeType.getName())) {
             return;
           }
-          foundPDS.setName(mdsPersonAttributeType.getName());
-          foundPDS.setDescription(mdsPersonAttributeType.getDescription());
-          this.personService.savePersonAttributeType(foundPDS);
-
         } else {
           List<PersonAttribute> relatedPersonAttributes =
               this.harmonizationPersonAttributeTypeServiceDAO
@@ -380,14 +399,20 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
                 personAttributes, mdsPersonAttributeType.getPersonAttributeTypeId());
           }
           this.harmonizationPersonAttributeTypeServiceDAO.deletePersonAttributeType(foundPDS);
+
+          PersonAttributeType foundMDSPersonAttributeTypeByID =
+              this.harmonizationPersonAttributeTypeServiceDAO.getPersonAttributeTypeById(
+                  mdsPersonAttributeType.getId());
+          if (foundMDSPersonAttributeTypeByID == null) {
+            this.harmonizationPersonAttributeTypeServiceDAO.saveNotSwappablePersonAttributeType(
+                mdsPersonAttributeType);
+          }
         }
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
-      } catch (Exception e) {
+      } catch (SQLException e) {
         e.printStackTrace();
       }
     }
@@ -419,7 +444,7 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
       for (PersonAttributeType pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
             && mdsItem.getId() == pdsItem.getId()
-            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
+            && !mdsItem.getName().trim().equalsIgnoreCase(pdsItem.getName().trim())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }

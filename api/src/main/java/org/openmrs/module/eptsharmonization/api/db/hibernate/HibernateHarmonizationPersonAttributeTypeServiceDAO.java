@@ -256,4 +256,9 @@ public class HibernateHarmonizationPersonAttributeTypeServiceDAO
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
+
+  @Override
+  public PersonAttributeType getPersonAttributeTypeByUuid(String uuid) throws DAOException {
+    return this.personDAO.getPersonAttributeTypeByUuid(uuid);
+  }
 }
