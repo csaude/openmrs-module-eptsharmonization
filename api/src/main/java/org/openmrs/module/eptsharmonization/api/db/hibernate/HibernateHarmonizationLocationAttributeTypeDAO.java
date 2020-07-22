@@ -84,7 +84,7 @@ public class HibernateHarmonizationLocationAttributeTypeDAO
     StringBuilder queryBulder =
         new StringBuilder("select count(*) from _location_attribute_type v ")
             .append("where v.location_attribute_type_id = :id and ")
-            .append("v.uuid = :uuid and v.name = :name ")
+            .append("v.uuid = :uuid and v.name = :name and ")
             .append("v.datatype = :dataType and ")
             .append("v.datatype_config = :dataTypeConfig and ")
             .append("v.preferred_handler = :preferredHandler and ")
@@ -102,6 +102,8 @@ public class HibernateHarmonizationLocationAttributeTypeDAO
             .setString("dataType", locationAttributeType.getDatatypeClassname())
             .setString("dataTypeConfig", locationAttributeType.getDatatypeConfig())
             .setString("preferredHandler", locationAttributeType.getPreferredHandlerClassname())
+            .setString("handlerConfig", locationAttributeType.getHandlerConfig())
+            .setString("handlerConfig", locationAttributeType.getHandlerConfig())
             .setInteger("minOccurs", locationAttributeType.getMinOccurs())
             .setInteger("maxOccurs", locationAttributeType.getMaxOccurs());
     int matchingMDSRecords = ((Number) query.uniqueResult()).intValue();

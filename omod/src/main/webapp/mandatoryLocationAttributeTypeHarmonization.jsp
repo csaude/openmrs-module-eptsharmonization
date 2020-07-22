@@ -90,7 +90,7 @@ td {
 			action="exportLocationAttributeTypesHarmonizationLog.form">
 			<div class="submit-btn" align="right">
 				<input type="submit"
-					style="width: 8.6em; padding: 6px; font-size: 6pt;"
+					style="width: 14.10em; padding: 1px; font-size: 8pt;"
 					value='<spring:message code="eptsharmonization.encountertype.harmonized.viewLog"/>'
 					name="harmonizeAllLocationAttributeTypes" />
 			</div>
@@ -173,8 +173,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.locationattributetype.select" /></option>
-								<c:forEach items="${mappableLocationAttributeTypes}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.locationAttributeType.name}</option>
+								<c:forEach items="${mappablePDSLocationAttributeTypes}" var="type">
+									<option value="${type.uuid}">${type.locationAttributeType.name}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
@@ -198,7 +198,7 @@ td {
 	</fieldset>
 </c:if>
 <c:if
-	test="${not empty manualLocationAttributeTypeMappings || not empty mappableLocationAttributeTypes}">
+	test="${not empty manualLocationAttributeTypeMappings || not empty mappablePDSLocationAttributeTypes}">
 	<fieldset>
 		<legend>
 			<b><spring:message code="eptsharmonization.harmonizeWithinPDS" /></b>
@@ -233,8 +233,8 @@ td {
 							<select name="${status.expression}">
 								<option value=""><spring:message
 										code="eptsharmonization.locationattributetype.select" /></option>
-								<c:forEach items="${mappableLocationAttributeTypes}" var="entry">
-									<option value="${entry.key.uuid}">${entry.key.locationAttributeType.name}</option>
+								<c:forEach items="${mappablePDSLocationAttributeTypes}" var="type">
+									<option value="${type.uuid}">${type.locationAttributeType.name}</option>
 								</c:forEach>
 							</select>
 							<c:if test="${not empty errorRequiredPDSValue}">
