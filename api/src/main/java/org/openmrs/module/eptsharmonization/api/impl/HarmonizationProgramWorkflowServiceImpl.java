@@ -494,7 +494,7 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
 
           ProgramWorkflow foundMDSProgramWorkflowByID =
               this.harmonizationProgramWorkflowServiceDAO.getProgramWorkflowById(
-                  mdsProgram.getId());
+                  mdsProgramWorkflow.getId());
           if (foundMDSProgramWorkflowByID == null) {
             this.harmonizationProgramWorkflowServiceDAO.saveNotSwappableProgramWorkflow(
                 mdsProgramWorkflow);

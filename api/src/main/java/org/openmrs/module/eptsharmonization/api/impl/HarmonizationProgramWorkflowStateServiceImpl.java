@@ -428,7 +428,7 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
                 mdsProgramWorkflowState, true);
         final Integer mdsConceptId =
             harmonizationProgramWorkflowStateServiceDAO.getConceptId(mdsProgramWorkflowState, true);
-        final ProgramWorkflow pdsProgram =
+        final ProgramWorkflow pdsProgramWorkflow =
             harmonizationProgramWorkflowStateServiceDAO.getProgramWorkflow(
                 pdsProgramWorkflowState, false);
         final Integer pdsConceptId =
@@ -438,7 +438,7 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
         if (mdsProgramWorkflowState.getUuid().equals(pdsProgramWorkflowState.getUuid())
             && mdsProgramWorkflowState.getId().equals(pdsProgramWorkflowState.getId())) {
           if (mdsProgramWorkflowState.getId().equals(pdsProgramWorkflowState.getId())
-              && mdsProgramWorkflow.getId().equals(pdsProgram.getId())
+              && mdsProgramWorkflow.getId().equals(pdsProgramWorkflow.getId())
               && mdsConceptId.equals(pdsConceptId)) {
             return;
           }
@@ -454,15 +454,15 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
             this.harmonizationProgramWorkflowStateServiceDAO.updateConceptStateConversion(
                 conceptStateConversion, mdsProgramWorkflowState.getProgramWorkflowStateId());
           }
-          for (PatientState programWorkflowState : relatedPatientStates) {
+          for (PatientState patientState : relatedPatientStates) {
             this.harmonizationProgramWorkflowStateServiceDAO.updatePatientState(
-                programWorkflowState, mdsProgramWorkflowState.getProgramWorkflowStateId());
+                patientState, mdsProgramWorkflowState.getProgramWorkflowStateId());
           }
           this.harmonizationProgramWorkflowStateServiceDAO.deleteProgramWorkflowState(foundPDS);
 
           ProgramWorkflowState foundMDSProgramWorkflowStateByID =
               this.harmonizationProgramWorkflowStateServiceDAO.getProgramWorkflowStateById(
-                  mdsProgramWorkflow.getId());
+                  mdsProgramWorkflowState.getId());
           if (foundMDSProgramWorkflowStateByID == null) {
             this.harmonizationProgramWorkflowStateServiceDAO.saveNotSwappableProgramWorkflowState(
                 mdsProgramWorkflowState);
