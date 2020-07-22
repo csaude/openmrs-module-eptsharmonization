@@ -1,7 +1,6 @@
 package org.openmrs.module.eptsharmonization.web.delegate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +34,8 @@ public class HarmonizePersonAttributeTypeDelegate {
   public static List<PersonAttributeType> EXECUTED_PERSONATTRIBUTETYPES_MANUALLY_CACHE =
       new ArrayList<>();
   public static List<PersonAttributeType> PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED = new ArrayList<>();
+  public static List<PersonAttributeType> MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED =
+      new ArrayList<>();
 
   public HarmonizationData getConvertedData(List<PersonAttributeTypeDTO> personAttributeTypes) {
 
@@ -237,6 +238,7 @@ public class HarmonizePersonAttributeTypeDelegate {
       if (item.isSelected()) {
         list.put((String) item.getKey(), value);
       } else {
+        MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED.add(value.get(0).getPersonAttributeType());
         PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED.add(value.get(1).getPersonAttributeType());
       }
     }
@@ -259,6 +261,7 @@ public class HarmonizePersonAttributeTypeDelegate {
       if (item.isSelected()) {
         list.put((String) item.getKey(), value);
       } else {
+        MDS_PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED.add(value.get(0).getPersonAttributeType());
         PERSON_ATTRIBUTE_TYPES_NOT_PROCESSED.add(value.get(1).getPersonAttributeType());
       }
     }
@@ -269,78 +272,6 @@ public class HarmonizePersonAttributeTypeDelegate {
           "eptsharmonization.summary.personattributetype.harmonize.differentID.andEqualUUID");
       logBuilder.appendLogForPersonAttributeTypesWithDiferrentIdsAndEqualUUID(list);
       HarmonizePersonAttributeTypesController.HAS_ATLEAST_ONE_ROW_HARMONIZED = true;
-    }
-  }
-
-  public void processManualMapping(
-      Map<PersonAttributeType, PersonAttributeType> manualHarmonizePersonAttributeTypes,
-      Builder logBuilder) {
-
-    List<HarmonizationItem> differntNamesItems = new ArrayList<>();
-    List<HarmonizationItem> differntIDsItems = new ArrayList<>();
-
-    Map<PersonAttributeType, PersonAttributeType> manualHarmonizeItens = new HashMap<>();
-
-    for (Entry<PersonAttributeType, PersonAttributeType> entry :
-        manualHarmonizePersonAttributeTypes.entrySet()) {
-      PersonAttributeType pdsPersonAttributeType = entry.getKey();
-      PersonAttributeType mdsPersonAttributeType = entry.getValue();
-
-      if (mdsPersonAttributeType.getUuid().equals(pdsPersonAttributeType.getUuid())) {
-
-        if (!mdsPersonAttributeType.getId().equals(pdsPersonAttributeType.getId())) {
-          HarmonizationItem item =
-              new HarmonizationItem(
-                  mdsPersonAttributeType.getUuid(),
-                  DTOUtils.fromPersonAttributeTypes(
-                      Arrays.asList(mdsPersonAttributeType, pdsPersonAttributeType)));
-          item.setEncountersCount(
-              this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
-                  DTOUtils.fromPersonAttributeType(pdsPersonAttributeType)));
-          item.setSelected(Boolean.TRUE);
-          if (!differntIDsItems.contains(item)) {
-            differntIDsItems.add(item);
-          }
-        } else {
-          if (!mdsPersonAttributeType.getName().equals(pdsPersonAttributeType.getName())) {
-            HarmonizationItem item =
-                new HarmonizationItem(
-                    mdsPersonAttributeType.getUuid(),
-                    DTOUtils.fromPersonAttributeTypes(
-                        Arrays.asList(mdsPersonAttributeType, pdsPersonAttributeType)));
-            item.setEncountersCount(
-                this.harmonizationPersonAttributeTypeService.getNumberOfAffectedPersonAttributes(
-                    DTOUtils.fromPersonAttributeType(pdsPersonAttributeType)));
-            item.setSelected(Boolean.TRUE);
-
-            if (!differntNamesItems.contains(item)) {
-              differntNamesItems.add(item);
-            }
-          }
-        }
-
-      } else {
-        manualHarmonizeItens.put(pdsPersonAttributeType, mdsPersonAttributeType);
-      }
-    }
-
-    if (!manualHarmonizeItens.isEmpty()) {
-      this.harmonizationPersonAttributeTypeService.saveManualMapping(
-          manualHarmonizePersonAttributeTypes);
-      logBuilder.appendNewMappedPersonAttributeTypes(manualHarmonizePersonAttributeTypes);
-      logBuilder.build();
-    }
-    if (!differntIDsItems.isEmpty()) {
-      HarmonizationData harmonizationData = new HarmonizationData(differntIDsItems);
-      processPersonAttributeTypesWithDiferrentIdsAndEqualUUID(harmonizationData, logBuilder);
-      logBuilder.build();
-      HarmonizePersonAttributeTypesController.IS_IDS_AND_UUID_DIFFERENCES_HARMONIZED = true;
-    }
-    if (!differntNamesItems.isEmpty()) {
-      HarmonizationData harmonizationData = new HarmonizationData(differntNamesItems);
-      processUpdatePersonAttributeTypesNames(harmonizationData, logBuilder);
-      logBuilder.build();
-      HarmonizePersonAttributeTypesController.IS_NAMES_DIFFERENCES_HARMONIZED = true;
     }
   }
 }

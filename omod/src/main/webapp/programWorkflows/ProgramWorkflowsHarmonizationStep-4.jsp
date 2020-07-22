@@ -8,8 +8,10 @@
 		<table cellspacing="0" border="0" style="width: 100%">
 			<tr>
 				<th><spring:message code="general.id" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
+				<th><spring:message
+						code="eptsharmonization.programworkflow.harmonize.program" /></th>
+				<th><spring:message
+						code="eptsharmonization.programworkflow.harmonize.concept" /></th>
 				<th><spring:message code="general.uuid" /></th>
 				<th><spring:message
 						code="eptsharmonization.programworkflow.harmonize.conceptStateConversions" /></th>
@@ -39,11 +41,141 @@
 	</form>
 	<br />
 
-	<c:if
-		test="${not empty swappableProgramWorkflowsClone && not empty notSwappableProgramWorkflowsClone}">
+	<c:if test="${not empty notSwappableProgramWorkflowsClone}">
 		<br />
-		<b class="boxHeader"><spring:message
-				code="eptsharmonization.programworkflow.defineNewMappings" /></b>
+
+		<c:if test="${not empty mdsProgramWorkflowNotHarmonizedYet}">
+			<fieldset>
+				<legend>
+					<b> <spring:message
+							code="eptsharmonization.harmonizeBasedOnMDS" /></b>
+				</legend>
+				<table cellspacing="0" border="0" style="width: 100%">
+					<tr>
+						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+								code="eptsharmonization.programworkflow.from.metadataServer" /></th>
+						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+								code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
+						<th colspan="2" style="text-align: left; width: 10%;"></th>
+					</tr>
+
+					<form method="post" action="addProgramWorkflowFromMDSMapping.form">
+						<tr>
+							<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+									path="harmonizationItem.value">
+									<select name="${status.expression}">
+										<option value="">Selecione</option>
+										<c:forEach items="${mdsProgramWorkflowNotHarmonizedYet}"
+											var="type">
+											<option value="${type.uuid}"
+												<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
+										</c:forEach>
+									</select>
+									<c:if test="${not empty errorRequiredMdsValueFromMDS}">
+										<span class="error"><spring:message
+												code="${errorRequiredMdsValueFromMDS}"
+												text="${errorRequiredMdsValueFromMDS}" /></span>
+									</c:if>
+								</spring:bind></td>
+							<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+									path="harmonizationItem.key">
+									<select name="${status.expression}">
+										<option value="">Selecione</option>
+										<c:forEach items="${swappableProgramWorkflows}" var="type">
+											<option value="${type.uuid}"
+												<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
+										</c:forEach>
+									</select>
+									<c:if test="${not empty errorRequiredPDSValueFromMDS}">
+										<span class="error"> <spring:message
+												code="${errorRequiredPDSValueFromMDS}"
+												text="${errorRequiredPDSValueFromMDS}" />
+										</span>
+									</c:if>
+								</spring:bind></td>
+							<td colspan="2" style="text-align: left; width: 10%;"><c:choose>
+									<c:when test="${not empty swappableProgramWorkflows}">
+										<div class="submit-btn" align="left">
+											<input type="submit"
+												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
+												value='<spring:message code="general.add"/>'
+												name="addNewMDSMapping" />
+										</div>
+									</c:when>
+									<c:otherwise>
+									</c:otherwise>
+								</c:choose></td>
+						</tr>
+					</form>
+				</table>
+			</fieldset>
+			<br>
+		</c:if>
+		<c:if test="${not empty swappableProgramWorkflows}">
+			<fieldset>
+				<legend>
+					<b><spring:message code="eptsharmonization.harmonizeWithinPDS" /></b>
+				</legend>
+
+				<table cellspacing="0" border="0" style="width: 100%">
+					<tr>
+						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+								code="eptsharmonization.programworkflow.copiedFrom.metadataServer" /></th>
+						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
+								code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
+						<th colspan="2" style="text-align: left; width: 10%;"></th>
+					</tr>
+					<form method="post" action="addProgramWorkflowMapping.form">
+						<tr>
+							<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+									path="harmonizationItem.value">
+									<select name="${status.expression}">
+										<option value="">Selecione</option>
+										<c:forEach items="${notSwappableProgramWorkflows}" var="type">
+											<option value="${type.uuid}"
+												<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
+										</c:forEach>
+									</select>
+									<c:if test="${not empty errorRequiredMdsValue}">
+										<span class="error"><spring:message
+												code="${errorRequiredMdsValue}"
+												text="${errorRequiredMdsValue}" /></span>
+									</c:if>
+								</spring:bind></td>
+							<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
+									path="harmonizationItem.key">
+									<select name="${status.expression}">
+										<option value="">Selecione</option>
+										<c:forEach items="${swappableProgramWorkflows}" var="type">
+											<option value="${type.uuid}"
+												<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
+										</c:forEach>
+									</select>
+									<c:if test="${not empty errorRequiredPDSValue}">
+										<span class="error"> <spring:message
+												code="${errorRequiredPDSValue}"
+												text="${errorRequiredPDSValue}" />
+										</span>
+									</c:if>
+								</spring:bind></td>
+							<td colspan="2" style="text-align: left; width: 10%;"><c:choose>
+									<c:when test="${not empty swappableProgramWorkflows}">
+										<div class="submit-btn" align="left">
+											<input type="submit"
+												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
+												value='<spring:message code="general.add"/>'
+												name="addNewMapping" />
+										</div>
+									</c:when>
+									<c:otherwise>
+									</c:otherwise>
+								</c:choose></td>
+						</tr>
+					</form>
+				</table>
+			</fieldset>
+			<br>
+		</c:if>
 		<fieldset>
 			<table cellspacing="0" border="0" style="width: 100%">
 				<tr>
@@ -51,113 +183,61 @@
 							code="eptsharmonization.programworkflow.from.metadataServer" /></th>
 					<th colspan="3" style="text-align: center; width: 45%;"><spring:message
 							code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
-					<th colspan="2" style="text-align: left; width: 10%;"></th>
+					<th colspan="2"></th>
 				</tr>
-				<form method="post" action="addProgramWorkflowMapping.form">
-					<tr>
-						<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
-								path="harmonizationItem.value">
-								<select name="${status.expression}">
-									<option value="">Selecione</option>
-									<c:forEach items="${notSwappableProgramWorkflows}" var="type">
-										<option value="${type.uuid}"
-											<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
-									</c:forEach>
-								</select>
-								<c:if test="${not empty errorRequiredMdsValue}">
-									<span class="error"><spring:message
-											code="${errorRequiredMdsValue}"
-											text="${errorRequiredMdsValue}" /></span>
-								</c:if>
-							</spring:bind></td>
-						<td colspan="3" style="text-align: center; width: 45%;"><spring:bind
-								path="harmonizationItem.key">
-								<select name="${status.expression}">
-									<option value="">Selecione</option>
-									<c:forEach items="${swappableProgramWorkflows}" var="type">
-										<option value="${type.uuid}"
-											<c:if test="${type.uuid == status.value}">selected</c:if>>${type.concept}</option>
-									</c:forEach>
-								</select>
-								<c:if test="${not empty errorRequiredPDSValue}">
-									<span class="error"> <spring:message
-											code="${errorRequiredPDSValue}"
-											text="${errorRequiredPDSValue}" />
-									</span>
-								</c:if>
-							</spring:bind></td>
-						<td colspan="2" style="text-align: left; width: 10%;"><c:choose>
-								<c:when test="${not empty swappableProgramWorkflows}">
+				<tr>
+					<th><spring:message code="general.id" /></th>
+					<th><spring:message
+							code="eptsharmonization.programworkflow.harmonize.program" /></th>
+					<th><spring:message
+							code="eptsharmonization.programworkflow.harmonize.concept" /></th>
+					<th><spring:message code="general.id" /></th>
+					<th><spring:message
+							code="eptsharmonization.programworkflow.harmonize.program" /></th>
+					<th><spring:message
+							code="eptsharmonization.programworkflow.harmonize.concept" /></th>
+					<th colspan="2"></th>
+				</tr>
+				<c:if test="${not empty manualHarmonizeProgramWorkflows}">
+					<form method="post" action="removeProgramWorkflowMapping.form">
+						<c:forEach var="item" items="${manualHarmonizeProgramWorkflows}"
+							varStatus="itemsRow">
+							<tr>
+								<td valign="top">${item.value.id}</td>
+								<td valign="top">${item.value.program}</td>
+								<td valign="top">${item.value.concept}</td>
+								<td valign="top">${item.key.id}</td>
+								<td valign="top">${item.key.program}</td>
+								<td valign="top">${item.key.concept}</td>
+								<td colspan="2">
 									<div class="submit-btn" align="left">
-										<input type="submit"
-											style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #4CAF50;"
-											value='<spring:message code="general.add"/>'
-											name="addNewMapping" />
+										<input type="hidden" id="${item.key.uuid}"
+											name="productionServerProgramWorkflowUuID"
+											value="${item.key.uuid}" /> <input type="submit"
+											id="${item.key.uuid}"
+											style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
+											value='<spring:message code="general.remove"/>'
+											name="removeMapping" />
 									</div>
-								</c:when>
-								<c:otherwise>
-								</c:otherwise>
-							</c:choose></td>
-					</tr>
-				</form>
-				<fieldset>
-					<tr>
-						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.programworkflow.from.metadataServer" /></th>
-						<th colspan="3" style="text-align: center; width: 45%;"><spring:message
-								code="eptsharmonization.programworkflow.created.OnProductionServer" /></th>
-						<th colspan="2"></th>
-					</tr>
-					<tr>
-						<th><spring:message code="general.id" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
-						<th><spring:message code="general.id" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.program" /></th>
-				<th><spring:message code="eptsharmonization.programworkflow.harmonize.concept" /></th>
-						<th colspan="2"></th>
-					</tr>
-					<c:if test="${not empty manualHarmonizeProgramWorkflows}">
-						<form method="post" action="removeProgramWorkflowMapping.form">
-							<c:forEach var="item" items="${manualHarmonizeProgramWorkflows}"
-								varStatus="itemsRow">
-								<tr>
-									<td valign="top">${item.value.id}</td>
-									<td valign="top">${item.value.program}</td>
-									<td valign="top">${item.value.concept}</td>
-									<td valign="top">${item.key.id}</td>
-									<td valign="top">${item.key.program}</td>
-									<td valign="top">${item.key.concept}</td>
-									<td colspan="2">
-										<div class="submit-btn" align="left">
-											<input type="hidden" id="${item.key.uuid}"
-												name="productionServerProgramWorkflowUuID"
-												value="${item.key.uuid}" /> <input type="submit"
-												id="${item.key.uuid}"
-												style="width: 8.6em; padding: 6px; font-size: 6pt; background-color: #FF5733;"
-												value='<spring:message code="general.remove"/>'
-												name="removeMapping" />
-										</div>
 
-									</td>
-								</tr>
-							</c:forEach>
-						</form>
-						<tr>
-							<td colspan="8">
-								<form method="post" action="processHarmonizationStep4.form">
-									<div class="submit-btn" align="center">
-										<input type="submit"
-											value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
-											name="processHarmonizationStep3" />
-									</div>
-								</form>
-							</td>
-						</tr>
-					</c:if>
+								</td>
+							</tr>
+						</c:forEach>
+					</form>
+					<tr>
+						<td colspan="8">
+							<form method="post" action="processHarmonizationStep4.form">
+								<div class="submit-btn" align="center">
+									<input type="submit"
+										value='<spring:message code="eptsharmonization.encountertype.btn.harmonizeNewFromMDS"/>'
+										name="processHarmonizationStep3" />
+								</div>
+							</form>
+						</td>
+					</tr>
+				</c:if>
 				</fieldset>
 			</table>
-		</fieldset>
-		<br />
+			<br />
 	</c:if>
 </c:if>

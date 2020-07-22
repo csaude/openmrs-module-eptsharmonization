@@ -34,6 +34,8 @@ public interface HarmonizationProgramServiceDAO {
 
   public Program getProgramById(Integer programId) throws DAOException;
 
+  public Program getProgramByUuid(String uuid) throws DAOException;
+
   public boolean isSwappable(Program program) throws DAOException;
 
   public List<Program> findAllSwappable() throws DAOException;

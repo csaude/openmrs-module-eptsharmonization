@@ -11,6 +11,7 @@
  */
 package org.openmrs.module.eptsharmonization.api.impl;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationProgramServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -315,7 +317,8 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
 
   @Override
   @Authorized({"Manage Program"})
-  public void saveManualMapping(Map<Program, Program> mapPrograms) throws APIException {
+  public void saveManualMapping(Map<Program, Program> mapPrograms)
+      throws UUIDDuplicationException, SQLException {
     this.harmonizationDAO.evictCache();
     try {
 
@@ -325,6 +328,24 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
         Program pdSProgram = entry.getKey();
         Program mdsProgram = entry.getValue();
 
+        Program foundMDSProgramByUuid =
+            this.harmonizationProgramServiceDAO.getProgramByUuid(mdsProgram.getUuid());
+
+        if ((foundMDSProgramByUuid != null
+                && !foundMDSProgramByUuid.getId().equals(mdsProgram.getId()))
+            && (!foundMDSProgramByUuid.getId().equals(pdSProgram.getId())
+                && !foundMDSProgramByUuid.getUuid().equals(pdSProgram.getUuid()))) {
+
+          throw new UUIDDuplicationException(
+              String.format(
+                  " Cannot Update the Program '%s' to '%s'. There is one entry with NAME='%s', ID='%s' an UUID='%s' ",
+                  pdSProgram.getName(),
+                  mdsProgram.getName(),
+                  foundMDSProgramByUuid.getName(),
+                  foundMDSProgramByUuid.getId(),
+                  foundMDSProgramByUuid.getUuid()));
+        }
+
         Program foundPDS = this.harmonizationProgramServiceDAO.getProgramById(pdSProgram.getId());
 
         if (mdsProgram.getUuid().equals(pdSProgram.getUuid())
@@ -333,10 +354,6 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
               && mdsProgram.getName().equals(pdSProgram.getName())) {
             return;
           }
-          foundPDS.setName(mdsProgram.getName());
-          foundPDS.setDescription(mdsProgram.getDescription());
-          this.programWorkflowService.saveProgram(foundPDS);
-
         } else {
           List<PatientProgram> relatedPatientPrograms =
               this.harmonizationProgramServiceDAO.findPatientProgramsByProgramId(foundPDS.getId());
@@ -353,14 +370,18 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
                 patientProgram, mdsProgram.getProgramId());
           }
           this.harmonizationProgramServiceDAO.deleteProgram(foundPDS);
+
+          Program foundMDSProgramByID =
+              this.harmonizationProgramServiceDAO.getProgramById(mdsProgram.getId());
+          if (foundMDSProgramByID == null) {
+            this.harmonizationProgramServiceDAO.saveNotSwappableProgram(mdsProgram);
+          }
         }
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     } finally {
       try {
         this.harmonizationDAO.setEnableCheckConstraints();
-      } catch (Exception e) {
+      } catch (SQLException e) {
         e.printStackTrace();
       }
     }
@@ -389,7 +410,7 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
       for (Program pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
             && mdsItem.getId().equals(pdsItem.getId())
-            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
+            && !mdsItem.getName().trim().equalsIgnoreCase(pdsItem.getName().trim())) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }

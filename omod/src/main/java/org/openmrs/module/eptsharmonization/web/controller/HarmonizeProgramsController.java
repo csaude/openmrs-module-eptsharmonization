@@ -5,11 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,8 +19,8 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Program;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
+import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramDTO;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
@@ -48,6 +50,9 @@ public class HarmonizeProgramsController {
 
   public static final String ADD_PROGRAM_MAPPING =
       HarmonizeProgramsController.CONTROLLER_PATH + "/addProgramMapping";
+
+  public static final String ADD_PROGRAM_FROM_MDS_MAPPING =
+      HarmonizeProgramsController.CONTROLLER_PATH + "/addProgramFromMDSMapping";
 
   public static final String REMOVE_PROGRAM_MAPPING =
       HarmonizeProgramsController.CONTROLLER_PATH + "/removeProgramMapping";
@@ -102,10 +107,16 @@ public class HarmonizeProgramsController {
       @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
       @ModelAttribute("notSwappablePrograms") List<Program> notSwappablePrograms,
       @ModelAttribute("swappablePrograms") List<Program> swappablePrograms,
+      @ModelAttribute("mdsProgramNotHarmonizedYet") List<Program> mdsProgramNotHarmonizedYet,
       @RequestParam(required = false, value = "openmrs_msg") String openmrs_msg,
       @RequestParam(required = false, value = "errorRequiredMdsValue") String errorRequiredMdsValue,
-      @RequestParam(required = false, value = "errorRequiredPDSValue")
-          String errorRequiredPDSValue) {
+      @RequestParam(required = false, value = "errorRequiredPDSValue") String errorRequiredPDSValue,
+      @RequestParam(required = false, value = "errorRequiredMdsValueFromMDS")
+          String errorRequiredMdsValueFromMDS,
+      @RequestParam(required = false, value = "errorRequiredPDSValueFromMDS")
+          String errorRequiredPDSValueFromMDS,
+      @RequestParam(required = false, value = "errorProcessingManualMapping")
+          String errorProcessingManualMapping) {
 
     // TODO: I did this fetch as a workaround to prevent having cached data
     newMDSPrograms = getNewMDSPrograms();
@@ -119,6 +130,9 @@ public class HarmonizeProgramsController {
     session.setAttribute("openmrs_msg", openmrs_msg);
     session.setAttribute("errorRequiredMdsValue", errorRequiredMdsValue);
     session.setAttribute("errorRequiredPDSValue", errorRequiredPDSValue);
+    session.setAttribute("errorRequiredMdsValueFromMDS", errorRequiredMdsValueFromMDS);
+    session.setAttribute("errorRequiredPDSValueFromMDS", errorRequiredPDSValueFromMDS);
+    session.setAttribute("errorProcessingManualMapping", errorProcessingManualMapping);
 
     delegate.setHarmonizationStage(
         session,
@@ -204,20 +218,48 @@ public class HarmonizeProgramsController {
 
   @SuppressWarnings("unchecked")
   @RequestMapping(value = PROCESS_HARMONIZATION_STEP4, method = RequestMethod.POST)
-  public ModelAndView processHarmonizationStep4(HttpSession session, HttpServletRequest request) {
+  public ModelAndView processHarmonizationStep4(
+      HttpSession session,
+      HttpServletRequest request,
+      @ModelAttribute("swappablePrograms") List<Program> swappablePrograms,
+      @ModelAttribute("mdsProgramNotHarmonizedYet") List<Program> mdsProgramNotHarmonizedYet)
+      throws Exception {
 
     Map<Program, Program> manualHarmonizePrograms =
         (Map<Program, Program>) session.getAttribute("manualHarmonizePrograms");
 
+    ModelAndView modelAndView = getRedirectModelAndView();
+
     if (manualHarmonizePrograms != null && !manualHarmonizePrograms.isEmpty()) {
+
+      try {
+        this.harmonizationProgramService.saveManualMapping(manualHarmonizePrograms);
+      } catch (UUIDDuplicationException e) {
+
+        for (Entry<Program, Program> entry : manualHarmonizePrograms.entrySet()) {
+          if (!swappablePrograms.contains(entry.getKey())) {
+            swappablePrograms.add(entry.getKey());
+          }
+          if (!mdsProgramNotHarmonizedYet.contains(entry.getKey())) {
+            mdsProgramNotHarmonizedYet.add(entry.getValue());
+          }
+        }
+
+        modelAndView.addObject("errorProcessingManualMapping", e.getMessage());
+        return modelAndView;
+      } catch (SQLException e) {
+        e.printStackTrace();
+        throw new Exception(e);
+      }
+
       String defaultLocationName =
           Context.getAdministrationService().getGlobalProperty("default_location");
       Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(defaultLocationName);
-      delegate.processManualMapping(manualHarmonizePrograms, logBuilder);
+      logBuilder.appendNewMappedPrograms(manualHarmonizePrograms);
       HarmonizeProgramsDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.encounterType.newDefinedMapping");
     }
-    ModelAndView modelAndView = getRedirectModelAndView();
+
     modelAndView.addObject("openmrs_msg", "eptsharmonization.program.harmonized");
 
     HarmonizeProgramsDelegate.EXECUTED_PROGRAMS_MANUALLY_CACHE =
@@ -269,10 +311,65 @@ public class HarmonizeProgramsController {
     return modelAndView;
   }
 
+  @SuppressWarnings("unchecked")
+  @RequestMapping(value = ADD_PROGRAM_FROM_MDS_MAPPING, method = RequestMethod.POST)
+  public ModelAndView addProgramFromMDSMapping(
+      HttpSession session,
+      @ModelAttribute("swappablePrograms") List<Program> swappablePrograms,
+      @ModelAttribute("harmonizationItem") HarmonizationItem harmonizationItem,
+      @ModelAttribute("mdsProgramNotHarmonizedYet") List<Program> mdsProgramNotHarmonizedYet) {
+
+    ModelAndView modelAndView = this.getRedirectModelAndView();
+
+    if (harmonizationItem.getValue() == null
+        || StringUtils.isEmpty(((String) harmonizationItem.getValue()))) {
+      modelAndView.addObject(
+          "errorRequiredMdsValueFromMDS", "eptsharmonization.error.programForMapping.required");
+      return modelAndView;
+    }
+
+    if (harmonizationItem.getKey() == null
+        || StringUtils.isEmpty(((String) harmonizationItem.getKey()))) {
+      modelAndView.addObject(
+          "errorRequiredPDSValueFromMDS", "eptsharmonization.error.programForMapping.required");
+      return modelAndView;
+    }
+
+    Program pdsProgram =
+        Context.getProgramWorkflowService().getProgramByUuid((String) harmonizationItem.getKey());
+
+    String mdsPATUuid = (String) harmonizationItem.getValue();
+    Program mdsProgram = null;
+    for (Program personAttributeType : mdsProgramNotHarmonizedYet) {
+      if (mdsPATUuid.equals(personAttributeType.getUuid())) {
+        mdsProgram = personAttributeType;
+        break;
+      }
+    }
+
+    Map<Program, Program> manualHarmonizePrograms =
+        (Map<Program, Program>) session.getAttribute("manualHarmonizePrograms");
+
+    if (manualHarmonizePrograms == null) {
+      manualHarmonizePrograms = new HashMap<>();
+    }
+    swappablePrograms.remove(pdsProgram);
+    manualHarmonizePrograms.put(pdsProgram, mdsProgram);
+    session.setAttribute("manualHarmonizePrograms", manualHarmonizePrograms);
+
+    if (mdsProgramNotHarmonizedYet != null && mdsProgramNotHarmonizedYet.contains(mdsProgram)) {
+      mdsProgramNotHarmonizedYet.remove(mdsProgram);
+    }
+
+    return modelAndView;
+  }
+
   @RequestMapping(value = REMOVE_PROGRAM_MAPPING, method = RequestMethod.POST)
   public ModelAndView removeProgramMapping(
       HttpSession session,
       @ModelAttribute("swappablePrograms") List<Program> swappablePrograms,
+      @ModelAttribute("notSwappablePrograms") List<Program> notSwappablePrograms,
+      @ModelAttribute("mdsProgramNotHarmonizedYet") List<Program> mdsProgramNotHarmonizedYet,
       HttpServletRequest request) {
 
     Program productionProgram =
@@ -283,8 +380,23 @@ public class HarmonizeProgramsController {
     Map<Program, Program> manualHarmonizePrograms =
         (Map<Program, Program>) session.getAttribute("manualHarmonizePrograms");
 
+    Program mdsProgram = manualHarmonizePrograms.get(productionProgram);
+
     manualHarmonizePrograms.remove(productionProgram);
     swappablePrograms.add(productionProgram);
+
+    if (notSwappablePrograms != null && !notSwappablePrograms.contains(mdsProgram)) {
+      if (mdsProgramNotHarmonizedYet != null && !mdsProgramNotHarmonizedYet.contains(mdsProgram)) {
+        mdsProgramNotHarmonizedYet.add(mdsProgram);
+      }
+    }
+
+    if (mdsProgramNotHarmonizedYet != null) {
+      this.sortByName(mdsProgramNotHarmonizedYet);
+    }
+    if (swappablePrograms != null) {
+      this.sortByName(swappablePrograms);
+    }
 
     if (manualHarmonizePrograms.isEmpty()) {
       session.removeAttribute("manualHarmonizePrograms");
@@ -378,7 +490,7 @@ public class HarmonizeProgramsController {
   }
 
   @ModelAttribute("harmonizationItem")
-  HarmonizationItem formBackingObject() {
+  HarmonizationItem formHarmonizationItem() {
     return new HarmonizationItem();
   }
 
@@ -405,18 +517,17 @@ public class HarmonizeProgramsController {
 
   @ModelAttribute("swappablePrograms")
   public List<Program> getSwappablePrograms() {
-    List<Program> productionItemsToExport = DTOUtils.fromProgramDTOs(getProductionItemsToExport());
-    productionItemsToExport.addAll(HarmonizeProgramsDelegate.PROGRAMS_NOT_PROCESSED);
-    return sortByName(productionItemsToExport);
+    return sortByName(harmonizationProgramService.findAllSwappablePrograms());
   }
 
   @ModelAttribute("notSwappablePrograms")
   public List<Program> getNotSwappablePrograms() {
-    return sortByName(this.harmonizationProgramService.findAllMetadataPrograms());
+    return sortByName(this.harmonizationProgramService.findAllNotSwappablePrograms());
   }
 
-  private ModelAndView getRedirectModelAndView() {
-    return new ModelAndView("redirect:" + PROGRAMS_LIST + ".form");
+  @ModelAttribute("mdsProgramNotHarmonizedYet")
+  public List<Program> getMDSProgramNotHarmonizedYet() {
+    return this.sortByName(HarmonizeProgramsDelegate.MDS_PROGRAMS_NOT_PROCESSED);
   }
 
   @SuppressWarnings("unchecked")
@@ -424,5 +535,9 @@ public class HarmonizeProgramsController {
     BeanComparator comparator = new BeanComparator("name");
     Collections.sort(list, comparator);
     return list;
+  }
+
+  private ModelAndView getRedirectModelAndView() {
+    return new ModelAndView("redirect:" + PROGRAMS_LIST + ".form");
   }
 }
