@@ -495,7 +495,9 @@ public class HarmonizeVisitTypeController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=visit_type_harmonization_" + defaultLocation + ".log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocation)
+            + "-visit_type_harmonization-log.csv");
     response.setHeader("Cache-Control", "no-cache");
     response.getWriter().write(outputStream.toString(StandardCharsets.ISO_8859_1.name()));
   }
@@ -515,7 +517,9 @@ public class HarmonizeVisitTypeController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=visit_type_crb_" + defaultLocation + "_export.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocation)
+            + "-visit_type_harmonization-export.csv");
     response.setHeader("Cache-Control", "no-cache");
     response.getWriter().write(outputStream.toString(StandardCharsets.ISO_8859_1.name()));
   }
@@ -573,5 +577,14 @@ public class HarmonizeVisitTypeController {
     BeanComparator comparator = new BeanComparator("visitType.name");
     Collections.sort(list, comparator);
     return list;
+  }
+
+  private String getFormattedLocationName(String defaultLocationName) {
+    if (defaultLocationName == null) {
+      defaultLocationName = StringUtils.EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(defaultLocationName.replaceAll(" ", "_"));
+    return sb.toString();
   }
 }

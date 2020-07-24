@@ -470,9 +470,9 @@ public class HarmonizePatientIdentifierTypesController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=patient_identifier_types_harmonization_"
-            + this.getDefaultLocation()
-            + "-log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(this.getDefaultLocation())
+            + "-patient_identifier_types_harmonization-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -497,9 +497,9 @@ public class HarmonizePatientIdentifierTypesController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=patient_identifier_types_harmonization_"
-            + defaultLocationName
-            + "-export-log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocationName)
+            + "-patient_identifier_types_harmonization-export-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -597,5 +597,14 @@ public class HarmonizePatientIdentifierTypesController {
 
   private String getDefaultLocation() {
     return Context.getAdministrationService().getGlobalProperty("default_location");
+  }
+
+  private String getFormattedLocationName(String defaultLocationName) {
+    if (defaultLocationName == null) {
+      defaultLocationName = StringUtils.EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(defaultLocationName.replaceAll(" ", "_"));
+    return sb.toString();
   }
 }
