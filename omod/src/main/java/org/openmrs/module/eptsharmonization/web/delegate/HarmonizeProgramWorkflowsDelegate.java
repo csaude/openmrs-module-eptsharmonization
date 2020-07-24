@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.beanutils.BeanComparator;
-import org.openmrs.ProgramWorkflow;
-import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowService;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
@@ -87,8 +85,7 @@ public class HarmonizeProgramWorkflowsDelegate {
 
     this.updateProductionToExportList(productionItemsToExport);
     this.setSwappableDataClones(session, notSwappableProgramWorkflows, swappableProgramWorkflows);
-    this.removeAllChoosenToManualHarmonize(
-        session, DTOUtils.fromProgramWorkflowDTOs(swappableProgramWorkflows));
+    this.removeAllChoosenToManualHarmonize(session, swappableProgramWorkflows);
 
     boolean isFirstStepHarmonizationCompleted =
         newMDSProgramWorkflows.getItems().isEmpty() && productionItemsToDelete.isEmpty();
@@ -187,12 +184,12 @@ public class HarmonizeProgramWorkflowsDelegate {
 
   @SuppressWarnings("unchecked")
   public void removeAllChoosenToManualHarmonize(
-      HttpSession session, List<ProgramWorkflow> swappableProgramWorkflows) {
-    Map<ProgramWorkflow, ProgramWorkflow> manualHarmonizeProgramWorkflows =
-        (Map<ProgramWorkflow, ProgramWorkflow>)
+      HttpSession session, List<ProgramWorkflowDTO> swappableProgramWorkflows) {
+    Map<ProgramWorkflowDTO, ProgramWorkflowDTO> manualHarmonizeProgramWorkflows =
+        (Map<ProgramWorkflowDTO, ProgramWorkflowDTO>)
             session.getAttribute("manualHarmonizeProgramWorkflows");
     if (manualHarmonizeProgramWorkflows != null) {
-      for (Entry<ProgramWorkflow, ProgramWorkflow> entry :
+      for (Entry<ProgramWorkflowDTO, ProgramWorkflowDTO> entry :
           manualHarmonizeProgramWorkflows.entrySet()) {
         swappableProgramWorkflows.remove(entry.getKey());
       }
