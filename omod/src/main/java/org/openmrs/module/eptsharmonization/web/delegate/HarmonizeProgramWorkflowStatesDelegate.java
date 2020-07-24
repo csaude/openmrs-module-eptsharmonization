@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.beanutils.BeanComparator;
-import org.openmrs.ProgramWorkflowState;
-import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowStateService;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowStateDTO;
 import org.openmrs.module.eptsharmonization.web.bean.HarmonizationData;
@@ -91,8 +89,7 @@ public class HarmonizeProgramWorkflowStatesDelegate {
     this.updateProductionToExportList(productionItemsToExport);
     this.setSwappableDataClones(
         session, notSwappableProgramWorkflowStates, swappableProgramWorkflowStates);
-    this.removeAllChoosenToManualHarmonize(
-        session, DTOUtils.fromProgramWorkflowStateDTOs(swappableProgramWorkflowStates));
+    this.removeAllChoosenToManualHarmonize(session, swappableProgramWorkflowStates);
 
     boolean isFirstStepHarmonizationCompleted =
         newMDSProgramWorkflowStates.getItems().isEmpty() && productionItemsToDelete.isEmpty();
@@ -193,12 +190,12 @@ public class HarmonizeProgramWorkflowStatesDelegate {
 
   @SuppressWarnings("unchecked")
   public void removeAllChoosenToManualHarmonize(
-      HttpSession session, List<ProgramWorkflowState> swappableProgramWorkflowStates) {
-    Map<ProgramWorkflowState, ProgramWorkflowState> manualHarmonizeProgramWorkflowStates =
-        (Map<ProgramWorkflowState, ProgramWorkflowState>)
+      HttpSession session, List<ProgramWorkflowStateDTO> swappableProgramWorkflowStates) {
+    Map<ProgramWorkflowStateDTO, ProgramWorkflowStateDTO> manualHarmonizeProgramWorkflowStates =
+        (Map<ProgramWorkflowStateDTO, ProgramWorkflowStateDTO>)
             session.getAttribute("manualHarmonizeProgramWorkflowStates");
     if (manualHarmonizeProgramWorkflowStates != null) {
-      for (Entry<ProgramWorkflowState, ProgramWorkflowState> entry :
+      for (Entry<ProgramWorkflowStateDTO, ProgramWorkflowStateDTO> entry :
           manualHarmonizeProgramWorkflowStates.entrySet()) {
         swappableProgramWorkflowStates.remove(entry.getKey());
       }
