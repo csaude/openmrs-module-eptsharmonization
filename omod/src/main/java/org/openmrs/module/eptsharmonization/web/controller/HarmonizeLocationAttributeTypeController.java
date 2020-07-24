@@ -554,9 +554,9 @@ public class HarmonizeLocationAttributeTypeController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=location_attribute_type_harmonization_"
-            + defaultLocation
-            + ".log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocation)
+            + "-location_attribute_type_harmonization-log.csv");
     response.setHeader("Cache-Control", "no-cache");
     response.getWriter().write(outputStream.toString(StandardCharsets.ISO_8859_1.name()));
   }
@@ -575,7 +575,9 @@ public class HarmonizeLocationAttributeTypeController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=location_attribute_type_crb_" + defaultLocation + "_export.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocation)
+            + "-location_attribute_type_harmonization-export.csv");
     response.setHeader("Cache-Control", "no-cache");
     response.getWriter().write(outputStream.toString(StandardCharsets.ISO_8859_1.name()));
   }
@@ -636,5 +638,14 @@ public class HarmonizeLocationAttributeTypeController {
     BeanComparator comparator = new BeanComparator("locationAttributeType.name");
     Collections.sort(list, comparator);
     return list;
+  }
+
+  private String getFormattedLocationName(String defaultLocationName) {
+    if (defaultLocationName == null) {
+      defaultLocationName = StringUtils.EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(defaultLocationName.replaceAll(" ", "_"));
+    return sb.toString();
   }
 }

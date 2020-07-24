@@ -173,9 +173,8 @@ public class HarmonizePersonAttributeTypesController {
       @ModelAttribute("productionItemsToDelete")
           List<PersonAttributeTypeDTO> productionItemsToDelete) {
 
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new PersonAttributeTypesHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder =
+        new PersonAttributeTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
 
     delegate.processAddNewFromMetadataServer(newMDSPersonAttributeTypes, logBuilder);
     delegate.processDeleteFromProductionServer(productionItemsToDelete, logBuilder);
@@ -193,9 +192,8 @@ public class HarmonizePersonAttributeTypesController {
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new PersonAttributeTypesHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder =
+        new PersonAttributeTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
     delegate.processPersonAttributeTypesWithDiferrentIdsAndEqualUUID(
         differentIDsAndEqualUUID, logBuilder);
     logBuilder.build();
@@ -214,9 +212,8 @@ public class HarmonizePersonAttributeTypesController {
           HarmonizationData differentNameAndSameUUIDAndID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new PersonAttributeTypesHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder =
+        new PersonAttributeTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
     delegate.processUpdatePersonAttributeTypesNames(differentNameAndSameUUIDAndID, logBuilder);
     logBuilder.build();
 
@@ -269,10 +266,8 @@ public class HarmonizePersonAttributeTypesController {
         e.printStackTrace();
         throw new Exception(e);
       }
-
-      String defaultLocationName =
-          Context.getAdministrationService().getGlobalProperty("default_location");
-      Builder logBuilder = new PersonAttributeTypesHarmonizationCSVLog.Builder(defaultLocationName);
+      Builder logBuilder =
+          new PersonAttributeTypesHarmonizationCSVLog.Builder(this.getDefaultLocation());
       logBuilder.appendNewMappedPersonAttributeTypes(manualHarmonizePersonAttributeTypes);
       HarmonizePersonAttributeTypeDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.encounterType.newDefinedMapping");
@@ -456,14 +451,12 @@ public class HarmonizePersonAttributeTypesController {
     } catch (IOException ex) {
 
     }
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=person_attribute_types_harmonization_"
-            + defaultLocationName
-            + "-log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(this.getDefaultLocation())
+            + "-person_attribute_types_harmonization-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -475,8 +468,7 @@ public class HarmonizePersonAttributeTypesController {
 
     HarmonizationData productionItemsToExport =
         (HarmonizationData) session.getAttribute("productionItemsToExport");
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getDefaultLocation();
 
     List<PersonAttributeTypeDTO> list = new ArrayList<>();
     for (HarmonizationItem item : productionItemsToExport.getItems()) {
@@ -489,9 +481,9 @@ public class HarmonizePersonAttributeTypesController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=person_Attribute_types_harmonization_"
-            + defaultLocationName
-            + "-export-log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocationName)
+            + "-person_Attribute_types_harmonization-export-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -581,6 +573,19 @@ public class HarmonizePersonAttributeTypesController {
     BeanComparator comparator = new BeanComparator("name");
     Collections.sort(list, comparator);
     return list;
+  }
+
+  private String getDefaultLocation() {
+    return Context.getAdministrationService().getGlobalProperty("default_location");
+  }
+
+  private String getFormattedLocationName(String defaultLocationName) {
+    if (defaultLocationName == null) {
+      defaultLocationName = StringUtils.EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(defaultLocationName.replaceAll(" ", "_"));
+    return sb.toString();
   }
 
   private ModelAndView getRedirectModelAndView() {

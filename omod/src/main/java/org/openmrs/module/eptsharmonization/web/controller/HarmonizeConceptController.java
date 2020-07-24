@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
@@ -45,7 +46,7 @@ public class HarmonizeConceptController {
   private HarmonizationConceptService harmonizationConceptService;
   private MessageSourceService messageSourceService;
   private AdministrationService adminService;
-  //  private static ConceptHarmonizationCSVLog.Builder logBuilder;
+  // private static ConceptHarmonizationCSVLog.Builder logBuilder;
 
   @Autowired
   public void setHarmonizationConceptService(
@@ -131,7 +132,9 @@ public class HarmonizeConceptController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=concept_harmonization_" + defaultLocation + ".log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocation)
+            + "-concept_harmonization-log.csv");
     response.setHeader("Cache-Control", "no-cache");
     response.getWriter().write(outputStream.toString(StandardCharsets.ISO_8859_1.name()));
   }
@@ -151,7 +154,9 @@ public class HarmonizeConceptController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=concepts_crb_" + defaultLocation + "_export.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocation)
+            + "-concepts_harmonization-export.csv");
     response.setHeader("Cache-Control", "no-cache");
     response.getWriter().write(outputStream.toString(StandardCharsets.ISO_8859_1.name()));
   }
@@ -180,5 +185,14 @@ public class HarmonizeConceptController {
         }
       }
     }
+  }
+
+  private String getFormattedLocationName(String defaultLocationName) {
+    if (defaultLocationName == null) {
+      defaultLocationName = StringUtils.EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(defaultLocationName.replaceAll(" ", "_"));
+    return sb.toString();
   }
 }

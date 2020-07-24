@@ -162,8 +162,7 @@ public class HarmonizeEncounterTypeController {
       @ModelAttribute("newMDSEncounterTypes") HarmonizationData newMDSEncounterTypes,
       @ModelAttribute("productionItemsToDelete") List<EncounterTypeDTO> productionItemsToDelete) {
 
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getLocationName();
     Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
 
     delegate.processAddNewFromMetadataServer(newMDSEncounterTypes, logBuilder);
@@ -182,8 +181,7 @@ public class HarmonizeEncounterTypeController {
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getLocationName();
     Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
     delegate.processEncounterTypesWithDiferrentIdsAndEqualUUID(
         differentIDsAndEqualUUID, logBuilder);
@@ -203,8 +201,7 @@ public class HarmonizeEncounterTypeController {
           HarmonizationData differentNameAndSameUUIDAndID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getLocationName();
     Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
     delegate.processUpdateEncounterNames(differentNameAndSameUUIDAndID, logBuilder);
     logBuilder.build();
@@ -253,8 +250,7 @@ public class HarmonizeEncounterTypeController {
         throw new Exception(e);
       }
 
-      String defaultLocationName =
-          Context.getAdministrationService().getGlobalProperty("default_location");
+      String defaultLocationName = this.getLocationName();
       Builder logBuilder = new EncounterTypeHarmonizationCSVLog.Builder(defaultLocationName);
       logBuilder.appendNewMappedEncounterTypes(manualHarmonizeEtypes);
       logBuilder.build();
@@ -426,12 +422,11 @@ public class HarmonizeEncounterTypeController {
     } catch (IOException ex) {
 
     }
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getFormattedLocationName(this.getLocationName());
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=encounter_type_harmonization_" + defaultLocationName + "-log.csv");
+        "attachment; fileName=" + defaultLocationName + "-encounter_type_harmonization-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -443,8 +438,7 @@ public class HarmonizeEncounterTypeController {
 
     HarmonizationData productionItemsToExport =
         (HarmonizationData) session.getAttribute("productionItemsToExport");
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getLocationName();
 
     List<EncounterType> metaadataServerEncounterTypes =
         this.harmonizationEncounterTypeService.findAllMetadataServerEncounterTypes();
@@ -460,9 +454,9 @@ public class HarmonizeEncounterTypeController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=encounter_type_harmonization_"
-            + defaultLocationName
-            + "-export-log.csv");
+        "attachment; fileName="
+            + getFormattedLocationName(defaultLocationName)
+            + "-encounter_type_harmonization-export-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -555,5 +549,18 @@ public class HarmonizeEncounterTypeController {
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + ENCOUNTER_TYPES_LIST + ".form");
+  }
+
+  private String getLocationName() {
+    return Context.getAdministrationService().getGlobalProperty("default_location");
+  }
+
+  private String getFormattedLocationName(String defaultLocationName) {
+    if (defaultLocationName == null) {
+      defaultLocationName = StringUtils.EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(defaultLocationName.replaceAll(" ", "_"));
+    return sb.toString();
   }
 }

@@ -162,9 +162,7 @@ public class HarmonizeProgramsController {
       @ModelAttribute("newMDSPrograms") HarmonizationData newMDSPrograms,
       @ModelAttribute("productionItemsToDelete") List<ProgramDTO> productionItemsToDelete) {
 
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(this.getDefaultLocation());
 
     delegate.processAddNewFromMetadataServer(newMDSPrograms, logBuilder);
     delegate.processDeleteFromProductionServer(productionItemsToDelete, logBuilder);
@@ -182,9 +180,7 @@ public class HarmonizeProgramsController {
       @ModelAttribute("differentIDsAndEqualUUID") HarmonizationData differentIDsAndEqualUUID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(this.getDefaultLocation());
     delegate.processProgramsWithDiferrentIdsAndEqualUUID(differentIDsAndEqualUUID, logBuilder);
     logBuilder.build();
 
@@ -202,9 +198,7 @@ public class HarmonizeProgramsController {
           HarmonizationData differentNameAndSameUUIDAndID) {
 
     HAS_ATLEAST_ONE_ROW_HARMONIZED = false;
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
-    Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(defaultLocationName);
+    Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(this.getDefaultLocation());
     delegate.processUpdateProgramsNames(differentNameAndSameUUIDAndID, logBuilder);
     logBuilder.build();
 
@@ -251,10 +245,7 @@ public class HarmonizeProgramsController {
         e.printStackTrace();
         throw new Exception(e);
       }
-
-      String defaultLocationName =
-          Context.getAdministrationService().getGlobalProperty("default_location");
-      Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(defaultLocationName);
+      Builder logBuilder = new ProgramsHarmonizationCSVLog.Builder(this.getDefaultLocation());
       logBuilder.appendNewMappedPrograms(manualHarmonizePrograms);
       HarmonizeProgramsDelegate.SUMMARY_EXECUTED_SCENARIOS.add(
           "eptsharmonization.encounterType.newDefinedMapping");
@@ -420,12 +411,12 @@ public class HarmonizeProgramsController {
     } catch (IOException ex) {
 
     }
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=programs_harmonization_" + defaultLocationName + "-log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(this.getDefaultLocation())
+            + "-programs_harmonization-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -437,8 +428,7 @@ public class HarmonizeProgramsController {
 
     HarmonizationData productionItemsToExport =
         (HarmonizationData) session.getAttribute("productionItemsToExport");
-    String defaultLocationName =
-        Context.getAdministrationService().getGlobalProperty("default_location");
+    String defaultLocationName = this.getDefaultLocation();
 
     List<ProgramDTO> list = new ArrayList<>();
     for (HarmonizationItem item : productionItemsToExport.getItems()) {
@@ -451,7 +441,9 @@ public class HarmonizeProgramsController {
     response.setContentType("text/csv");
     response.setHeader(
         "Content-Disposition",
-        "attachment; fileName=programs_harmonization_" + defaultLocationName + "-export-log.csv");
+        "attachment; fileName="
+            + this.getFormattedLocationName(defaultLocationName)
+            + "-programs_harmonization-export-log.csv");
     response.setContentLength(outputStream.size());
     return outputStream.toByteArray();
   }
@@ -539,5 +531,18 @@ public class HarmonizeProgramsController {
 
   private ModelAndView getRedirectModelAndView() {
     return new ModelAndView("redirect:" + PROGRAMS_LIST + ".form");
+  }
+
+  private String getDefaultLocation() {
+    return Context.getAdministrationService().getGlobalProperty("default_location");
+  }
+
+  private String getFormattedLocationName(String defaultLocationName) {
+    if (defaultLocationName == null) {
+      defaultLocationName = StringUtils.EMPTY;
+    }
+    StringBuilder sb = new StringBuilder();
+    sb.append(defaultLocationName.replaceAll(" ", "_"));
+    return sb.toString();
   }
 }
