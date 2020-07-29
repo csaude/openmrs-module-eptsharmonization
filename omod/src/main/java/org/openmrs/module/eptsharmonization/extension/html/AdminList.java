@@ -11,7 +11,7 @@
  */
 package org.openmrs.module.eptsharmonization.extension.html;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.openmrs.module.Extension;
 import org.openmrs.module.web.extension.AdministrationSectionExt;
@@ -35,13 +35,19 @@ public class AdminList extends AdministrationSectionExt {
 
   /** @see org.openmrs.module.web.extension.AdministrationSectionExt#getLinks() */
   public Map<String, String> getLinks() {
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> map = new LinkedHashMap<String, String>();
     map.put(
-        "module/eptsharmonization/encounterType/harmonizeEncounterTypeList.form",
-        "eptsharmonization.harmonize.encountertype");
+        "module/eptsharmonization/harmonizeVisitType.form",
+        "eptsharmonization.visittype.harmonize");
     map.put(
-        "module/eptsharmonization/personAttributeTypes/harmonizePersonAttributeTypesList.form",
-        "eptsharmonization.harmonize.personattributetypes");
+        "module/eptsharmonization/harmonizeLocationTag.form",
+        "eptsharmonization.locationtag.harmonize");
+    map.put(
+        "module/eptsharmonization/harmonizeLocationAttributeType.form",
+        "eptsharmonization.locationattributetype.harmonize");
+    map.put(
+        "module/eptsharmonization/patientIdentifierTypes/harmonizePatientIdentifierTypesList.form",
+        "eptsharmonization.harmonize.patientidentifiertypes");
     map.put(
         "module/eptsharmonization/programs/harmonizeProgramsList.form",
         "eptsharmonization.harmonize.programs");
@@ -52,25 +58,19 @@ public class AdminList extends AdministrationSectionExt {
         "module/eptsharmonization/programWorkflowStates/harmonizeProgramWorkflowStatesList.form",
         "eptsharmonization.harmonize.programworkflowstates");
     map.put(
-        "module/eptsharmonization/harmonizeVisitType.form",
-        "eptsharmonization.visittype.harmonize");
+        "module/eptsharmonization/encounterType/harmonizeEncounterTypeList.form",
+        "eptsharmonization.harmonize.encountertype");
+    map.put(
+        "module/eptsharmonization/form/harmonizeFormList.form", "eptsharmonization.harmonize.form");
+    map.put(
+        "module/eptsharmonization/personAttributeTypes/harmonizePersonAttributeTypesList.form",
+        "eptsharmonization.harmonize.personattributetypes");
     map.put(
         "module/eptsharmonization/harmonizeRelationshipType.form",
         "eptsharmonization.relationshiptype.harmonize");
     map.put(
-        "module/eptsharmonization/harmonizeLocationAttributeType.form",
-        "eptsharmonization.locationattributetype.harmonize");
-    map.put(
-        "module/eptsharmonization/harmonizeLocationTag.form",
-        "eptsharmonization.locationtag.harmonize");
-    map.put(
         "module/eptsharmonization/harmonizeConcept.form",
         "eptsharmonization.concept.harmonize.status");
-    map.put(
-        "module/eptsharmonization/patientIdentifierTypes/harmonizePatientIdentifierTypesList.form",
-        "eptsharmonization.harmonize.patientidentifiertypes");
-    map.put(
-        "module/eptsharmonization/form/harmonizeFormList.form", "eptsharmonization.harmonize.form");
     return map;
   }
 }
