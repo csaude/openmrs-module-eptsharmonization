@@ -27,5 +27,7 @@
 				code="eptsharmonization.relationshiptype.harmonize" /></a></li>
 	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizeConcept.form"><spring:message
 				code="eptsharmonization.concept.harmonize.status" /></a></li>
+	<li><a href="${pageContext.request.contextPath}/module/eptsharmonization/harmonizationstatus/harmonizationStatusList.form"><spring:message
+				code="eptsharmonization.harmonizationstatus.title" /></a></li>
 	<!-- Add further links here -->
 </ul>

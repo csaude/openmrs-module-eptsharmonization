@@ -63,6 +63,8 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
 
   public List<EncounterType> findPDSEncounterTypesNotExistsInMDServer() throws APIException;
 
+  boolean isAllEncounterTypeMedatadaHarmonized();
+
   public void saveEncounterTypesWithDifferentNames(
       Map<String, List<EncounterTypeDTO>> encounterTypes) throws APIException;
 
