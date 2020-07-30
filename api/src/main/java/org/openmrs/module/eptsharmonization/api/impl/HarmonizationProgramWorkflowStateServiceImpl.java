@@ -28,6 +28,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowStateService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationProgramWorkflowStateServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
@@ -40,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service("eptsharmonization.harmonizationProgramWorkflowStateService")
 public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsService
-    implements HarmonizationProgramWorkflowStateService {
+    implements HarmonizationProgramWorkflowStateService, HarmonizationService {
 
   private HarmonizationServiceDAO harmonizationDAO;
   private ProgramWorkflowService programWorkflowService;
@@ -551,5 +552,13 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
     this.harmonizationDAO.evictCache();
     return this.harmonizationProgramWorkflowStateServiceDAO.getConceptId(
         programWorkflow, isFromMetadata);
+  }
+
+  @Override
+  public boolean isHarmonized() throws APIException {
+    return findAllMDSStatesNotContainedInPDS().isEmpty()
+        && findAllPDSStatesNotContainedInMDS().isEmpty()
+        && findAllStatesWithDifferentIDAndSameUUID().isEmpty()
+        && findAllStatesWithDifferentWorkflowOrConceptAndSameUUIDAndID().isEmpty();
   }
 }
