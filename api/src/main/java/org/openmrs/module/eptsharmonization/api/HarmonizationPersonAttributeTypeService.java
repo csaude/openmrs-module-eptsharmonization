@@ -47,9 +47,6 @@ public interface HarmonizationPersonAttributeTypeService {
 
   public int getNumberOfAffectedPersonAttributes(PersonAttributeTypeDTO personAttributeTypeDTO);
 
-  public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
-      throws APIException;
-
   public void savePersonAttributeTypesWithDifferentNames(
       Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException;
 

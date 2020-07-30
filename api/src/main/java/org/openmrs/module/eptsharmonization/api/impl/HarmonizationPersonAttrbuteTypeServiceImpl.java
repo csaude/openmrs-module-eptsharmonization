@@ -26,6 +26,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
+import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationPersonAttributeTypeServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
@@ -39,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service("eptsharmonization.harmonizatPersonAttributeTypeService")
 public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsService
-    implements HarmonizationPersonAttributeTypeService {
+    implements HarmonizationPersonAttributeTypeService, HarmonizationService {
 
   private HarmonizationServiceDAO harmonizationDAO;
   private PersonService personService;
@@ -160,17 +161,6 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
         .findPersonAttributesByPersonAttributeTypeId(
             personAttributeTypeDTO.getPersonAttributeType().getPersonAttributeTypeId())
         .size();
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Person Attribute Types"})
-  public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<PersonAttributeType> result =
-        harmonizationPersonAttributeTypeServiceDAO.findPDSPersonAttributeTypesNotExistsInMDServer();
-    return result;
   }
 
   @Override
@@ -502,5 +492,15 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
     PersonAttributeType result =
         this.harmonizationPersonAttributeTypeServiceDAO.findMDSPersonAttributeTypeByUuid(uuid);
     return result;
+  }
+
+  @Override
+  public boolean isHarmonized() throws APIException {
+    return findAllMetadataPersonAttributeTypesNotContainedInProductionServer().isEmpty()
+        && findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer().isEmpty()
+        && findAllProductionPersonAttributeTypesNotContainedInMetadataServer().isEmpty()
+        && findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer().isEmpty()
+        && findAllPersonAttributeTypesWithDifferentIDAndSameUUID().isEmpty()
+        && findAllPersonAttributeTypesWithDifferentNameAndSameUUIDAndID().isEmpty();
   }
 }
