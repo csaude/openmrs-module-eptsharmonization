@@ -27,12 +27,6 @@ public interface HarmonizationPersonAttributeTypeService {
   public List<PersonAttributeTypeDTO>
       findAllProductionPersonAttributeTypesNotContainedInMetadataServer() throws APIException;
 
-  public List<PersonAttributeTypeDTO>
-      findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer() throws APIException;
-
-  public List<PersonAttributeTypeDTO>
-      findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer() throws APIException;
-
   public Map<String, List<PersonAttributeTypeDTO>>
       findAllPersonAttributeTypesWithDifferentNameAndSameUUIDAndID() throws APIException;
 

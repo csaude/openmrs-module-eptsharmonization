@@ -39,12 +39,6 @@ public interface HarmonizationProgramService extends OpenmrsService {
   public List<ProgramDTO> findAllProductionProgramsNotContainedInMetadataServer()
       throws APIException;
 
-  public List<ProgramDTO> findAllMetadataProgramsPartialEqualsToProductionServer()
-      throws APIException;
-
-  public List<ProgramDTO> findAllProductionProgramsPartialEqualsToMetadataServer()
-      throws APIException;
-
   public Map<String, List<ProgramDTO>> findAllProgramsWithDifferentNameAndSameUUIDAndID()
       throws APIException;
 
