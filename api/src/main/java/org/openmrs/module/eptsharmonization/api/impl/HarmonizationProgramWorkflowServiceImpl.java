@@ -12,7 +12,6 @@
 package org.openmrs.module.eptsharmonization.api.impl;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationProgramWorkflowServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service("eptsharmonization.harmonizationProgramWorkflowService")
 public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
-    implements HarmonizationProgramWorkflowService {
+    implements HarmonizationProgramWorkflowService, HarmonizationService {
 
   private HarmonizationServiceDAO harmonizationDAO;
   private ProgramWorkflowService programWorkflowService;
@@ -93,47 +93,6 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
     pdsProgramWorkflows.removeAll(mdsProgramWorkflows);
     final List<ProgramWorkflowDTO> programWorkflows =
         DTOUtils.fromProgramWorkflows(pdsProgramWorkflows);
-    setProgramAndConceptNames(programWorkflows, false);
-    return programWorkflows;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View ProgramWorkflow"})
-  public List<ProgramWorkflowDTO> findAllMetadataProgramWorkflowsPartialEqualsToProductionServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<ProgramWorkflow> allMDS =
-        harmonizationProgramWorkflowServiceDAO.findAllMetadataServerProgramWorkflows();
-    List<ProgramWorkflow> allPDS =
-        harmonizationProgramWorkflowServiceDAO.findAllProductionServerProgramWorkflows();
-    List<ProgramWorkflow> mdsProgramWorkflows =
-        this.removeElementsWithDifferentIDsAndSameUUIDs(allMDS, allPDS);
-    allMDS.removeAll(allPDS);
-    mdsProgramWorkflows.removeAll(allMDS);
-    final List<ProgramWorkflowDTO> programWorkflows =
-        DTOUtils.fromProgramWorkflows(mdsProgramWorkflows);
-    setProgramAndConceptNames(programWorkflows, true);
-    return programWorkflows;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View ProgramWorkflow"})
-  public List<ProgramWorkflowDTO> findAllProductionProgramWorkflowsPartialEqualsToMetadataServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<ProgramWorkflow> allPDS =
-        harmonizationProgramWorkflowServiceDAO.findAllProductionServerProgramWorkflows();
-    List<ProgramWorkflow> allMDS =
-        harmonizationProgramWorkflowServiceDAO.findAllMetadataServerProgramWorkflows();
-    List<ProgramWorkflow> pdsProgramWorkflows =
-        this.removeElementsWithDifferentIDsAndSameUUIDs(allPDS, allMDS);
-    allPDS.removeAll(allMDS);
-    pdsProgramWorkflows.removeAll(allPDS);
-    final List<ProgramWorkflowDTO> programWorkflows =
-        DTOUtils.fromProgramWorkflows(pdsProgramWorkflows);
-
     setProgramAndConceptNames(programWorkflows, false);
     return programWorkflows;
   }
@@ -497,20 +456,6 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
     }
   }
 
-  private List<ProgramWorkflow> removeElementsWithDifferentIDsAndSameUUIDs(
-      List<ProgramWorkflow> allMDS, List<ProgramWorkflow> allPDS) {
-    List<ProgramWorkflow> auxMDS = new ArrayList<>();
-    for (ProgramWorkflow mdsProgramWorkflow : allMDS) {
-      for (ProgramWorkflow pdsProgramWorkflow : allPDS) {
-        if (mdsProgramWorkflow.getId().compareTo(pdsProgramWorkflow.getId()) != 0
-            && mdsProgramWorkflow.getUuid().contentEquals(pdsProgramWorkflow.getUuid())) {
-          auxMDS.add(mdsProgramWorkflow);
-        }
-      }
-    }
-    return auxMDS;
-  }
-
   private void updateToGivenId(
       ProgramWorkflow programWorkflow,
       Integer givenId,
@@ -592,5 +537,13 @@ public class HarmonizationProgramWorkflowServiceImpl extends BaseOpenmrsService
     this.harmonizationDAO.evictCache();
     return this.harmonizationProgramWorkflowServiceDAO.getProgramWorkflowConceptId(
         programWorkflow, isFromMetadata);
+  }
+
+  @Override
+  public boolean isHarmonized() throws APIException {
+    return findAllMetadataProgramWorkflowsNotContainedInProductionServer().isEmpty()
+        && findAllProductionProgramWorkflowsNotContainedInMetadataServer().isEmpty()
+        && findAllProgramWorkflowsWithDifferentIDAndSameUUID().isEmpty()
+        && findAllProgramWorkflowsWithDifferentProgramOrConceptAndSameUUIDAndID().isEmpty();
   }
 }

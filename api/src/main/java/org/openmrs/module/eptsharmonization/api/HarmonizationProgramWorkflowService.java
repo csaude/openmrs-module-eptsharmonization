@@ -40,12 +40,6 @@ public interface HarmonizationProgramWorkflowService extends OpenmrsService {
   public List<ProgramWorkflowDTO> findAllProductionProgramWorkflowsNotContainedInMetadataServer()
       throws APIException;
 
-  public List<ProgramWorkflowDTO> findAllMetadataProgramWorkflowsPartialEqualsToProductionServer()
-      throws APIException;
-
-  public List<ProgramWorkflowDTO> findAllProductionProgramWorkflowsPartialEqualsToMetadataServer()
-      throws APIException;
-
   public Map<String, List<ProgramWorkflowDTO>>
       findAllProgramWorkflowsWithDifferentProgramOrConceptAndSameUUIDAndID() throws APIException;
 
