@@ -21,21 +21,24 @@
 			<th style="text-align: left; width: 70%;"><spring:message code="eptsharmonization.harmonizationstatus.metadatatype" /></th>
 			<th style="text-align: left; width: 30%;"><spring:message code="eptsharmonization.harmonizationstatus.status" /></th>
 		</tr>
-		<tr>
-			<td style="text-align: left; width: 70%;"><spring:message code="eptsharmonization.harmonizationstatus.encounterType" /></td>
-			<c:choose>
-				<c:when test="${encounterTypeStatus}">
-					<td style="text-align: left; width: 30%; background-color: #4CAF50;">
-						<spring:message code="eptsharmonization.harmonizationstatus.harmonized" />
-					</td>
-				</c:when>
-				<c:otherwise>
-					<td style="text-align: left; width: 30%; background-color: #FF5733;">
-						<spring:message code="eptsharmonization.harmonizationstatus.pending.harmonization" />
-					</td>
-				</c:otherwise>
-			</c:choose>
-		</tr>
+		
+		<c:forEach var="item" items="${metadataTypes}" varStatus="itemsRow">
+			<tr>
+				<td style="text-align: left; width: 70%;"><spring:message code="${item.key}" /></td>
+				<c:choose>
+					<c:when test="${item.value}">
+						<td style="text-align: left; width: 30%; background-color: #4CAF50;">
+							<spring:message code="eptsharmonization.harmonizationstatus.harmonized" />
+						</td>
+					</c:when>
+					<c:otherwise>
+						<td style="text-align: left; width: 30%; background-color: #FF5733;">
+							<spring:message code="eptsharmonization.harmonizationstatus.pending.harmonization" />
+						</td>
+					</c:otherwise>
+				</c:choose>
+			</tr>
+		</c:forEach>
 	</table>
 </fieldset>
 
