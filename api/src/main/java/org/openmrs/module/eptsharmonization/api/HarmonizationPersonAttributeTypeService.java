@@ -19,7 +19,7 @@ import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationPersonAttributeTypeService {
+public interface HarmonizationPersonAttributeTypeService extends HarmonizationService {
 
   public List<PersonAttributeTypeDTO>
       findAllMetadataPersonAttributeTypesNotContainedInProductionServer() throws APIException;

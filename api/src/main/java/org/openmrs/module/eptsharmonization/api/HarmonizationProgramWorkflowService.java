@@ -17,7 +17,6 @@ import java.util.Map;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.api.APIException;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
 
@@ -32,7 +31,7 @@ import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationProgramWorkflowService extends OpenmrsService {
+public interface HarmonizationProgramWorkflowService extends HarmonizationService {
 
   public List<ProgramWorkflowDTO> findAllMetadataProgramWorkflowsNotContainedInProductionServer()
       throws APIException;

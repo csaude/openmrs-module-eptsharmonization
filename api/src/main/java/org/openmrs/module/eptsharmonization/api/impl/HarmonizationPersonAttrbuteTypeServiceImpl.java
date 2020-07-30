@@ -26,7 +26,6 @@ import org.openmrs.api.PersonService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
-import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationPersonAttributeTypeServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
@@ -39,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service("eptsharmonization.harmonizatPersonAttributeTypeService")
 public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsService
-    implements HarmonizationPersonAttributeTypeService, HarmonizationService {
+    implements HarmonizationPersonAttributeTypeService {
 
   private HarmonizationServiceDAO harmonizationDAO;
   private PersonService personService;
@@ -445,7 +444,7 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
   }
 
   @Override
-  public boolean isHarmonized() throws APIException {
+  public boolean isAllMetadataHarmonized() throws APIException {
     return findAllMetadataPersonAttributeTypesNotContainedInProductionServer().isEmpty()
         && findAllProductionPersonAttributeTypesNotContainedInMetadataServer().isEmpty()
         && findAllPersonAttributeTypesWithDifferentIDAndSameUUID().isEmpty()

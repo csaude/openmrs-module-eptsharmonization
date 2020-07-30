@@ -27,7 +27,6 @@ import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
-import org.openmrs.module.eptsharmonization.api.HarmonizationService;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationProgramServiceDAO;
 import org.openmrs.module.eptsharmonization.api.db.HarmonizationServiceDAO;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
@@ -40,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service("eptsharmonization.harmonizationProgramService")
 public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
-    implements HarmonizationProgramService, HarmonizationService {
+    implements HarmonizationProgramService {
 
   private HarmonizationServiceDAO harmonizationDAO;
   private ProgramWorkflowService programWorkflowService;
@@ -432,7 +431,7 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
   }
 
   @Override
-  public boolean isHarmonized() throws APIException {
+  public boolean isAllMetadataHarmonized() throws APIException {
     return findAllMetadataProgramsNotContainedInProductionServer().isEmpty()
         && findAllProductionProgramsNotContainedInMetadataServer().isEmpty()
         && findAllProgramsWithDifferentIDAndSameUUID().isEmpty()
