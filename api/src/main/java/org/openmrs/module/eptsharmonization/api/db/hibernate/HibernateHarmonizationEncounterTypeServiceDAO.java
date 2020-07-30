@@ -17,6 +17,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.BooleanType;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Form;
@@ -119,6 +120,28 @@ public class HibernateHarmonizationEncounterTypeServiceDAO
                 String.format(
                     "select swappable from encounter_type where encounter_type_id = %s ",
                     encounterType.getId()))
+            .uniqueResult();
+  }
+
+  @Override
+  public boolean isAllMedatadaHarmonized() {
+    return (boolean)
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                "  select if(count(*)> 0, false, true) as res from (  "
+                    + "select _encounter_type.encounter_type_id from _encounter_type where not exists (  "
+                    + "	select * from encounter_type where                                            "
+                    + "	 encounter_type.encounter_type_id = _encounter_type.encounter_type_id         "
+                    + "	 and encounter_type.uuid = _encounter_type.uuid                               "
+                    + "	 and lower(trim(encounter_type.name)) = lower(trim(_encounter_type.name)))    "
+                    + " union                                                                            "
+                    + " select encounter_type.encounter_type_id from encounter_type where not exists (   "
+                    + "	select * from _encounter_type where                                            "
+                    + "	 _encounter_type.encounter_type_id = encounter_type.encounter_type_id          "
+                    + "	 and _encounter_type.uuid = encounter_type.uuid                                "
+                    + "	 and lower(trim( _encounter_type.name)) = lower(trim(encounter_type.name)))) a  ")
+            .addScalar("res", new BooleanType())
             .uniqueResult();
   }
 

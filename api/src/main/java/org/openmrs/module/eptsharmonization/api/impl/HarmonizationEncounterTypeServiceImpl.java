@@ -478,6 +478,11 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
     return map;
   }
 
+  @Override
+  public boolean isAllEncounterTypeMedatadaHarmonized() {
+    return this.harmonizationEncounterTypeServiceDAO.isAllMedatadaHarmonized();
+  }
+
   private void updateToGivenId(
       EncounterType encounterType,
       Integer encounterTypeId,

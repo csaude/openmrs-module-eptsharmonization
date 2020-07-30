@@ -42,6 +42,8 @@ public interface HarmonizationEncounterTypeServiceDAO {
 
   public List<EncounterType> findAllNotSwappable() throws DAOException;
 
+  boolean isAllMedatadaHarmonized();
+
   public EncounterType updateEncounterType(
       Integer nextId, EncounterType encounterType, boolean swappable) throws DAOException;
 
