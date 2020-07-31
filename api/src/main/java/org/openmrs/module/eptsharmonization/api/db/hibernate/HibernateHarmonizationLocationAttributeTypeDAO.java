@@ -58,28 +58,6 @@ public class HibernateHarmonizationLocationAttributeTypeDAO
   }
 
   @Override
-  public List<LocationAttributeType> findPDSLocationAttributeTypesNotExistsInMDServer()
-      throws DAOException {
-    final Query query =
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select * from location_attribute_type "
-                    + "where NOT EXISTS (select * from _location_attribute_type lat"
-                    + "where _location_attribute_type.location_attribute_type_id = location_attribute_type.location_attribute_type_id "
-                    + "and lat.uuid = location_attribute_type.uuid "
-                    + "and lat.name = location_attribute_type.name "
-                    + "and lat.datatype = location_attribute_type.datatype "
-                    + "and lat.datatype_config = location_attribute_type.datatype_config "
-                    + "and lat.preferred_handler = location_attribute_type.preferred_handler "
-                    + "and lat.handler_config = location_attribute_type.handler_config "
-                    + "and lat.min_occurs = location_attribute_type.min_occurs "
-                    + "and lat.max_occurs = location_attribute_type.max_occurs)")
-            .addEntity(LocationAttributeType.class);
-    return query.list();
-  }
-
-  @Override
   public boolean isSwappable(LocationAttributeType locationAttributeType) throws DAOException {
     StringBuilder queryBulder =
         new StringBuilder("select count(*) from _location_attribute_type v ")

@@ -57,22 +57,6 @@ public class HibernateHarmonizationRelationshipTypeDAO implements HarmonizationR
   }
 
   @Override
-  public List<RelationshipType> findPDSRelationshipTypesNotExistsInMDServer() throws DAOException {
-    final Query query =
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select relationship_type.* from relationship_type "
-                    + "where NOT EXISTS (select * from _relationship_type "
-                    + "where _relationship_type.relationship_type_id = relationship_type.relationship_type_id "
-                    + "and _relationship_type.uuid = relationship_type.uuid "
-                    + "and _relationship_type.a_is_to_b = relationship_type.a_is_to_b "
-                    + "and _relationship_type.b_is_to_a = relationship_type.b_is_to_a)")
-            .addEntity(RelationshipType.class);
-    return query.list();
-  }
-
-  @Override
   public RelationshipType findMDSRelationshipTypeByUuid(String uuid) throws APIException {
     this.clearAndFlushSession();
     final Query query =

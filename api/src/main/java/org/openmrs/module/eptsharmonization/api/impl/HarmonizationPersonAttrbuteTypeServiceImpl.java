@@ -12,7 +12,6 @@
 package org.openmrs.module.eptsharmonization.api.impl;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -92,40 +91,6 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View Person Attribute Types"})
-  public List<PersonAttributeTypeDTO>
-      findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer() throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<PersonAttributeType> allMDS =
-        harmonizationPersonAttributeTypeServiceDAO.findAllMetadataServerPersonAttributeTypes();
-    List<PersonAttributeType> allPDS =
-        harmonizationPersonAttributeTypeServiceDAO.findAllProductionServerPersonAttributeTypes();
-    List<PersonAttributeType> mdsPersonAttributeTypes =
-        this.removeElementsWithDifferentIDsAndUUIDs(allMDS, allPDS);
-    allMDS.removeAll(allPDS);
-    mdsPersonAttributeTypes.removeAll(allMDS);
-    return DTOUtils.fromPersonAttributeTypes(mdsPersonAttributeTypes);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Person Attribute Types"})
-  public List<PersonAttributeTypeDTO>
-      findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer() throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<PersonAttributeType> allPDS =
-        harmonizationPersonAttributeTypeServiceDAO.findAllProductionServerPersonAttributeTypes();
-    List<PersonAttributeType> allMDS =
-        harmonizationPersonAttributeTypeServiceDAO.findAllMetadataServerPersonAttributeTypes();
-    List<PersonAttributeType> pdsPersonAttributeTypes =
-        this.removeElementsWithDifferentIDsAndUUIDs(allPDS, allMDS);
-    allPDS.removeAll(allMDS);
-    pdsPersonAttributeTypes.removeAll(allPDS);
-    return DTOUtils.fromPersonAttributeTypes(pdsPersonAttributeTypes);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Person Attribute Types"})
   public Map<String, List<PersonAttributeTypeDTO>>
       findAllPersonAttributeTypesWithDifferentNameAndSameUUIDAndID() throws APIException {
     this.harmonizationDAO.evictCache();
@@ -160,17 +125,6 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
         .findPersonAttributesByPersonAttributeTypeId(
             personAttributeTypeDTO.getPersonAttributeType().getPersonAttributeTypeId())
         .size();
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Person Attribute Types"})
-  public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<PersonAttributeType> result =
-        harmonizationPersonAttributeTypeServiceDAO.findPDSPersonAttributeTypesNotExistsInMDServer();
-    return result;
   }
 
   @Override
@@ -409,21 +363,6 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
     }
   }
 
-  private List<PersonAttributeType> removeElementsWithDifferentIDsAndUUIDs(
-      List<PersonAttributeType> mdsPersonAttributeTypes,
-      List<PersonAttributeType> pdsPersonAttributeTypes) {
-    List<PersonAttributeType> auxMDS = new ArrayList<>();
-    for (PersonAttributeType mdsPersonAttributeType : mdsPersonAttributeTypes) {
-      for (PersonAttributeType pdsPersonAttributeType : pdsPersonAttributeTypes) {
-        if (mdsPersonAttributeType.getId().compareTo(pdsPersonAttributeType.getId()) != 0
-            && mdsPersonAttributeType.getUuid().contentEquals(pdsPersonAttributeType.getUuid())) {
-          auxMDS.add(mdsPersonAttributeType);
-        }
-      }
-    }
-    return auxMDS;
-  }
-
   private Map<String, List<PersonAttributeType>> findByWithDifferentNameAndSameUUIDAndID() {
     List<PersonAttributeType> allMDS =
         harmonizationPersonAttributeTypeServiceDAO.findAllMetadataServerPersonAttributeTypes();
@@ -502,5 +441,13 @@ public class HarmonizationPersonAttrbuteTypeServiceImpl extends BaseOpenmrsServi
     PersonAttributeType result =
         this.harmonizationPersonAttributeTypeServiceDAO.findMDSPersonAttributeTypeByUuid(uuid);
     return result;
+  }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllMetadataPersonAttributeTypesNotContainedInProductionServer().isEmpty()
+        && findAllProductionPersonAttributeTypesNotContainedInMetadataServer().isEmpty()
+        && findAllPersonAttributeTypesWithDifferentIDAndSameUUID().isEmpty()
+        && findAllPersonAttributeTypesWithDifferentNameAndSameUUIDAndID().isEmpty();
   }
 }

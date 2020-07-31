@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import org.openmrs.Form;
 import org.openmrs.api.APIException;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.FormDTO;
 import org.openmrs.module.eptsharmonization.api.model.HtmlForm;
@@ -32,7 +31,7 @@ import org.openmrs.module.eptsharmonization.api.model.HtmlForm;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationFormService extends OpenmrsService {
+public interface HarmonizationFormService extends HarmonizationService {
 
   public List<FormDTO> findAllMetadataFormsNotContainedInProductionServer() throws APIException;
 

@@ -71,30 +71,6 @@ public class HibernateHarmonizationLocationTagDAO implements HarmonizationLocati
   }
 
   @Override
-  public List<LocationTag> findPDSLocationTagsNotExistsInMDServer() throws DAOException {
-    final Query query =
-        this.sessionFactory
-            .getCurrentSession()
-            .createSQLQuery(
-                "select l.location_tag_id as id, l.name as name, l.description as description, l.date_created as dateCreated, "
-                    + "l.retired as retired, l.date_retired as dateRetired, l.retire_reason as retireReason, l.uuid as uuid from location_tag l"
-                    + "where NOT EXISTS (select * from _location_tag "
-                    + "where _location_tag.location_tag_id = l.location_tag_id "
-                    + "and _location_tag.uuid = l.uuid "
-                    + "and _location_tag.name = l.name)")
-            .addScalar("id", IntegerType.INSTANCE)
-            .addScalar("name", StringType.INSTANCE)
-            .addScalar("description", StringType.INSTANCE)
-            .addScalar("dateCreated", DateType.INSTANCE)
-            .addScalar("dateRetired", DateType.INSTANCE)
-            .addScalar("retired", BooleanType.INSTANCE)
-            .addScalar("retireReason", StringType.INSTANCE)
-            .addScalar("uuid", StringType.INSTANCE)
-            .setResultTransformer(Transformers.aliasToBean(LocationTag.class));
-    return query.list();
-  }
-
-  @Override
   public boolean isSwappable(LocationTag locationTag) throws DAOException {
     final Query query =
         this.sessionFactory

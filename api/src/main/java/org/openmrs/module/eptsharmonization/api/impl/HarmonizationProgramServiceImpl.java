@@ -12,7 +12,6 @@
 package org.openmrs.module.eptsharmonization.api.impl;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -83,34 +82,6 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
     List<Program> pdsPrograms = harmonizationProgramServiceDAO.findAllProductionServerPrograms();
     List<Program> mdsPrograms = harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
     pdsPrograms.removeAll(mdsPrograms);
-    return DTOUtils.fromPrograms(pdsPrograms);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Program"})
-  public List<ProgramDTO> findAllMetadataProgramsPartialEqualsToProductionServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<Program> allMDS = harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
-    List<Program> allPDS = harmonizationProgramServiceDAO.findAllProductionServerPrograms();
-    List<Program> mdsPrograms = this.removeElementsWithDifferentIDsAndSameUUIDs(allMDS, allPDS);
-    allMDS.removeAll(allPDS);
-    mdsPrograms.removeAll(allMDS);
-    return DTOUtils.fromPrograms(mdsPrograms);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Program"})
-  public List<ProgramDTO> findAllProductionProgramsPartialEqualsToMetadataServer()
-      throws APIException {
-    this.harmonizationDAO.evictCache();
-    List<Program> allPDS = harmonizationProgramServiceDAO.findAllProductionServerPrograms();
-    List<Program> allMDS = harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
-    List<Program> pdsPrograms = this.removeElementsWithDifferentIDsAndSameUUIDs(allPDS, allMDS);
-    allPDS.removeAll(allMDS);
-    pdsPrograms.removeAll(allPDS);
     return DTOUtils.fromPrograms(pdsPrograms);
   }
 
@@ -379,20 +350,6 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
     }
   }
 
-  private List<Program> removeElementsWithDifferentIDsAndSameUUIDs(
-      List<Program> mdsPrograms, List<Program> pdsPrograms) {
-    List<Program> auxMDS = new ArrayList<>();
-    for (Program mdsProgram : mdsPrograms) {
-      for (Program pdsProgram : pdsPrograms) {
-        if (mdsProgram.getId().compareTo(pdsProgram.getId()) != 0
-            && mdsProgram.getUuid().contentEquals(pdsProgram.getUuid())) {
-          auxMDS.add(mdsProgram);
-        }
-      }
-    }
-    return auxMDS;
-  }
-
   private Map<String, List<Program>> findByWithDifferentNameAndSameUUIDAndID() {
     List<Program> allMDS = harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
     List<Program> allPDS = harmonizationProgramServiceDAO.findAllProductionServerPrograms();
@@ -471,5 +428,13 @@ public class HarmonizationProgramServiceImpl extends BaseOpenmrsService
   public List<Program> findAllMetadataPrograms() throws APIException {
     this.harmonizationDAO.evictCache();
     return this.harmonizationProgramServiceDAO.findAllMetadataServerPrograms();
+  }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllMetadataProgramsNotContainedInProductionServer().isEmpty()
+        && findAllProductionProgramsNotContainedInMetadataServer().isEmpty()
+        && findAllProgramsWithDifferentIDAndSameUUID().isEmpty()
+        && findAllProgramsWithDifferentNameAndSameUUIDAndID().isEmpty();
   }
 }

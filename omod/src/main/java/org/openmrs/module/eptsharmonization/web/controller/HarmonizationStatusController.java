@@ -1,6 +1,18 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationFormService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationLocationAttributeTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationLocationTagService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationPatientIdentifierTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowStateService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationRelationshipTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationVisitTypeService;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +30,16 @@ public class HarmonizationStatusController {
       HarmonizationStatusController.CONTROLLER_PATH + "/harmonizationStatusList";
 
   private HarmonizationEncounterTypeService harmonizationEncounterTypeService;
+  private HarmonizationPersonAttributeTypeService harmonizationPersonAttributeTypeService;
+  private HarmonizationProgramService harmonizationProgramService;
+  private HarmonizationProgramWorkflowService harmonizationProgramWorkflowService;
+  private HarmonizationProgramWorkflowStateService harmonizationProgramWorkflowStateService;
+  private HarmonizationPatientIdentifierTypeService harmonizationPatientIdentifierTypeService;
+  private HarmonizationVisitTypeService harmonizationVisitTypeService;
+  private HarmonizationLocationTagService harmonizationLocationTagService;
+  private HarmonizationLocationAttributeTypeService harmonizationLocationAttributeTypeService;
+  private HarmonizationFormService harmonizationFormService;
+  private HarmonizationRelationshipTypeService harmonizationRelationshipTypeService;
 
   @Autowired
   public void setHarmonizationEncounterTypeService(
@@ -25,13 +47,106 @@ public class HarmonizationStatusController {
     this.harmonizationEncounterTypeService = harmonizationEncounterTypeService;
   }
 
+  @Autowired
+  public void setHarmonizationPersonAttributeTypeService(
+      HarmonizationPersonAttributeTypeService harmonizationPersonAttributeTypeService) {
+    this.harmonizationPersonAttributeTypeService = harmonizationPersonAttributeTypeService;
+  }
+
+  @Autowired
+  public void setHarmonizationProgramService(
+      HarmonizationProgramService harmonizationProgramService) {
+    this.harmonizationProgramService = harmonizationProgramService;
+  }
+
+  @Autowired
+  public void setHarmonizationProgramWorkflowService(
+      HarmonizationProgramWorkflowService harmonizationProgramWorkflowService) {
+    this.harmonizationProgramWorkflowService = harmonizationProgramWorkflowService;
+  }
+
+  @Autowired
+  public void setHarmonizationProgramWorkflowStateService(
+      HarmonizationProgramWorkflowStateService harmonizationProgramWorkflowStateService) {
+    this.harmonizationProgramWorkflowStateService = harmonizationProgramWorkflowStateService;
+  }
+
+  @Autowired
+  public void setHarmonizationPatientIdentifierTypeService(
+      HarmonizationPatientIdentifierTypeService harmonizationPatientIdentifierTypeService) {
+    this.harmonizationPatientIdentifierTypeService = harmonizationPatientIdentifierTypeService;
+  }
+
+  @Autowired
+  public void setHarmonizeVisitTypeController(
+      HarmonizationVisitTypeService harmonizationVisitTypeService) {
+    this.harmonizationVisitTypeService = harmonizationVisitTypeService;
+  }
+
+  @Autowired
+  public void setHarmonizationLocationTagService(
+      HarmonizationLocationTagService harmonizationLocationTagService) {
+    this.harmonizationLocationTagService = harmonizationLocationTagService;
+  }
+
+  @Autowired
+  public void setHarmonizationLocationAttributeTypeService(
+      HarmonizationLocationAttributeTypeService harmonizationLocationAttributeTypeService) {
+    this.harmonizationLocationAttributeTypeService = harmonizationLocationAttributeTypeService;
+  }
+
+  @Autowired
+  public void setHarmonizationFormService(HarmonizationFormService harmonizationFormService) {
+    this.harmonizationFormService = harmonizationFormService;
+  }
+
+  @Autowired
+  public void setHarmonizationRelationshipTypeService(
+      HarmonizationRelationshipTypeService harmonizationRelationshipTypeService) {
+    this.harmonizationRelationshipTypeService = harmonizationRelationshipTypeService;
+  }
+
   @RequestMapping(value = HARMONIZATION_STATUS_LIST, method = RequestMethod.GET)
   public ModelAndView getHarmonizationStatusList() {
 
-    ModelAndView modelAndView = new ModelAndView();
-    modelAndView.addObject(
-        "encounterTypeStatus",
+    Map<String, Boolean> metadataTypes = new LinkedHashMap<>();
+
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.visitType",
+        this.harmonizationVisitTypeService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.locationTag",
+        this.harmonizationLocationTagService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.locationAttributeType",
+        this.harmonizationLocationAttributeTypeService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.patientIdentifierType",
+        this.harmonizationPatientIdentifierTypeService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.program",
+        this.harmonizationProgramService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.programWorkflow",
+        this.harmonizationProgramWorkflowService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.programWorkflowState",
+        this.harmonizationProgramWorkflowStateService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.encounterType",
         this.harmonizationEncounterTypeService.isAllEncounterTypeMedatadaHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.form",
+        this.harmonizationFormService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.personAttributeType",
+        this.harmonizationPersonAttributeTypeService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.relationshipType",
+        this.harmonizationRelationshipTypeService.isAllMetadataHarmonized());
+
+    ModelAndView modelAndView = new ModelAndView();
+    modelAndView.addObject("metadataTypes", metadataTypes);
 
     return modelAndView;
   }

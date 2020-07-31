@@ -140,16 +140,6 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View Relationship Types"})
-  public List<RelationshipTypeDTO> findAllProductionRelationshipTypesNotInHarmonyWithMetadata()
-      throws APIException {
-    List<RelationshipType> notInHarmonyWithMetadata =
-        harmonizationRelationshipTypeDao.findPDSRelationshipTypesNotExistsInMDServer();
-    return DTOUtils.fromRelationshipTypes(notInHarmonyWithMetadata);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Relationship Types"})
   public Map<String, List<RelationshipTypeDTO>>
       findAllRelationshipTypeWithDifferentTypesAndSameUUIDAndID() throws APIException {
     List<RelationshipType> allPDS = personService.getAllRelationshipTypes();
@@ -489,5 +479,15 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       this.updateToGivenId(found, nextId, relatedRelationships);
     }
     this.harmonizationRelationshipTypeDao.insertRelationshipType(relationshipTypeFromDTO);
+  }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllMetadataRelationshipTypesNotInHarmonyWithProduction().isEmpty()
+        && findAllMetadataRelationshipTypesNotSharingUuidWithAnyFromProduction().isEmpty()
+        && findAllRelationshipTypesWithDifferentIDAndSameUUID().isEmpty()
+        && findAllRelationshipTypeWithDifferentTypesAndSameUUIDAndID().isEmpty()
+        && findAllUsedProductionRelationshipTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
+        && findAllUselessProductionRelationshipTypesNotSharingUuidWithAnyFromMetadata().isEmpty();
   }
 }

@@ -13,8 +13,6 @@ public interface HarmonizationLocationTagDAO {
 
   Integer getCountOfLocationsByLocationTag(LocationTag locationTag) throws DAOException;
 
-  List<LocationTag> findPDSLocationTagsNotExistsInMDServer() throws DAOException;
-
   LocationTag findMDSLocationTagByUuid(String uuid) throws DAOException;
 
   LocationTag findPDSLocationTagByUuid(String uuid) throws DAOException;

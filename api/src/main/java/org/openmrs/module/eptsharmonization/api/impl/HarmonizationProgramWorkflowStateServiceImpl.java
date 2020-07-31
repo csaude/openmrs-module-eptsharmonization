@@ -552,4 +552,12 @@ public class HarmonizationProgramWorkflowStateServiceImpl extends BaseOpenmrsSer
     return this.harmonizationProgramWorkflowStateServiceDAO.getConceptId(
         programWorkflow, isFromMetadata);
   }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllMDSStatesNotContainedInPDS().isEmpty()
+        && findAllPDSStatesNotContainedInMDS().isEmpty()
+        && findAllStatesWithDifferentIDAndSameUUID().isEmpty()
+        && findAllStatesWithDifferentWorkflowOrConceptAndSameUUIDAndID().isEmpty();
+  }
 }

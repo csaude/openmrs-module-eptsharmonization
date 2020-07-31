@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import org.openmrs.RelationshipType;
 import org.openmrs.api.APIException;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
 
 /**
@@ -29,7 +28,7 @@ import org.openmrs.module.eptsharmonization.api.model.RelationshipTypeDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationRelationshipTypeService extends OpenmrsService {
+public interface HarmonizationRelationshipTypeService extends HarmonizationService {
   List<RelationshipTypeDTO> findAllMetadataRelationshipTypesNotSharingUuidWithAnyFromProduction()
       throws APIException;
 
@@ -57,9 +56,6 @@ public interface HarmonizationRelationshipTypeService extends OpenmrsService {
   RelationshipType findPDSRelationshipTypeByUuid(String uuid) throws APIException;
 
   int getNumberOfAffectedRelationships(RelationshipTypeDTO relationshipTypeDTO);
-
-  List<RelationshipTypeDTO> findAllProductionRelationshipTypesNotInHarmonyWithMetadata()
-      throws APIException;
 
   void saveRelationshipTypesWithDifferentNames(
       Map<String, List<RelationshipTypeDTO>> relationshipTypes) throws APIException;

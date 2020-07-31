@@ -148,16 +148,6 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View LocationAttribute Types"})
-  public List<LocationAttributeTypeDTO>
-      findAllProductionLocationAttributeTypesNotInHarmonyWithMetadata() throws APIException {
-    List<LocationAttributeType> notInHarmonyWithMetadata =
-        harmonizationLocationAttributeTypeDao.findPDSLocationAttributeTypesNotExistsInMDServer();
-    return DTOUtils.fromLocationAttributeTypes(notInHarmonyWithMetadata);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View LocationAttribute Types"})
   public Map<String, List<LocationAttributeTypeDTO>>
       findAllLocationAttributeTypesWithDifferentNameAndSameUUIDAndID() throws APIException {
     List<LocationAttributeType> allPDS = locationService.getAllLocationAttributeTypes();
@@ -551,5 +541,16 @@ public class HarmonizationLocationAttributeTypeServiceImpl extends BaseOpenmrsSe
     }
 
     return attributes;
+  }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllLocationAttributeTypesWithDifferentIDAndSameUUID().isEmpty()
+        && findAllLocationAttributeTypesWithDifferentNameAndSameUUIDAndID().isEmpty()
+        && findAllMetadataLocationAttributeTypesNotInHarmonyWithProduction().isEmpty()
+        && findAllMetadataLocationAttributeTypesNotSharingUuidWithAnyFromProduction().isEmpty()
+        && findAllUsedProductionLocationAttributeTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
+        && findAllUselessProductionLocationAttributeTypesNotSharingUuidWithAnyFromMetadata()
+            .isEmpty();
   }
 }

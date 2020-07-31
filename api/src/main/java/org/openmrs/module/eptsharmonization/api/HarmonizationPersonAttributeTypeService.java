@@ -19,19 +19,13 @@ import org.openmrs.module.eptsharmonization.api.model.PersonAttributeTypeDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationPersonAttributeTypeService {
+public interface HarmonizationPersonAttributeTypeService extends HarmonizationService {
 
   public List<PersonAttributeTypeDTO>
       findAllMetadataPersonAttributeTypesNotContainedInProductionServer() throws APIException;
 
   public List<PersonAttributeTypeDTO>
       findAllProductionPersonAttributeTypesNotContainedInMetadataServer() throws APIException;
-
-  public List<PersonAttributeTypeDTO>
-      findAllMetadataPersonAttributeTypesPartialEqualsToProductionServer() throws APIException;
-
-  public List<PersonAttributeTypeDTO>
-      findAllProductionPersonAttributeTypesPartialEqualsToMetadataServer() throws APIException;
 
   public Map<String, List<PersonAttributeTypeDTO>>
       findAllPersonAttributeTypesWithDifferentNameAndSameUUIDAndID() throws APIException;
@@ -46,9 +40,6 @@ public interface HarmonizationPersonAttributeTypeService {
   public List<PersonAttributeType> findAllMetadataPersonAttributeTypes() throws APIException;
 
   public int getNumberOfAffectedPersonAttributes(PersonAttributeTypeDTO personAttributeTypeDTO);
-
-  public List<PersonAttributeType> findPDSPersonAttributeTypesNotExistsInMDServer()
-      throws APIException;
 
   public void savePersonAttributeTypesWithDifferentNames(
       Map<String, List<PersonAttributeTypeDTO>> personAttributeTypes) throws APIException;

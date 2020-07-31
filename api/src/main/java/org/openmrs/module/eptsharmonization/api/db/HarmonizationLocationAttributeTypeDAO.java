@@ -15,9 +15,6 @@ public interface HarmonizationLocationAttributeTypeDAO {
   Integer getCountOfLocationAttributesByLocationAttributeType(
       LocationAttributeType locationAttributeType) throws DAOException;
 
-  List<LocationAttributeType> findPDSLocationAttributeTypesNotExistsInMDServer()
-      throws DAOException;
-
   boolean isSwappable(LocationAttributeType locationAttributeType) throws DAOException;
 
   LocationAttributeType findMDSLocationAttributeTypeByUuid(String uuid) throws DAOException;

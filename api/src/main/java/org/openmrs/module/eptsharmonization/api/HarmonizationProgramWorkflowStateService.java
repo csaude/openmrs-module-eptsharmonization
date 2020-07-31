@@ -17,7 +17,6 @@ import java.util.Map;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
 import org.openmrs.api.APIException;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowStateDTO;
 
@@ -32,7 +31,7 @@ import org.openmrs.module.eptsharmonization.api.model.ProgramWorkflowStateDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationProgramWorkflowStateService extends OpenmrsService {
+public interface HarmonizationProgramWorkflowStateService extends HarmonizationService {
 
   public List<ProgramWorkflowStateDTO> findAllMDSStatesNotContainedInPDS() throws APIException;
 

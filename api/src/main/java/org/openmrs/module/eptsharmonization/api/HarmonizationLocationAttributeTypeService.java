@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.api.APIException;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
 
 /**
@@ -29,7 +28,7 @@ import org.openmrs.module.eptsharmonization.api.model.LocationAttributeTypeDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationLocationAttributeTypeService extends OpenmrsService {
+public interface HarmonizationLocationAttributeTypeService extends HarmonizationService {
   List<LocationAttributeTypeDTO>
       findAllMetadataLocationAttributeTypesNotSharingUuidWithAnyFromProduction()
           throws APIException;
@@ -56,9 +55,6 @@ public interface HarmonizationLocationAttributeTypeService extends OpenmrsServic
       findAllLocationAttributeTypesWithDifferentIDAndSameUUID() throws APIException;
 
   int getNumberOfAffectedLocationAttributes(LocationAttributeTypeDTO locationAttributeTypeDTO);
-
-  List<LocationAttributeTypeDTO> findAllProductionLocationAttributeTypesNotInHarmonyWithMetadata()
-      throws APIException;
 
   LocationAttributeType findMDSLocationAttributeTypeByUuid(String uuid) throws APIException;
 

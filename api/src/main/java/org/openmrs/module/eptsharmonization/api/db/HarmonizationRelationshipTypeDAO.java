@@ -16,8 +16,6 @@ public interface HarmonizationRelationshipTypeDAO {
   Integer getCountOfRelationshipsByRelationshipType(RelationshipType relationshipType)
       throws DAOException;
 
-  List<RelationshipType> findPDSRelationshipTypesNotExistsInMDServer() throws DAOException;
-
   boolean isSwappable(RelationshipType relationshipType) throws DAOException;
 
   Integer getNextRelationshipTypeId() throws DAOException;
