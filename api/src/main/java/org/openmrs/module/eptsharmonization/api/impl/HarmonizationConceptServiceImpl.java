@@ -41,4 +41,9 @@ public class HarmonizationConceptServiceImpl extends BaseOpenmrsService
   public List<ConceptDTO> findMDSConceptsNotInPDS() throws APIException {
     return harmonizationConceptDao.findAllMDSConceptsNotInPDS();
   }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findMDSConceptsNotInPDS().isEmpty() && findMDSConceptsNotInPDS().isEmpty();
+  }
 }

@@ -2,6 +2,7 @@ package org.openmrs.module.eptsharmonization.web.controller;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.openmrs.module.eptsharmonization.api.HarmonizationConceptService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationFormService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationLocationAttributeTypeService;
@@ -40,6 +41,7 @@ public class HarmonizationStatusController {
   private HarmonizationLocationAttributeTypeService harmonizationLocationAttributeTypeService;
   private HarmonizationFormService harmonizationFormService;
   private HarmonizationRelationshipTypeService harmonizationRelationshipTypeService;
+  private HarmonizationConceptService harmonizationConceptService;
 
   @Autowired
   public void setHarmonizationEncounterTypeService(
@@ -106,6 +108,12 @@ public class HarmonizationStatusController {
     this.harmonizationRelationshipTypeService = harmonizationRelationshipTypeService;
   }
 
+  @Autowired
+  public void setHarmonizationConceptService(
+      HarmonizationConceptService harmonizationConceptService) {
+    this.harmonizationConceptService = harmonizationConceptService;
+  }
+
   @RequestMapping(value = HARMONIZATION_STATUS_LIST, method = RequestMethod.GET)
   public ModelAndView getHarmonizationStatusList() {
 
@@ -144,6 +152,9 @@ public class HarmonizationStatusController {
     metadataTypes.put(
         "eptsharmonization.harmonizationstatus.relationshipType",
         this.harmonizationRelationshipTypeService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.concept",
+        this.harmonizationConceptService.isAllMetadataHarmonized());
 
     ModelAndView modelAndView = new ModelAndView();
     modelAndView.addObject("metadataTypes", metadataTypes);
