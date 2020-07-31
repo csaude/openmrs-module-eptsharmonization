@@ -513,4 +513,13 @@ public class HarmonizationPatientIdentifierTypeServiceImpl extends BaseOpenmrsSe
         this.harmonizationPatientIdentifierTypeServiceDAO.findMDSPatientIdentifierTypeByUuid(uuid);
     return result;
   }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllFromMDSNotContainedInPDS().isEmpty()
+        && findAllFromPDSNotContainedInMDS().isEmpty()
+        && findAllWithDifferentIDAndSameUUID().isEmpty()
+        && findAllWithDifferentNameAndSameUUIDAndID().isEmpty()
+        && findAllWithDifferentDetailsAndSameNameUUIDAndID().isEmpty();
+  }
 }

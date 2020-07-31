@@ -19,7 +19,7 @@ import org.openmrs.module.eptsharmonization.api.model.PatientIdentifierTypeDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationPatientIdentifierTypeService {
+public interface HarmonizationPatientIdentifierTypeService extends HarmonizationService {
 
   public List<PatientIdentifierTypeDTO> findAllFromMDSNotContainedInPDS() throws APIException;
 
