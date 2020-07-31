@@ -8,6 +8,7 @@ import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeType
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowStateService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationVisitTypeService;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,6 +31,7 @@ public class HarmonizationStatusController {
   private HarmonizationProgramWorkflowService harmonizationProgramWorkflowService;
   private HarmonizationProgramWorkflowStateService harmonizationProgramWorkflowStateService;
   private HarmonizationPatientIdentifierTypeService harmonizationPatientIdentifierTypeService;
+  private HarmonizationVisitTypeService harmonizationVisitTypeService;
 
   @Autowired
   public void setHarmonizationEncounterTypeService(
@@ -67,11 +69,20 @@ public class HarmonizationStatusController {
     this.harmonizationPatientIdentifierTypeService = harmonizationPatientIdentifierTypeService;
   }
 
+  @Autowired
+  public void setHarmonizeVisitTypeController(
+      HarmonizationVisitTypeService harmonizationVisitTypeService) {
+    this.harmonizationVisitTypeService = harmonizationVisitTypeService;
+  }
+
   @RequestMapping(value = HARMONIZATION_STATUS_LIST, method = RequestMethod.GET)
   public ModelAndView getHarmonizationStatusList() {
 
     Map<String, Boolean> metadataTypes = new LinkedHashMap<>();
 
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.visitType",
+        this.harmonizationVisitTypeService.isAllMetadataHarmonized());
     metadataTypes.put(
         "eptsharmonization.harmonizationstatus.patientIdentifierType",
         this.harmonizationPatientIdentifierTypeService.isAllMetadataHarmonized());

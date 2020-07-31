@@ -496,4 +496,16 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
       adminService.setGlobalProperty(V_TO_E_GP, gpValue);
     }
   }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllMetadataVisitTypesNotInHarmonyWithProduction().isEmpty()
+        && findAllMetadataVisitTypesNotSharingUuidWithAnyFromProduction().isEmpty()
+        && findAllProductionVisitTypesNotInHarmonyWithMetadata().isEmpty()
+        && findAllProductionVisitTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
+        && findAllUsedProductionVisitTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
+        && findAllUselessProductionVisitTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
+        && findAllVisitTypesWithDifferentIDAndSameUUID().isEmpty()
+        && findAllVisitTypesWithDifferentNameAndSameUUIDAndID().isEmpty();
+  }
 }

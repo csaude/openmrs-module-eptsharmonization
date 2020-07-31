@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import org.openmrs.VisitType;
 import org.openmrs.api.APIException;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 
 /**
@@ -29,7 +28,7 @@ import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationVisitTypeService extends OpenmrsService {
+public interface HarmonizationVisitTypeService extends HarmonizationService {
   List<VisitTypeDTO> findAllMetadataVisitTypesNotSharingUuidWithAnyFromProduction()
       throws APIException;
 
