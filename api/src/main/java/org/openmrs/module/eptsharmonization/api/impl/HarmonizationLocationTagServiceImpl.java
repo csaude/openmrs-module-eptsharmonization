@@ -134,16 +134,6 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
   @Override
   @Transactional(readOnly = true)
   @Authorized({"View Location Types"})
-  public List<LocationTagDTO> findAllProductionLocationTagsNotInHarmonyWithMetadata()
-      throws APIException {
-    List<LocationTag> notInHarmonyWithMetadata =
-        harmonizationLocationTagDao.findPDSLocationTagsNotExistsInMDServer();
-    return DTOUtils.fromLocationTags(notInHarmonyWithMetadata);
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  @Authorized({"View Location Types"})
   public Map<String, List<LocationTagDTO>> findAllLocationTagsWithDifferentNameAndSameUUIDAndID()
       throws APIException {
     List<LocationTag> allPDS = locationService.getAllLocationTags();
@@ -466,5 +456,15 @@ public class HarmonizationLocationTagServiceImpl extends BaseOpenmrsService
       this.updateToGivenId(found, nextId, relatedLocations);
     }
     this.harmonizationLocationTagDao.insertLocationTag(locationTagFromDTO);
+  }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllLocationTagsWithDifferentIDAndSameUUID().isEmpty()
+        && findAllLocationTagsWithDifferentNameAndSameUUIDAndID().isEmpty()
+        && findAllMetadataLocationTagsNotInHarmonyWithProduction().isEmpty()
+        && findAllMetadataLocationTagsNotSharingUuidWithAnyFromProduction().isEmpty()
+        && findAllUsedProductionLocationTagsNotSharingUuidWithAnyFromMetadata().isEmpty()
+        && findAllUselessProductionLocationTagsNotSharingUuidWithAnyFromMetadata().isEmpty();
   }
 }

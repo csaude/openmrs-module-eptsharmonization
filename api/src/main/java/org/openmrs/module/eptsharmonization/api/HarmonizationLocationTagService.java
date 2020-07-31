@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import org.openmrs.LocationTag;
 import org.openmrs.api.APIException;
-import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
 
 /**
@@ -29,7 +28,7 @@ import org.openmrs.module.eptsharmonization.api.model.LocationTagDTO;
  *
  * @see org.openmrs.api.context.Context
  */
-public interface HarmonizationLocationTagService extends OpenmrsService {
+public interface HarmonizationLocationTagService extends HarmonizationService {
   List<LocationTagDTO> findAllMetadataLocationTagsNotSharingUuidWithAnyFromProduction()
       throws APIException;
 
@@ -51,8 +50,6 @@ public interface HarmonizationLocationTagService extends OpenmrsService {
       throws APIException;
 
   int getNumberOfAffectedLocations(LocationTagDTO locationTagDTO);
-
-  List<LocationTagDTO> findAllProductionLocationTagsNotInHarmonyWithMetadata() throws APIException;
 
   LocationTag findMDSLocationTagByUuid(String uuid) throws APIException;
 

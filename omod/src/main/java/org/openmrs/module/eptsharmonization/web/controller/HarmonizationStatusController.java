@@ -3,11 +3,15 @@ package org.openmrs.module.eptsharmonization.web.controller;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationFormService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationLocationAttributeTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationLocationTagService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPatientIdentifierTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationPersonAttributeTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationProgramWorkflowStateService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationRelationshipTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationVisitTypeService;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +36,10 @@ public class HarmonizationStatusController {
   private HarmonizationProgramWorkflowStateService harmonizationProgramWorkflowStateService;
   private HarmonizationPatientIdentifierTypeService harmonizationPatientIdentifierTypeService;
   private HarmonizationVisitTypeService harmonizationVisitTypeService;
+  private HarmonizationLocationTagService harmonizationLocationTagService;
+  private HarmonizationLocationAttributeTypeService harmonizationLocationAttributeTypeService;
+  private HarmonizationFormService harmonizationFormService;
+  private HarmonizationRelationshipTypeService harmonizationRelationshipTypeService;
 
   @Autowired
   public void setHarmonizationEncounterTypeService(
@@ -75,6 +83,29 @@ public class HarmonizationStatusController {
     this.harmonizationVisitTypeService = harmonizationVisitTypeService;
   }
 
+  @Autowired
+  public void setHarmonizationLocationTagService(
+      HarmonizationLocationTagService harmonizationLocationTagService) {
+    this.harmonizationLocationTagService = harmonizationLocationTagService;
+  }
+
+  @Autowired
+  public void setHarmonizationLocationAttributeTypeService(
+      HarmonizationLocationAttributeTypeService harmonizationLocationAttributeTypeService) {
+    this.harmonizationLocationAttributeTypeService = harmonizationLocationAttributeTypeService;
+  }
+
+  @Autowired
+  public void setHarmonizationFormService(HarmonizationFormService harmonizationFormService) {
+    this.harmonizationFormService = harmonizationFormService;
+  }
+
+  @Autowired
+  public void setHarmonizationRelationshipTypeService(
+      HarmonizationRelationshipTypeService harmonizationRelationshipTypeService) {
+    this.harmonizationRelationshipTypeService = harmonizationRelationshipTypeService;
+  }
+
   @RequestMapping(value = HARMONIZATION_STATUS_LIST, method = RequestMethod.GET)
   public ModelAndView getHarmonizationStatusList() {
 
@@ -83,6 +114,12 @@ public class HarmonizationStatusController {
     metadataTypes.put(
         "eptsharmonization.harmonizationstatus.visitType",
         this.harmonizationVisitTypeService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.locationTag",
+        this.harmonizationLocationTagService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.locationAttributeType",
+        this.harmonizationLocationAttributeTypeService.isAllMetadataHarmonized());
     metadataTypes.put(
         "eptsharmonization.harmonizationstatus.patientIdentifierType",
         this.harmonizationPatientIdentifierTypeService.isAllMetadataHarmonized());
@@ -99,8 +136,14 @@ public class HarmonizationStatusController {
         "eptsharmonization.harmonizationstatus.encounterType",
         this.harmonizationEncounterTypeService.isAllEncounterTypeMedatadaHarmonized());
     metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.form",
+        this.harmonizationFormService.isAllMetadataHarmonized());
+    metadataTypes.put(
         "eptsharmonization.harmonizationstatus.personAttributeType",
         this.harmonizationPersonAttributeTypeService.isAllMetadataHarmonized());
+    metadataTypes.put(
+        "eptsharmonization.harmonizationstatus.relationshipType",
+        this.harmonizationRelationshipTypeService.isAllMetadataHarmonized());
 
     ModelAndView modelAndView = new ModelAndView();
     modelAndView.addObject("metadataTypes", metadataTypes);

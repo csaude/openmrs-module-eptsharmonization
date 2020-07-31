@@ -502,7 +502,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
     return findAllMetadataVisitTypesNotInHarmonyWithProduction().isEmpty()
         && findAllMetadataVisitTypesNotSharingUuidWithAnyFromProduction().isEmpty()
         && findAllProductionVisitTypesNotInHarmonyWithMetadata().isEmpty()
-        && findAllProductionVisitTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
         && findAllUsedProductionVisitTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
         && findAllUselessProductionVisitTypesNotSharingUuidWithAnyFromMetadata().isEmpty()
         && findAllVisitTypesWithDifferentIDAndSameUUID().isEmpty()

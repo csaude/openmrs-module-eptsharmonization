@@ -459,4 +459,12 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       this.harmonizationFormServiceDAO.updatePDSHtmlForm(relatedHtmlForm, updated);
     }
   }
+
+  @Override
+  public boolean isAllMetadataHarmonized() throws APIException {
+    return findAllFormsWithDifferentIDAndSameUUID().isEmpty()
+        && findAllFormsWithDifferentNameAndSameUUIDAndID().isEmpty()
+        && findAllMetadataFormsNotContainedInProductionServer().isEmpty()
+        && findAllProductionFormsNotContainedInMetadataServer().isEmpty();
+  }
 }
