@@ -246,7 +246,8 @@ public class HarmonizationUtils {
                 || !StringUtils.equals(ele1DatatypeClassname, ele2DatatypeClassname));
 
         String ele1DatatypeConfig =
-            org.springframework.util.StringUtils.trimWhitespace(ele1.getDatatypeConfig());
+            org.springframework.util.StringUtils.trimWhitespace(
+                StringUtils.defaultString(ele1.getDatatypeConfig()));
         String ele2DatatypeConfig =
             org.springframework.util.StringUtils.trimWhitespace(ele2.getDatatypeConfig());
         boolean differentDatatypeConfig =
@@ -257,7 +258,8 @@ public class HarmonizationUtils {
                 || !StringUtils.equals(ele1DatatypeConfig, ele2DatatypeConfig));
 
         String ele1HandlerConfig =
-            org.springframework.util.StringUtils.trimWhitespace(ele1.getHandlerConfig());
+            org.springframework.util.StringUtils.trimWhitespace(
+                StringUtils.defaultString(ele1.getHandlerConfig()));
         String ele2HandlerConfig =
             org.springframework.util.StringUtils.trimWhitespace(ele2.getHandlerConfig());
         boolean differentHandlerConfig =
@@ -269,7 +271,7 @@ public class HarmonizationUtils {
 
         String ele1PreferredHandlerClassname =
             org.springframework.util.StringUtils.trimWhitespace(
-                ele1.getPreferredHandlerClassname());
+                StringUtils.defaultString(ele1.getPreferredHandlerClassname()));
         String ele2PreferredHandlerClassname =
             org.springframework.util.StringUtils.trimWhitespace(
                 ele2.getPreferredHandlerClassname());
@@ -315,10 +317,13 @@ public class HarmonizationUtils {
         && type1.getName().equalsIgnoreCase(type2.getName())
         && type1.getUuid().equals(type2.getUuid())
         && StringUtils.equals(type1.getDatatypeClassname(), type2.getDatatypeClassname())
-        && StringUtils.equalsIgnoreCase(type1.getDatatypeConfig(), type2.getDatatypeConfig())
-        && StringUtils.equalsIgnoreCase(type1.getHandlerConfig(), type2.getHandlerConfig())
+        && StringUtils.equalsIgnoreCase(
+            type1.getDatatypeConfig(), StringUtils.defaultString(type2.getDatatypeConfig()))
+        && StringUtils.equalsIgnoreCase(
+            type1.getHandlerConfig(), StringUtils.defaultString(type2.getHandlerConfig()))
         && StringUtils.equals(
-            type1.getPreferredHandlerClassname(), type2.getPreferredHandlerClassname())
+            type1.getPreferredHandlerClassname(),
+            StringUtils.defaultString(type2.getPreferredHandlerClassname()))
         && Integer.compare(type1.getMinOccurs(), type2.getMinOccurs()) == 0
         && Integer.compare(type1.getMaxOccurs(), type2.getMaxOccurs()) == 0);
   }
