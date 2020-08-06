@@ -79,4 +79,6 @@ public interface HarmonizationEncounterTypeService extends OpenmrsService {
 
   public void deleteNewEncounterTypesFromPDS(List<EncounterTypeDTO> encounterTypes)
       throws APIException;
+
+  void updateGPEncounterTypeToVisitTypeMapping();
 }

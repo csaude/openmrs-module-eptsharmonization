@@ -22,7 +22,6 @@ import org.openmrs.Visit;
 import org.openmrs.VisitType;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.eptsharmonization.HarmonizationUtils;
@@ -36,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 /** It is a default implementation of {@link HarmonizationVisitTypeService}. */
 @Transactional
@@ -51,8 +49,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
 
   private VisitService visitService;
 
-  private AdministrationService adminService;
-
   @Autowired
   public void setVisitService(VisitService visitService) {
     this.visitService = visitService;
@@ -66,11 +62,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
   @Autowired
   public void setHarmonizationVisitTypeDAO(HarmonizationVisitTypeDAO harmonizationVisitTypeDAO) {
     this.harmonizationVisitTypeDAO = harmonizationVisitTypeDAO;
-  }
-
-  @Autowired
-  public void setAdminService(AdministrationService adminService) {
-    this.adminService = adminService;
   }
 
   @Override
@@ -280,9 +271,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
         // Get a fresh copy from the database.
         pdsVisitType = visitService.getVisitType(pdsVisitType.getVisitTypeId());
         overwriteVisitType(pdsVisitType, mdsVisitType, relatedVisits);
-
-        // Update global properties mapping if any.
-        updateGPWithNewVisitTypeId(pdsVisitType.getVisitTypeId(), mdsVisitType.getVisitTypeId());
       }
 
     } catch (Exception e) {
@@ -318,7 +306,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
           harmonizationVisitTypeDAO.updateVisitType(
               pdsVisitType, nextId, UUID.randomUUID().toString());
 
-          updateGPWithNewVisitTypeId(pdsVisitType.getVisitTypeId(), nextId);
           for (Visit visit : relatedVisits) {
             this.harmonizationVisitTypeDAO.updateVisit(visit, nextId);
           }
@@ -411,7 +398,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
           if (foundMDSVisitTypeByID == null) {
             this.harmonizationVisitTypeDAO.insertVisitType(mdsVisitType);
           }
-          this.updateGPWithNewVisitTypeId(pdsVisitType.getVisitTypeId(), mdsVisitType.getId());
         }
       }
     } catch (Exception e) {
@@ -452,9 +438,6 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
     List<Visit> relatedVisits = harmonizationVisitTypeDAO.findVisitsByVisitType(toBeMoved);
     Integer nextId = harmonizationVisitTypeDAO.getNextVisitTypeId();
     updateToGivenId(toBeMoved, nextId, relatedVisits);
-
-    // Update the global property mapping if any
-    updateGPWithNewVisitTypeId(toBeMoved.getVisitTypeId(), nextId);
   }
 
   private void saveNewVisitTypeFromDTO(VisitTypeDTO visitTypeDTO) throws APIException {
@@ -476,25 +459,8 @@ public class HarmonizationVisitTypeServiceImpl extends BaseOpenmrsService
           this.harmonizationVisitTypeDAO.findVisitsByVisitType(visitTypeFromDTO);
       Integer nextId = this.harmonizationVisitTypeDAO.getNextVisitTypeId();
       this.updateToGivenId(found, nextId, relatedVisits);
-      updateGPWithNewVisitTypeId(found.getVisitTypeId(), nextId);
     }
     this.harmonizationVisitTypeDAO.insertVisitType(visitTypeFromDTO);
-  }
-
-  private void updateGPWithNewVisitTypeId(Integer oldVisitTypeId, Integer newVisitTypeId) {
-    final String V_TO_E_GP = "visits.encounterTypeToVisitTypeMapping";
-    String gpValue = adminService.getGlobalProperty(V_TO_E_GP);
-    if (!StringUtils.isEmpty(gpValue)) {
-      String toReplaceMiddle = ":" + oldVisitTypeId + "\\s*,";
-      String replacement = ":" + newVisitTypeId + ",";
-      gpValue = gpValue.replaceAll(toReplaceMiddle, replacement);
-
-      String toReplaceEnd = ":" + oldVisitTypeId + "\\s*$";
-      replacement = ":" + newVisitTypeId;
-      gpValue = gpValue.replaceAll(toReplaceEnd, replacement);
-
-      adminService.setGlobalProperty(V_TO_E_GP, gpValue);
-    }
   }
 
   @Override

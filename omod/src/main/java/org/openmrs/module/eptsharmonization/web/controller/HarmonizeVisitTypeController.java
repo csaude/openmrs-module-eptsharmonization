@@ -22,6 +22,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.VisitService;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.eptsharmonization.api.DTOUtils;
+import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationVisitTypeService;
 import org.openmrs.module.eptsharmonization.api.model.VisitTypeDTO;
 import org.openmrs.module.eptsharmonization.web.bean.VisitTypeBean;
@@ -63,6 +64,7 @@ public class HarmonizeVisitTypeController {
   private static String defaultLocation;
 
   private HarmonizationVisitTypeService harmonizationVisitTypeService;
+  private HarmonizationEncounterTypeService harmonizationEncounterTypeService;
   private MessageSourceService messageSourceService;
   private VisitService visitService;
   private AdministrationService adminService;
@@ -74,6 +76,12 @@ public class HarmonizeVisitTypeController {
   public void setHarmonizationVisitTypeService(
       HarmonizationVisitTypeService harmonizationVisitTypeService) {
     this.harmonizationVisitTypeService = harmonizationVisitTypeService;
+  }
+
+  @Autowired
+  public void setHarmonizationEncounterTypeService(
+      HarmonizationEncounterTypeService harmonizationEncounterTypeService) {
+    this.harmonizationEncounterTypeService = harmonizationEncounterTypeService;
   }
 
   @Autowired
@@ -305,6 +313,11 @@ public class HarmonizeVisitTypeController {
         && sameIdAndUuidDifferentNames.isEmpty()
         && (manualVisitTypeMappings == null || manualVisitTypeMappings.isEmpty())) {
       modelAndView.addObject("harmonizationCompleted", true);
+    }
+
+    if (this.harmonizationEncounterTypeService.isAllEncounterTypeMedatadaHarmonized()
+        || this.harmonizationVisitTypeService.isAllMetadataHarmonized()) {
+      this.harmonizationEncounterTypeService.updateGPEncounterTypeToVisitTypeMapping();
     }
 
     return modelAndView;

@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.EncounterType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
+import org.openmrs.module.eptsharmonization.api.HarmonizationVisitTypeService;
 import org.openmrs.module.eptsharmonization.api.exception.UUIDDuplicationException;
 import org.openmrs.module.eptsharmonization.api.model.EncounterTypeDTO;
 import org.openmrs.module.eptsharmonization.web.EptsHarmonizationConstants;
@@ -83,12 +84,20 @@ public class HarmonizeEncounterTypeController {
 
   private HarmonizationEncounterTypeService harmonizationEncounterTypeService;
 
+  private HarmonizationVisitTypeService harmonizationVisitTypeService;
+
   private HarmonizeEncounterTypeDelegate delegate;
 
   @Autowired
   public void setHarmonizationEncounterTypeService(
       HarmonizationEncounterTypeService harmonizationEncounterTypeService) {
     this.harmonizationEncounterTypeService = harmonizationEncounterTypeService;
+  }
+
+  @Autowired
+  public void setHarmonizationVisitTypeService(
+      HarmonizationVisitTypeService harmonizationVisitTypeService) {
+    this.harmonizationVisitTypeService = harmonizationVisitTypeService;
   }
 
   @Autowired
@@ -152,6 +161,11 @@ public class HarmonizeEncounterTypeController {
     model.addAttribute("productionItemsToExport", productionItemsToExport);
     model.addAttribute("differentIDsAndEqualUUID", differentIDsAndEqualUUID);
     model.addAttribute("differentNameAndSameUUIDAndID", differentNameAndSameUUIDAndID);
+
+    if (this.harmonizationEncounterTypeService.isAllEncounterTypeMedatadaHarmonized()
+        || this.harmonizationVisitTypeService.isAllMetadataHarmonized()) {
+      this.harmonizationEncounterTypeService.updateGPEncounterTypeToVisitTypeMapping();
+    }
 
     return modelAndView;
   }
