@@ -142,23 +142,31 @@ td {
 	<b class="boxHeader"><spring:message code="eptsharmonization.locationattributetype.harmonize.sameIdAndUuidDifferentNames" /></b>
 		<table class="box" cellspacing="0" border="0" style="width: 100%">
 			<tr>
+				<th><spring:message code="general.name" /></th>
+				<th><spring:message code="general.description" /></th>
+				<th><spring:message code="eptsharmonization.locationattributetype.harmonize.datatypeconfig.pdserver" /></th>
+				<th><spring:message code="eptsharmonization.locationattributetype.harmonize.datatypeconfig.mdserver" /></th>
+				<th><spring:message code="eptsharmonization.locationattributetype.harmonize.handlerconfig.pdserver" /></th>
+				<th><spring:message code="eptsharmonization.locationattributetype.harmonize.handlerconfig.mdserver" /></th>
+				<th><spring:message code="eptsharmonization.locationattributetype.harmonize.preferredhandler.pdserver" /></th>
+				<th><spring:message code="eptsharmonization.locationattributetype.harmonize.preferredhandler.mdserver" /></th>
 				<th><spring:message code="general.id" /></th>
 				<th><spring:message code="general.uuid" /></th>
-				<th>PDS <spring:message code="general.name" /></th>
-				<th>PDS <spring:message code="general.description" /></th>
-				<th>MDS <spring:message code="general.name" /></th>
-				<th>MDS <spring:message code="general.description" /></th>
 				<th><spring:message code="eptsharmonization.locationattributetype.harmonize.affectedLocationAttributes" /></th>
 				<th colspan="2"><spring:message code="eptsharmonization.locationattributetype.harmonize.actionForSimilarUuid" /></th>
 			</tr>
 			<c:forEach var="entry" items="${sameIdAndUuidDifferentNames}">
 				<tr>
-					<td valign="top" align="center">${entry.key[0].id}</td>
-					<td valign="top" align="center">${entry.key[0].uuid}</td>
 					<td valign="top">${entry.key[0].locationAttributeType.name}</td>
 					<td valign="top">${entry.key[0].locationAttributeType.description}</td>
-					<td valign="top">${entry.key[1].locationAttributeType.name}</td>
-					<td valign="top">${entry.key[1].locationAttributeType.description}</td>
+					<td valign="top">${entry.key[0].locationAttributeType.datatypeConfig}</td>
+					<td valign="top">${entry.key[1].locationAttributeType.datatypeConfig}</td>
+					<td valign="top">${entry.key[0].locationAttributeType.handlerConfig}</td>
+					<td valign="top">${entry.key[1].locationAttributeType.handlerConfig}</td>
+					<td valign="top">${entry.key[0].locationAttributeType.preferredHandlerClassname}</td>
+					<td valign="top">${entry.key[1].locationAttributeType.preferredHandlerClassname}</td>
+					<td valign="top" align="center">${entry.key[0].id}</td>
+					<td valign="top" align="center">${entry.key[0].uuid}</td>
 					<td valign="top" align="center">${entry.value}</td>
 					<td><input type="radio" value="true" name="${entry.key[0].uuid}"/><spring:message code="general.yes"/></td>
 					<td><input type="radio" value="false" name="${entry.key[0].uuid}"/><spring:message code="general.no"/></td>
