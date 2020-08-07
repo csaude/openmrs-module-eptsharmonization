@@ -443,13 +443,31 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.findFormFilterByForm(pdsForm);
 
     for (Encounter encounter : relatedEncounters) {
-      this.harmonizationFormServiceDAO.updateEncounter(encounter, updated);
+      List<Encounter> mdsRelatedEncounters =
+          this.harmonizationFormServiceDAO.findEncountersByForm(updated);
+      if (mdsRelatedEncounters.isEmpty()) {
+        this.harmonizationFormServiceDAO.updateEncounter(encounter, updated);
+      } else {
+        this.harmonizationFormServiceDAO.deleteRelatedEncounter(pdsForm);
+      }
     }
     for (FormField formField : relatedFormFields) {
-      this.harmonizationFormServiceDAO.updateFormField(formField, updated);
+      List<FormField> mdsRelatedFormFields =
+          this.harmonizationFormServiceDAO.findFormFieldsByForm(updated);
+      if (mdsRelatedFormFields.isEmpty()) {
+        this.harmonizationFormServiceDAO.updateFormField(formField, updated);
+      } else {
+        this.harmonizationFormServiceDAO.deleteRelatedFormField(pdsForm);
+      }
     }
     for (FormResource formResource : relatedFormResources) {
-      this.harmonizationFormServiceDAO.updateFormResource(formResource, updated);
+      List<FormResource> mdsRelatedFormResources =
+          this.harmonizationFormServiceDAO.findFormResourcesByForm(updated);
+      if (mdsRelatedFormResources.isEmpty()) {
+        this.harmonizationFormServiceDAO.updateFormResource(formResource, updated);
+      } else {
+        this.harmonizationFormServiceDAO.deleteRelatedFormResource(pdsForm);
+      }
     }
     for (FormFilter formFilter : relatedFormFilter) {
       List<FormFilter> mdsFormFilter =
