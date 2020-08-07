@@ -452,11 +452,22 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       this.harmonizationFormServiceDAO.updateFormResource(formResource, updated);
     }
     for (FormFilter formFilter : relatedFormFilter) {
-      this.harmonizationFormServiceDAO.updateFormFilter(formFilter, updated);
+      List<FormFilter> mdsFormFilter =
+          this.harmonizationFormServiceDAO.findFormFilterByForm(updated);
+      if (mdsFormFilter.isEmpty()) {
+        this.harmonizationFormServiceDAO.updateFormFilter(formFilter, updated);
+      } else {
+        this.harmonizationFormServiceDAO.deleteRelatedFormFilter(pdsForm);
+      }
     }
 
     if (relatedHtmlForm != null) {
-      this.harmonizationFormServiceDAO.updatePDSHtmlForm(relatedHtmlForm, updated);
+      HtmlForm mdsRelatedHtmlForm = this.harmonizationFormServiceDAO.findPDSHtmlFormByForm(updated);
+      if (mdsRelatedHtmlForm == null) {
+        this.harmonizationFormServiceDAO.updatePDSHtmlForm(relatedHtmlForm, updated);
+      } else {
+        this.harmonizationFormServiceDAO.deleteRelatedPDSHtmlForm(pdsForm);
+      }
     }
   }
 
