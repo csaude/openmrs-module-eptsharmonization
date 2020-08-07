@@ -137,8 +137,8 @@ public class LocationTagHarmonizationCSVLog {
 
         for (String key : data.keySet()) {
           List<LocationTagDTO> dtos = data.get(key);
-          LocationTag mdServerET = dtos.get(0).getLocationTag();
-          LocationTag pdServerET = dtos.get(1).getLocationTag();
+          LocationTag pdServerET = dtos.get(0).getLocationTag();
+          LocationTag mdServerET = dtos.get(1).getLocationTag();
           try {
             printer.print(
                 String.format(
