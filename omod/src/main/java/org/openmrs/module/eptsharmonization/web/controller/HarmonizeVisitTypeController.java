@@ -177,6 +177,8 @@ public class HarmonizeVisitTypeController {
         harmonizationVisitTypeService
             .findAllMetadataVisitTypesNotSharingUuidWithAnyFromProduction();
 
+    VisitTypeHarmonizationCSVLog.Builder logBuilder = getLogBuilder();
+
     if (missingInPDS.size() > 0) {
       LOGGER.debug("Adding new %s visit types from metadata server", missingInPDS.size());
 
@@ -185,10 +187,9 @@ public class HarmonizeVisitTypeController {
           messageSourceService.getMessage(
               "eptsharmonization.visittype.harmonize.newVisitTypeAdded");
       HARMONIZED_CACHED_SUMMARY.add(message + " " + missingInPDS.size());
-    }
 
-    VisitTypeHarmonizationCSVLog.Builder logBuilder = getLogBuilder();
-    logBuilder.appendLogForNewHarmonizedFromMDSVisitTypes(missingInPDS);
+      logBuilder.appendLogForNewHarmonizedFromMDSVisitTypes(missingInPDS);
+    }
 
     List<VisitTypeDTO> notInMDSNotInUse =
         harmonizationVisitTypeService
