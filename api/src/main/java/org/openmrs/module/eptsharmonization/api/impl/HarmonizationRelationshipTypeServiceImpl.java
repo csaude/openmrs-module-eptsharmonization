@@ -195,7 +195,8 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       RelationshipTypeDTO mdsRelationship = list.get(1);
       RelationshipType relationshipType =
           personService.getRelationshipType(pdsRelationship.getRelationshipType().getId());
-      relationshipType.setName(mdsRelationship.getRelationshipType().getName());
+      relationshipType.setaIsToB(mdsRelationship.getRelationshipType().getaIsToB());
+      relationshipType.setbIsToA(mdsRelationship.getRelationshipType().getbIsToA());
       relationshipType.setDescription(mdsRelationship.getRelationshipType().getDescription());
       personService.saveRelationshipType(relationshipType);
     }
