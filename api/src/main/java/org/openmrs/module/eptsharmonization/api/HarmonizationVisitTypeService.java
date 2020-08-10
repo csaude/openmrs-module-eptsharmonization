@@ -66,9 +66,6 @@ public interface HarmonizationVisitTypeService extends HarmonizationService {
   void updateVisitTypesFromProductionWithSameUuidWithInformationFromMetadata(
       Map<String, List<VisitTypeDTO>> visitTypes) throws APIException;
 
-  void replacePDSVisitTypesWithSameUuidWithThoseFromMDS(
-      Map<String, List<VisitTypeDTO>> visitTypesDTO) throws APIException;
-
   void deleteVisitTypesFromProduction(List<VisitTypeDTO> visitTypeDTOS) throws APIException;
 
   void saveManualVisitTypeMappings(Map<VisitType, VisitType> manualVisitTypeMappings)
