@@ -43,7 +43,8 @@ public class HarmonizationVisitTypeServiceImplTest extends BaseHarmonizationCont
 
   @Before
   public void setup() throws Exception {
-    // Purging visits and visit types to ensure each test starts with a clean slate, otherwise the
+    // Purging visits and visit types to ensure each test starts with a clean slate,
+    // otherwise the
     // save tests wreck havoc.
     DatabaseUpdater.getConnection().prepareStatement("DELETE from visit").execute();
     DatabaseUpdater.getConnection().prepareStatement("DELETE from visit_type").execute();
@@ -233,15 +234,5 @@ public class HarmonizationVisitTypeServiceImplTest extends BaseHarmonizationCont
     harmonizationVisitTypeService
         .updateVisitTypesFromProductionWithSameUuidWithInformationFromMetadata(
             sameUuidDifferentIds);
-  }
-
-  @Test
-  public void replacePDSVisitTypesWithSameUuidWithThoseFromMDS_shouldWork() {
-    Map<String, List<VisitTypeDTO>> sameUuidDifferentIds =
-        harmonizationVisitTypeService.findAllVisitTypesWithDifferentIDAndSameUUID();
-
-    // Expect no exception
-    harmonizationVisitTypeService.replacePDSVisitTypesWithSameUuidWithThoseFromMDS(
-        sameUuidDifferentIds);
   }
 }
