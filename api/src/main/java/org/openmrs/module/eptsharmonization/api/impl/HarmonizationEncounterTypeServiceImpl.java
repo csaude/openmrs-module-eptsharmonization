@@ -534,7 +534,7 @@ public class HarmonizationEncounterTypeServiceImpl extends BaseOpenmrsService
 
       boolean foundPair = false;
       for (String pdsPair : pdsMappings) {
-        if (mdsPair.equals(pdsPair)) {
+        if (mdsPair.trim().equals(pdsPair.trim())) {
           foundPair = true;
           break;
         }
