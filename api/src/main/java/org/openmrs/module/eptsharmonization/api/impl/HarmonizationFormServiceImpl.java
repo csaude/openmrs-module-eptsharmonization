@@ -443,14 +443,9 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.findFormFilterByForm(pdsForm);
 
     for (Encounter encounter : relatedEncounters) {
-      List<Encounter> mdsRelatedEncounters =
-          this.harmonizationFormServiceDAO.findEncountersByForm(updated);
-      if (mdsRelatedEncounters.isEmpty()) {
-        this.harmonizationFormServiceDAO.updateEncounter(encounter, updated);
-      } else {
-        this.harmonizationFormServiceDAO.deleteRelatedEncounter(pdsForm);
-      }
+      this.harmonizationFormServiceDAO.updateEncounter(encounter, updated);
     }
+
     for (FormField formField : relatedFormFields) {
       List<FormField> mdsRelatedFormFields =
           this.harmonizationFormServiceDAO.findFormFieldsByForm(updated);
@@ -460,15 +455,11 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
         this.harmonizationFormServiceDAO.deleteRelatedFormField(pdsForm);
       }
     }
+
     for (FormResource formResource : relatedFormResources) {
-      List<FormResource> mdsRelatedFormResources =
-          this.harmonizationFormServiceDAO.findFormResourcesByForm(updated);
-      if (mdsRelatedFormResources.isEmpty()) {
-        this.harmonizationFormServiceDAO.updateFormResource(formResource, updated);
-      } else {
-        this.harmonizationFormServiceDAO.deleteRelatedFormResource(pdsForm);
-      }
+      this.harmonizationFormServiceDAO.updateFormResource(formResource, updated);
     }
+
     for (FormFilter formFilter : relatedFormFilter) {
       List<FormFilter> mdsFormFilter =
           this.harmonizationFormServiceDAO.findFormFilterByForm(updated);
