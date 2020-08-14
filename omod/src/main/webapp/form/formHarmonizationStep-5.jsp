@@ -9,18 +9,23 @@
 					style="width: 100%">
 
 					<tr>
-						<th colspan="3"><spring:message
+						<th colspan="4"><spring:message
 								code="eptsharmonization.form.htmlfom.mdsDetails" /></th>
-						<th colspan="3"><spring:message
+						<th colspan="4"><spring:message
 								code="eptsharmonization.form.htmlfom.pdsDetails" /></th>
 					</tr>
+					
 					<tr>
 						<th><spring:message code="general.id" /></th>
+						<th><spring:message
+								code="eptsharmonization.form.htmlform.formID" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.htmlform.formName" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.htmlform.mdsHtmlUUid" /></th>
 						<th><spring:message code="general.id" /></th>
+						<th><spring:message
+								code="eptsharmonization.form.htmlform.formID" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.htmlform.formName" /></th>
 						<th><spring:message
@@ -30,9 +35,11 @@
 						items="${htmlFormsWithDifferentFormAndEqualUuid.items}">
 						<tr>
 							<td valign="top" align="center">${item.value[0].id}</td>
+							<td valign="top">${item.value[0].form.id}</td>
 							<td valign="top">${item.value[0].form.name}</td>
 							<td valign="top">${item.value[0].uuid}</td>
 							<td valign="top" align="center">${item.value[1].id}</td>
+								<td valign="top">${item.value[1].form.id}</td>
 							<td valign="top">${item.value[1].form.name}</td>
 							<td valign="top">${item.value[1].uuid}</td>
 						</tr>

@@ -66,20 +66,14 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
   @Transactional(readOnly = true)
   public List<FormDTO> findAllMetadataFormsNotContainedInProductionServer() throws APIException {
     this.harmonizationDAO.evictCache();
-    List<Form> mdsForms = harmonizationFormServiceDAO.findAllMetadataServerForms();
-    List<Form> pdsForms = harmonizationFormServiceDAO.findAllProductionServerForms();
-    mdsForms.removeAll(pdsForms);
-    return DTOUtils.fromForms(mdsForms);
+    return DTOUtils.fromForms(this.harmonizationFormServiceDAO.findOnlyMetadataServerForms());
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<FormDTO> findAllProductionFormsNotContainedInMetadataServer() throws APIException {
     this.harmonizationDAO.evictCache();
-    List<Form> pdsForms = harmonizationFormServiceDAO.findAllProductionServerForms();
-    List<Form> mdsForms = harmonizationFormServiceDAO.findAllMetadataServerForms();
-    pdsForms.removeAll(mdsForms);
-    return DTOUtils.fromForms(pdsForms);
+    return DTOUtils.fromForms(this.harmonizationFormServiceDAO.findOnlyProductionServerForms());
   }
 
   @Override

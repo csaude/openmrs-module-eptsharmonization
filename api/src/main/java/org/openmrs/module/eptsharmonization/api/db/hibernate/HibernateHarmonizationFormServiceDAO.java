@@ -68,10 +68,30 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
     return this.findMDSForms();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public List<Form> findAllProductionServerForms() throws DAOException {
+  public List<Form> findOnlyMetadataServerForms() throws DAOException {
     this.harmonizationServiceDAO.evictCache();
-    return this.setRelatedMetadataFromTableForm(this.formDAO.getAllForms(true));
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                "SELECT * FROM _form where  not EXISTS (select * from form where form.uuid = _form.uuid)")
+            .addEntity(Form.class);
+    return setRelatedMetadataFromTableMDSForm(query.list());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<Form> findOnlyProductionServerForms() throws DAOException {
+    this.harmonizationServiceDAO.evictCache();
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                "SELECT * FROM form where  not EXISTS (select * from _form where form.uuid = _form.uuid )")
+            .addEntity(Form.class);
+    return setRelatedMetadataFromTableForm(query.list());
   }
 
   @SuppressWarnings("unchecked")
@@ -381,10 +401,9 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery(
-                "SELECT id, form_id, xml_data, uuid, retired, creator, date_created FROM _htmlformentry_html_form where EXISTS (select * from htmlformentry_html_form  "
-                    + " where htmlformentry_html_form.form_id <> _htmlformentry_html_form.form_id and    "
-                    + " htmlformentry_html_form.uuid = _htmlformentry_html_form.uuid) and _htmlformentry_html_form.form_id "
-                    + " in (select htmlformentry_html_form.form_id from htmlformentry_html_form where htmlformentry_html_form.form_id = _htmlformentry_html_form.form_id )                   ");
+                " SELECT id, form_id, xml_data, uuid, retired, creator, date_created FROM _htmlformentry_html_form where EXISTS (select * from htmlformentry_html_form    "
+                    + "				  where _htmlformentry_html_form.form_id <> htmlformentry_html_form.form_id and                                                   "
+                    + "				  _htmlformentry_html_form.uuid = htmlformentry_html_form.uuid)                                                                   ");
 
     return this.convertToHtmlFormObjects(query.list());
   }

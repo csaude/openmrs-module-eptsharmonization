@@ -24,7 +24,9 @@ public interface HarmonizationFormServiceDAO {
 
   public List<Form> findAllMetadataServerForms() throws DAOException;
 
-  public List<Form> findAllProductionServerForms() throws DAOException;
+  public List<Form> findOnlyMetadataServerForms() throws DAOException;
+
+  public List<Form> findOnlyProductionServerForms() throws DAOException;
 
   public List<Form> findPDSFormsNotExistsInMDServer() throws DAOException;
 
