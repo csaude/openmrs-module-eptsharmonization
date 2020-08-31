@@ -91,6 +91,7 @@ public class EptsHarmonizationFormLoader {
       if (row.getCell(0) == null) {
         break;
       }
+
       List<FormData> rowList = new ArrayList<>();
 
       rowList.add(
