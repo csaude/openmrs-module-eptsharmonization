@@ -41,5 +41,7 @@
     <_encounter_type creator="1" date_created="2005-02-24"  description="Ficha de requisição da amostra de carga viral" encounter_type_id="51" name="FSR - Carga Viral"  retired="false"  uuid="b5b7d21f-efd1-407e-81ce-ba9d93c524f8"/>
     <_encounter_type creator="1" date_created="2019-07-09"  description="Registo de levantamento de ARV no Master Card" encounter_type_id="52" name="Levantamento de ARV Master Card"  retired="false"  uuid="cce7b2ec-4fc0-4f9e-806d-b1c4ee9577db"/>
     <_encounter_type creator="1" date_created="2019-07-31"  description="Ficha resumo no master card" encounter_type_id="53" name="Master Card - Ficha Resumo"  retired="false"  uuid="e422ecf9-75dd-4367-b21e-54bccabc4763"/>
+    <_encounter_type creator="1" date_created="2019-03-12"  description="This is for the purpose of updating patient\'s demographic via mUzim" encounter_type_id="54" name="MUZIMA: DEMOGRAPHIC UPDATE"  retired="false"  uuid="6a119786-f99e-4bff-8c2f-1d96fe2868e9"/>
+    <_encounter_type creator="1" date_created="2019-03-12"  description="This is for Patient Tracing and Triangulation purpose" encounter_type_id="55" name="MUZIMA: TRIANGULATION"  retired="false"  uuid="4280a8ca-dbae-4689-b523-b393ee203c19"/>
     
 </dataset>

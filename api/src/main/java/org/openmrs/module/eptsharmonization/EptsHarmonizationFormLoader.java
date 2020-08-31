@@ -88,9 +88,7 @@ public class EptsHarmonizationFormLoader {
     }
     while (rows.hasNext()) {
       Row row = (Row) rows.next();
-      if (row.getCell(0) == null) {
-        break;
-      }
+
       List<FormData> rowList = new ArrayList<>();
 
       rowList.add(
@@ -145,9 +143,6 @@ public class EptsHarmonizationFormLoader {
     }
     while (rows.hasNext()) {
       Row row = (Row) rows.next();
-      if (row.getCell(0) == null) {
-        break;
-      }
 
       List<FormData> rowList = new ArrayList<>();
       rowList.add(
