@@ -5,7 +5,7 @@
 	<c:if test="${ not empty newHtmlFormFromMDS}">
 		<form method="post" action="processHarmonizationStep6.form">
 			<br /> <b class="boxHeader"><spring:message
-					code="eptsharmonization.form.htmlform.differrentForm.equal.uuid" /></b>
+					code="eptsharmonization.form.htmlform.new.fromMDS" /></b>
 			<fieldset>
 				<table cellspacing="0" border="0" style="width: 100%">
 

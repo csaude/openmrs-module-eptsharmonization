@@ -80,4 +80,8 @@ public class HtmlForm implements Serializable {
   public void setForm(Form form) {
     this.form = form;
   }
+
+  public void setXmlData(String xmlData) {
+    this.xmlData = xmlData;
+  }
 }

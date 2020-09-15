@@ -182,7 +182,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
       prepareStatement.close();
       connection.close();
     } catch (SQLException e) {
-      throw new RuntimeException(e.getCause());
+      throw new RuntimeException(e);
     }
     return htmlForm;
   }
@@ -217,7 +217,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
       prepareStatement.close();
       connection.close();
     } catch (SQLException e) {
-      throw new RuntimeException(e.getCause());
+      throw new RuntimeException(e);
     }
     return htmlForm;
   }
@@ -423,7 +423,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
       prepareStatement.close();
       connection.close();
     } catch (SQLException e) {
-      throw new RuntimeException(e.getCause());
+      throw new RuntimeException(e);
     }
     return result;
   }
@@ -437,7 +437,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
             .createSQLQuery(
                 "SELECT id, form_id, xml_data, uuid, retired, creator, date_created FROM _htmlformentry_html_form     "
                     + " where  not EXISTS (select * from htmlformentry_html_form                      "
-                    + " where htmlformentry_html_form.form_id = _htmlformentry_html_form.form_id and htmlformentry_html_form.uuid = _htmlformentry_html_form.uuid) and "
+                    + " where htmlformentry_html_form.uuid = _htmlformentry_html_form.uuid) and "
                     + "EXISTS ( select * FROM form where form.form_id = _htmlformentry_html_form.form_id )  ");
 
     return this.convertToHtmlFormObjects(query.list());
@@ -492,13 +492,30 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
     if (form.getBuild() != null) {
       query.setInteger("build", form.getBuild());
     }
+
     query.executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
 
     HtmlForm mdsHtmlForm = this.getMDSHtmlForm(form);
     if (mdsHtmlForm != null) {
-      HtmlForm pdsHtmlForm = this.findPDSHtmlFormByForm(form);
 
+      HtmlForm pdsHtmlFormByMDSHtmlFormUuid = this.findPDSHtmlFormByUuid(mdsHtmlForm.getUuid());
+      if (pdsHtmlFormByMDSHtmlFormUuid != null) {
+
+        Query query2 =
+            sessionFactory
+                .getCurrentSession()
+                .createSQLQuery(
+                    "update htmlformentry_html_form set form_id =:formId, xml_data=:xmlData  where id =:id ");
+        query2.setInteger("formId", form.getId());
+        query2.setInteger("id", pdsHtmlFormByMDSHtmlFormUuid.getId());
+        query2.setString("xmlData", "N'" + mdsHtmlForm.getXmlData() + "'");
+        query2.executeUpdate();
+
+        return;
+      }
+
+      HtmlForm pdsHtmlForm = this.findPDSHtmlFormByForm(form);
       if (pdsHtmlForm == null) {
         this.createHtmlFormPDS(mdsHtmlForm);
       } else {
@@ -528,7 +545,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
       prepareStatement.close();
       connection.close();
     } catch (SQLException e) {
-      throw new RuntimeException(e.getCause());
+      throw new RuntimeException(e);
     }
   }
 
