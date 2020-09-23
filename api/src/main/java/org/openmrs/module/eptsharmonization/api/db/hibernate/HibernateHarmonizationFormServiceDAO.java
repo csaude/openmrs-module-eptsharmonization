@@ -509,7 +509,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
                     "update htmlformentry_html_form set form_id =:formId, xml_data=:xmlData  where id =:id ");
         query2.setInteger("formId", form.getId());
         query2.setInteger("id", pdsHtmlFormByMDSHtmlFormUuid.getId());
-        query2.setString("xmlData", "N'" + mdsHtmlForm.getXmlData() + "'");
+        query2.setString("xmlData", mdsHtmlForm.getXmlData());
         query2.executeUpdate();
 
         return;

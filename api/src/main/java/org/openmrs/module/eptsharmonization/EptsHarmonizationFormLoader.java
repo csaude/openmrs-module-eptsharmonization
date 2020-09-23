@@ -1,7 +1,9 @@
 package org.openmrs.module.eptsharmonization;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -76,6 +78,7 @@ public class EptsHarmonizationFormLoader {
               + ")");
       Context.getAdministrationService().executeSQL(sb.toString(), false);
     }
+    updateHtmlFormEntryWithLargXmlDataContent();
   }
 
   private static List<List<FormData>> loadFormEntries() throws IOException {
@@ -203,10 +206,25 @@ public class EptsHarmonizationFormLoader {
 
     InputStream excelFileToRead =
         OpenmrsClassLoader.getInstance()
-            .getResourceAsStream("all-htmlformentry_html_form_13072020.xls");
+            .getResourceAsStream("all-htmlformentry_html_form_13072020.xlsx");
     XSSFWorkbook xssfWBook = new XSSFWorkbook(excelFileToRead);
 
     return xssfWBook.getSheetAt(0);
+  }
+
+  private static void updateHtmlFormEntryWithLargXmlDataContent() {
+    InputStream inputStream =
+        OpenmrsClassLoader.getInstance()
+            .getResourceAsStream("ficha_clinica_and_ficha_resumo_xml_data.sql");
+
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        Context.getAdministrationService().executeSQL(line, false);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static List<List<FormData>> filterNonNullValues(List<List<FormData>> formData) {
@@ -329,7 +347,7 @@ public class EptsHarmonizationFormLoader {
       }
       if (FormDataTypes.XML.equals(this.getDataType())) {
 
-        return "N'" + this.value + "'";
+        return "'" + this.value + "'";
       }
 
       if (FormDataTypes.DATE.equals(this.getDataType())) {
