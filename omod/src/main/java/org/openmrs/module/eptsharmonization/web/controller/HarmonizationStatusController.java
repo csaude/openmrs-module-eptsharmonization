@@ -1,7 +1,5 @@
 package org.openmrs.module.eptsharmonization.web.controller;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.openmrs.module.eptsharmonization.api.HarmonizationConceptService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationEncounterTypeService;
 import org.openmrs.module.eptsharmonization.api.HarmonizationFormService;
@@ -117,47 +115,37 @@ public class HarmonizationStatusController {
   @RequestMapping(value = HARMONIZATION_STATUS_LIST, method = RequestMethod.GET)
   public ModelAndView getHarmonizationStatusList() {
 
-    Map<String, Boolean> metadataTypes = new LinkedHashMap<>();
-
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.visitType",
-        this.harmonizationVisitTypeService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.locationTag",
-        this.harmonizationLocationTagService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.locationAttributeType",
-        this.harmonizationLocationAttributeTypeService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.patientIdentifierType",
-        this.harmonizationPatientIdentifierTypeService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.program",
-        this.harmonizationProgramService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.programWorkflow",
-        this.harmonizationProgramWorkflowService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.programWorkflowState",
-        this.harmonizationProgramWorkflowStateService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.encounterType",
-        this.harmonizationEncounterTypeService.isAllEncounterTypeMedatadaHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.form",
-        this.harmonizationFormService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.personAttributeType",
-        this.harmonizationPersonAttributeTypeService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.relationshipType",
-        this.harmonizationRelationshipTypeService.isAllMetadataHarmonized());
-    metadataTypes.put(
-        "eptsharmonization.harmonizationstatus.concept",
-        this.harmonizationConceptService.isAllMetadataHarmonized());
-
     ModelAndView modelAndView = new ModelAndView();
-    modelAndView.addObject("metadataTypes", metadataTypes);
+    modelAndView.addObject(
+        "visitTypeStatus", this.harmonizationVisitTypeService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "locationTagStatus", this.harmonizationLocationTagService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "locationAttributeTypeStatus",
+        this.harmonizationLocationAttributeTypeService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "patientIdentifierTypeStatus",
+        this.harmonizationPatientIdentifierTypeService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "programStatus", this.harmonizationProgramService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "programWorkflowStatus",
+        this.harmonizationProgramWorkflowService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "programWorkflowStateStatus",
+        this.harmonizationProgramWorkflowStateService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "encounterTypeStatus",
+        this.harmonizationEncounterTypeService.isAllEncounterTypeMedatadaHarmonized());
+    modelAndView.addObject("formStatus", this.harmonizationFormService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "personAttributeTypeStatus",
+        this.harmonizationPersonAttributeTypeService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "relationshipTypeStatus",
+        this.harmonizationRelationshipTypeService.isAllMetadataHarmonized());
+    modelAndView.addObject(
+        "conceptStatus", this.harmonizationConceptService.isAllMetadataHarmonized());
 
     return modelAndView;
   }

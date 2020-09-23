@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.ResultSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
@@ -131,6 +132,8 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
         new StringBuilder(
             "ALTER TABLE `program_workflow` ADD COLUMN `swappable` boolean default false");
     Context.getAdministrationService().executeSQL(sb.toString(), false);
+
+    this.setOpenMRSDefaultCalogCharacterSet();
 
     try {
       log.info("Importing _form Metadata Server ");
@@ -326,6 +329,23 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
           .getMetaData()
           .getColumns(null, null, table, column)
           .next();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void setOpenMRSDefaultCalogCharacterSet() {
+    try {
+      ResultSet catalogs = DatabaseUpdater.getConnection().getMetaData().getCatalogs();
+      while (catalogs.next()) {
+        String calalog = catalogs.getString("TABLE_CAT");
+        if ("openmrs".equalsIgnoreCase(calalog)) {
+          Context.getAdministrationService()
+              .executeSQL("ALTER SCHEMA `openmrs` DEFAULT CHARACTER SET utf8", false);
+          log.info("changed `openmrs` DEFAULT CHARACTER to utf8 ");
+          return;
+        }
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

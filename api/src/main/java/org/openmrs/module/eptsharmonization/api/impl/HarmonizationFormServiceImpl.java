@@ -485,6 +485,8 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
     return findAllFormsWithDifferentIDAndSameUUID().isEmpty()
         && findAllFormsWithDifferentNameAndSameUUIDAndID().isEmpty()
         && findAllMetadataFormsNotContainedInProductionServer().isEmpty()
-        && findAllProductionFormsNotContainedInMetadataServer().isEmpty();
+        && findAllProductionFormsNotContainedInMetadataServer().isEmpty()
+        && findHtmlFormWithDifferentFormAndEqualUuid().isEmpty()
+        && findHtmlFormMetadataServerNotPresentInProductionServer().isEmpty();
   }
 }
