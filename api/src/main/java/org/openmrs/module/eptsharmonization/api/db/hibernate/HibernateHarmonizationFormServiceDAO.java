@@ -320,7 +320,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery(
-                "select _form.* from _form where EXISTS (select * from form where _form.form_id = form.form_id and _form.uuid = form.uuid and _form.name <> form.name)")
+                "select _form.* from _form where EXISTS (select * from form where _form.form_id = form.form_id and _form.uuid = form.uuid and (_form.name <> form.name or _form.encounter_type <> form.encounter_type))")
             .addEntity(Form.class);
     return setRelatedMetadataFromTableMDSForm(query.list());
   }
@@ -344,7 +344,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery(
-                "select form.* from form where EXISTS (select * from _form where _form.form_id = form.form_id and _form.uuid = form.uuid and _form.name <> form.name)")
+                "select form.* from form where EXISTS (select * from _form where _form.form_id = form.form_id and _form.uuid = form.uuid and (_form.name <> form.name or _form.encounter_type <> form.encounter_type))")
             .addEntity(Form.class);
     return setRelatedMetadataFromTableForm(query.list());
   }

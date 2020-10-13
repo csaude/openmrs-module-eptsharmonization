@@ -407,7 +407,8 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       for (Form pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
             && mdsItem.getId().equals(pdsItem.getId())
-            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
+            && (!mdsItem.getName().equalsIgnoreCase(pdsItem.getName())
+                || !mdsItem.getEncounterType().equals(pdsItem.getEncounterType()))) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }

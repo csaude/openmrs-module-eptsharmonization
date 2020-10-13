@@ -15,13 +15,13 @@
 						<th><spring:message
 								code="eptsharmonization.form.mdserver.description" /></th>
 						<th><spring:message
-								code="eptsharmonization.encountertype.name" /></th>
+								code="eptsharmonization.form.mdserver.encountertype.name" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.pdserver.name" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.pdserver.description" /></th>
 						<th><spring:message
-								code="eptsharmonization.encountertype.name" /></th>
+								code="eptsharmonization.form.pdserver.encountertype.name" /></th>
 						<th><spring:message code="general.id" /></th>
 						<th><spring:message code="general.uuid" /></th>
 						<th style="text-align: center; width: 10%;"><spring:message
