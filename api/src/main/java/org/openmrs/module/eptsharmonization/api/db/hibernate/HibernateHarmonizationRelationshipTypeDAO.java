@@ -176,7 +176,7 @@ public class HibernateHarmonizationRelationshipTypeDAO implements HarmonizationR
         .getCurrentSession()
         .createSQLQuery(
             "update relationship_type set relationship_type_id=:id, a_is_to_b=:aIsToB, b_is_to_a=:bIsToA, weight = :weight, "
-                + " preferred=:preferred, description=:description,date_created=:dateCreated, retired=:retired, retire_reason=:retireReason, uuid=:uuid "
+                + " preferred=:preferred, description=:description,date_created=:dateCreated, retired=:retired, retire_reason=:retireReason "
                 + " where relationship_type_id=:currentId")
         .setInteger("id", toOverwriteWith.getRelationshipTypeId())
         .setString("aIsToB", toOverwriteWith.getaIsToB())
@@ -188,7 +188,6 @@ public class HibernateHarmonizationRelationshipTypeDAO implements HarmonizationR
         .setDate("dateCreated", toOverwriteWith.getDateCreated())
         .setBoolean("retired", toOverwriteWith.isRetired())
         .setString("retireReason", toOverwriteWith.getRetireReason())
-        .setString("uuid", toOverwriteWith.getUuid())
         .executeUpdate();
     clearAndFlushSession();
 

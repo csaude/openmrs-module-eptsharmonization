@@ -142,7 +142,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
   @Authorized({"View Relationship Types"})
   public Map<String, List<RelationshipTypeDTO>>
       findAllRelationshipTypeWithDifferentTypesAndSameUUIDAndID() throws APIException {
-    List<RelationshipType> allPDS = personService.getAllRelationshipTypes();
+    List<RelationshipType> allPDS = personService.getAllRelationshipTypes(true);
     List<RelationshipType> allMDS = harmonizationRelationshipTypeDao.findAllMDSRelationshipTypes();
     Map<String, List<RelationshipTypeDTO>> result = new HashMap<>();
     Map<String, List<RelationshipType>> map =
@@ -158,7 +158,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
   @Authorized({"View Relationship Types"})
   public Map<String, List<RelationshipTypeDTO>> findAllRelationshipTypesWithDifferentIDAndSameUUID()
       throws APIException {
-    List<RelationshipType> allPDS = personService.getAllRelationshipTypes();
+    List<RelationshipType> allPDS = personService.getAllRelationshipTypes(true);
     List<RelationshipType> allMDS = harmonizationRelationshipTypeDao.findAllMDSRelationshipTypes();
     Map<String, List<RelationshipTypeDTO>> result = new HashMap<>();
     Map<String, List<RelationshipType>> map =
@@ -198,6 +198,7 @@ public class HarmonizationRelationshipTypeServiceImpl extends BaseOpenmrsService
       relationshipType.setaIsToB(mdsRelationship.getRelationshipType().getaIsToB());
       relationshipType.setbIsToA(mdsRelationship.getRelationshipType().getbIsToA());
       relationshipType.setDescription(mdsRelationship.getRelationshipType().getDescription());
+      relationshipType.setRetired(mdsRelationship.getRelationshipType().isRetired());
       personService.saveRelationshipType(relationshipType);
     }
   }
