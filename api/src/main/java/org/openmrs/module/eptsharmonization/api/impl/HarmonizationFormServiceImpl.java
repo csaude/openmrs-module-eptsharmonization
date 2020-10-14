@@ -182,7 +182,10 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       form.setName(mdsForm.getForm().getName());
       form.setDescription(mdsForm.getForm().getDescription());
       form.setEncounterType(mdsForm.getForm().getEncounterType());
-      this.formService.saveForm(form);
+      form = this.harmonizationFormServiceDAO.updateForm(form);
+      if (!mdsForm.getForm().getEncounterType().equals(pdsForm.getForm().getEncounterType())) {
+        updateRelatedMetadata(pdsForm.getForm(), form);
+      }
     }
   }
 

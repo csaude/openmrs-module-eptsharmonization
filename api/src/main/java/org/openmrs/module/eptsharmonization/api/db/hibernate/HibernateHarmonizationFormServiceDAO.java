@@ -466,6 +466,26 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
   }
 
   @Override
+  public Form updateForm(Form mdsForm) throws DAOException {
+    String updateSql =
+        "update form set name = :name, description = :description, encounter_type = :encounterType where form_id = :baseFormId";
+    Query query = sessionFactory.getCurrentSession().createSQLQuery(updateSql);
+
+    query.setString("name", mdsForm.getName());
+    query.setString("description", mdsForm.getDescription());
+    query.setInteger("encounterType", mdsForm.getEncounterType().getId());
+    query.setInteger("baseFormId", mdsForm.getId());
+    query.executeUpdate();
+
+    final Criteria searchCriteria =
+        this.sessionFactory.getCurrentSession().createCriteria(Form.class, "form");
+    searchCriteria.add(Restrictions.eq("formId", mdsForm.getFormId()));
+    this.sessionFactory.getCurrentSession().flush();
+
+    return (Form) searchCriteria.uniqueResult();
+  }
+
+  @Override
   public void saveNotSwappableForm(Form form) throws DAOException {
     this.harmonizationServiceDAO.evictCache();
 
@@ -661,8 +681,8 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         .getCurrentSession()
         .createSQLQuery(
             String.format(
-                "update encounter set form_id =%s where encounter_id =%s ",
-                form.getFormId(), encounter.getId()))
+                "update encounter set form_id =%s, encounter_type =%s where encounter_id =%s ",
+                form.getFormId(), form.getEncounterType().getId(), encounter.getId()))
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
