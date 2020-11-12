@@ -208,7 +208,7 @@ public class HarmonizeRelationshipTypeController {
             .findAllRelationshipTypeWithDifferentTypesAndSameUUIDAndID();
     if (sameIdAndUuidDifferentNames.size() > 0) {
       LOGGER.debug(
-          "Number of relationship types with same id and uuid but different names is %s",
+          "Number of relationship types with same id and uuid but different names or status is %s",
           sameIdAndUuidDifferentNames.size());
       Map<String, List<RelationshipTypeDTO>> toOverwrite =
           filterConfirmedOverwrites(sameIdAndUuidDifferentNames, request);

@@ -320,7 +320,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery(
-                "select _form.* from _form where EXISTS (select * from form where _form.form_id = form.form_id and _form.uuid = form.uuid and _form.name <> form.name)")
+                "select _form.* from _form where EXISTS (select * from form where _form.form_id = form.form_id and _form.uuid = form.uuid and (_form.name <> form.name or _form.encounter_type <> form.encounter_type))")
             .addEntity(Form.class);
     return setRelatedMetadataFromTableMDSForm(query.list());
   }
@@ -344,7 +344,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         this.sessionFactory
             .getCurrentSession()
             .createSQLQuery(
-                "select form.* from form where EXISTS (select * from _form where _form.form_id = form.form_id and _form.uuid = form.uuid and _form.name <> form.name)")
+                "select form.* from form where EXISTS (select * from _form where _form.form_id = form.form_id and _form.uuid = form.uuid and (_form.name <> form.name or _form.encounter_type <> form.encounter_type))")
             .addEntity(Form.class);
     return setRelatedMetadataFromTableForm(query.list());
   }
@@ -455,6 +455,26 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
     query.setBoolean("swappable", swappable);
     query.setInteger("baseFormId", pdsForm.getId());
     query.setString("uuid", mdsForm.getUuid());
+    query.executeUpdate();
+
+    final Criteria searchCriteria =
+        this.sessionFactory.getCurrentSession().createCriteria(Form.class, "form");
+    searchCriteria.add(Restrictions.eq("formId", mdsForm.getFormId()));
+    this.sessionFactory.getCurrentSession().flush();
+
+    return (Form) searchCriteria.uniqueResult();
+  }
+
+  @Override
+  public Form updateForm(Form mdsForm) throws DAOException {
+    String updateSql =
+        "update form set name = :name, description = :description, encounter_type = :encounterType where form_id = :baseFormId";
+    Query query = sessionFactory.getCurrentSession().createSQLQuery(updateSql);
+
+    query.setString("name", mdsForm.getName());
+    query.setString("description", mdsForm.getDescription());
+    query.setInteger("encounterType", mdsForm.getEncounterType().getId());
+    query.setInteger("baseFormId", mdsForm.getId());
     query.executeUpdate();
 
     final Criteria searchCriteria =
@@ -661,8 +681,8 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         .getCurrentSession()
         .createSQLQuery(
             String.format(
-                "update encounter set form_id =%s where encounter_id =%s ",
-                form.getFormId(), encounter.getId()))
+                "update encounter set form_id =%s, encounter_type =%s where encounter_id =%s ",
+                form.getFormId(), form.getEncounterType().getId(), encounter.getId()))
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }

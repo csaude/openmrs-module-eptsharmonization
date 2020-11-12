@@ -138,7 +138,8 @@ public class HarmonizationUtils {
         if (type1.getRelationshipTypeId().equals(type2.getRelationshipTypeId())
             && type1.getUuid().contentEquals(type2.getUuid())
             && (!type1.getaIsToB().equalsIgnoreCase(type2.getaIsToB())
-                || !type1.getbIsToA().equalsIgnoreCase(type2.getbIsToA()))) {
+                || !type1.getbIsToA().equalsIgnoreCase(type2.getbIsToA())
+                || !type1.isRetired().equals(type2.isRetired()))) {
           results.put(type1.getUuid(), Arrays.asList(type1, type2));
         }
       }
