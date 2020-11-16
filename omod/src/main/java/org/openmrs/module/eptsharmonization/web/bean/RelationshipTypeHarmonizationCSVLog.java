@@ -146,7 +146,7 @@ public class RelationshipTypeHarmonizationCSVLog {
           try {
             printer.print(
                 String.format(
-                    "ID:{%s}, UUID:%s, updated A_IS_TO_B from '%s' to '%s', B_IS_TO_A from '%s' to '%s', and DESCRIPTION from '%s' to '%s'",
+                    "ID:{%s}, UUID:%s, updated A_IS_TO_B from '%s' to '%s', B_IS_TO_A from '%s' to '%s', DESCRIPTION from '%s' to '%s', and RETIRED from '%s' to '%s'",
                     mdServerET.getId(),
                     mdServerET.getUuid(),
                     pdServerET.getaIsToB(),
@@ -154,7 +154,9 @@ public class RelationshipTypeHarmonizationCSVLog {
                     pdServerET.getbIsToA(),
                     mdServerET.getbIsToA(),
                     pdServerET.getDescription(),
-                    mdServerET.getDescription()));
+                    mdServerET.getDescription(),
+                    pdServerET.isRetired(),
+                    mdServerET.isRetired()));
             printer.println();
           } catch (Exception e) {
             e.printStackTrace();

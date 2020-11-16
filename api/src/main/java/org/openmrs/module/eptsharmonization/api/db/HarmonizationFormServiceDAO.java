@@ -46,6 +46,8 @@ public interface HarmonizationFormServiceDAO {
 
   public Form updateForm(Form pdsForm, Form mdsForm, boolean swappable) throws DAOException;
 
+  public Form updateForm(Form mdsForm) throws DAOException;
+
   public List<Form> findMDSFormsWithoutEncountersReferencesInPDServer();
 
   public List<HtmlForm> findHtmlFormMDSWithDifferentFormAndEqualUuidFromPDS();

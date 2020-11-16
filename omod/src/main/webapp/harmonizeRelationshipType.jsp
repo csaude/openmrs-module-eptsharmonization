@@ -151,9 +151,11 @@ td {
 				<th>PDS <spring:message code="eptsharmonization.relationshiptype.harmonize.aIsToB" />
 					:<spring:message code="eptsharmonization.relationshiptype.harmonize.bIsToA" /></th>
 				<th>PDS <spring:message code="general.description" /></th>
+				<th>PDS <spring:message code="eptsharmonization.relationshiptype.harmonize.inactive" /></th>
 				<th>MDS <spring:message code="eptsharmonization.relationshiptype.harmonize.aIsToB" />
 					:<spring:message code="eptsharmonization.relationshiptype.harmonize.bIsToA" /></th>
 				<th>MDS <spring:message code="general.description" /></th>
+				<th>MDS <spring:message code="eptsharmonization.relationshiptype.harmonize.inactive" /></th>
 				<th><spring:message code="eptsharmonization.relationshiptype.harmonize.affectedRelationships" /></th>
 				<th colspan="2"><spring:message code="eptsharmonization.relationshiptype.harmonize.actionForSimilarUuid" /></th>
 			</tr>
@@ -163,8 +165,10 @@ td {
 					<td valign="top" align="center">${entry.key[0].uuid}</td>
 					<td valign="top">${entry.key[0].relationshipType.aIsToB}:${entry.key[0].relationshipType.bIsToA}</td>
 					<td valign="top">${entry.key[0].relationshipType.description}</td>
+					<td valign="top">${entry.key[0].relationshipType.retired}</td>
 					<td valign="top">${entry.key[1].relationshipType.aIsToB}:${entry.key[1].relationshipType.bIsToA}</td>
 					<td valign="top">${entry.key[1].relationshipType.description}</td>
+					<td valign="top">${entry.key[1].relationshipType.retired}</td>
 					<td valign="top" align="center">${entry.value}</td>
 					<td><input type="radio" value="true" name="${entry.key[0].uuid}"/><spring:message code="general.yes"/></td>
 					<td><input type="radio" value="false" name="${entry.key[0].uuid}"/><spring:message code="general.no"/></td>

@@ -131,7 +131,7 @@ public class FormHarmonizationCSVLog {
     public Builder appendLogForUpdatedFormNames(Map<String, List<FormDTO>> data) {
 
       try {
-        printer.print("Metadata Harmonization Process Flow: Updated Form Names");
+        printer.print("Metadata Harmonization Process Flow: Updated Form Names or Encounter Types");
         printer.println();
         printer.print(
             "===============================================================================================================================");

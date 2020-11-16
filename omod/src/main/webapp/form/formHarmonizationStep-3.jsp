@@ -15,15 +15,16 @@
 						<th><spring:message
 								code="eptsharmonization.form.mdserver.description" /></th>
 						<th><spring:message
-								code="eptsharmonization.encountertype.name" /></th>
+								code="eptsharmonization.form.mdserver.encountertype.name" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.pdserver.name" /></th>
 						<th><spring:message
 								code="eptsharmonization.form.pdserver.description" /></th>
 						<th><spring:message
-								code="eptsharmonization.encountertype.name" /></th>
+								code="eptsharmonization.form.pdserver.encountertype.name" /></th>
 						<th><spring:message code="general.id" /></th>
 						<th><spring:message code="general.uuid" /></th>
+						<th><spring:message code="eptsharmonization.form.harmonize.encounters" /></th>
 						<th style="text-align: center; width: 10%;"><spring:message
 								code="eptsharmonization.proceedHarmonization" /></th>
 					</tr>
@@ -53,6 +54,7 @@
 							</c:choose>
 							<td valign="top">${item.value[0].form.id}</td>
 							<td valign="top">${item.key}</td>
+							<td style="text-align: right; width: 5%;">${item.encountersCount}</td>
 							<td style="text-align: center;"><spring:bind
 									path="items[${itemsRow.index}].selected">
 									<input type="hidden"

@@ -182,7 +182,10 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       form.setName(mdsForm.getForm().getName());
       form.setDescription(mdsForm.getForm().getDescription());
       form.setEncounterType(mdsForm.getForm().getEncounterType());
-      this.formService.saveForm(form);
+      form = this.harmonizationFormServiceDAO.updateForm(form);
+      if (!mdsForm.getForm().getEncounterType().equals(pdsForm.getForm().getEncounterType())) {
+        updateRelatedMetadata(pdsForm.getForm(), form);
+      }
     }
   }
 
@@ -407,7 +410,8 @@ public class HarmonizationFormServiceImpl extends BaseOpenmrsService
       for (Form pdsItem : allPDS) {
         if (mdsItem.getUuid().equals(pdsItem.getUuid())
             && mdsItem.getId().equals(pdsItem.getId())
-            && !mdsItem.getName().equalsIgnoreCase(pdsItem.getName())) {
+            && (!mdsItem.getName().equalsIgnoreCase(pdsItem.getName())
+                || !mdsItem.getEncounterType().equals(pdsItem.getEncounterType()))) {
           map.put(mdsItem.getUuid(), Arrays.asList(mdsItem, pdsItem));
         }
       }
