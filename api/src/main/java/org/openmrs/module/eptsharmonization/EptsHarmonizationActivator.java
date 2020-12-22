@@ -338,12 +338,11 @@ public class EptsHarmonizationActivator extends BaseModuleActivator {
     try {
       ResultSet catalogs = DatabaseUpdater.getConnection().getMetaData().getCatalogs();
       while (catalogs.next()) {
-        String calalog = catalogs.getString("TABLE_CAT");
-        if ("openmrs".equalsIgnoreCase(calalog)) {
+        String catalog = catalogs.getString("TABLE_CAT");
+        if (catalog.matches(".*openmrs.*")) {
           Context.getAdministrationService()
-              .executeSQL("ALTER SCHEMA `openmrs` DEFAULT CHARACTER SET utf8", false);
-          log.info("changed `openmrs` DEFAULT CHARACTER to utf8 ");
-          return;
+              .executeSQL("ALTER SCHEMA `" + catalog + "` DEFAULT CHARACTER SET utf8", false);
+          log.info("changed `" + catalog + "` DEFAULT CHARACTER to utf8 ");
         }
       }
     } catch (Exception e) {
