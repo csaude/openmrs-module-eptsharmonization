@@ -191,22 +191,22 @@ public class HibernateHarmonizationPersonAttributeTypeServiceDAO
   public void saveNotSwappablePersonAttributeType(PersonAttributeType personAttributeType)
       throws DAOException {
     String insert =
-        String.format(
-            "insert into person_attribute_type (person_attribute_type_id, name, description, format, searchable, creator, date_created, retired, sort_weight, uuid, swappable) "
-                + " values (%s, '%s', '%s', '%s', %s, %s, '%s', %s, %s, '%s', %s)",
-            personAttributeType.getId(),
-            personAttributeType.getName(),
-            personAttributeType.getDescription(),
-            personAttributeType.getFormat(),
-            personAttributeType.getSearchable(),
-            Context.getAuthenticatedUser().getId(),
-            personAttributeType.getDateCreated(),
-            personAttributeType.getRetired(),
-            personAttributeType.getSortWeight(),
-            personAttributeType.getUuid(),
-            false);
+        "insert into person_attribute_type (person_attribute_type_id, name, description, format, searchable, creator, date_created, retired, sort_weight, uuid, swappable) "
+            + " values (:id, :name, :description, :format, :searchable, :user, :dateCreated, :retired, :sortWeight, :uuid, :swappable)";
 
     Query query = sessionFactory.getCurrentSession().createSQLQuery(insert);
+    query
+        .setInteger("id", personAttributeType.getId())
+        .setString("name", personAttributeType.getName())
+        .setString("description", personAttributeType.getDescription())
+        .setString("format", personAttributeType.getFormat())
+        .setBoolean("searchable", personAttributeType.getSearchable())
+        .setInteger("user", Context.getAuthenticatedUser().getId())
+        .setDate("dateCreated", personAttributeType.getDateCreated())
+        .setBoolean("retired", personAttributeType.getRetired())
+        .setDouble("sortWeight", personAttributeType.getSortWeight())
+        .setString("uuid", personAttributeType.getUuid())
+        .setBoolean("swappable", false);
     query.executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
   }
