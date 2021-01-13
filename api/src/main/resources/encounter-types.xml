@@ -47,6 +47,7 @@
     <_encounter_type encounter_type_id="57" name="Actualização de Demográficos do Caso Índice" description="Actualização de Demográficos do Caso Índice de HIV" creator="1" date_created="2020-08-31" retired="false"  uuid="923dee15-6d6d-45ab-b849-7b9406cbfeb0"/>
     <_encounter_type encounter_type_id="58" name="Registo de Convivente do Caso Índice" description="Registro de pessoa relacionada ao caso de índice de HIV" creator="1" date_created="2020-08-31" retired="false"  uuid="c2ddc2a1-c3c1-4d48-b128-5ed3f7780ccd"/>
     <_encounter_type encounter_type_id="59" name="Actualização Demográfico do Convivente Caso Indice" description="Actualização de Demográficos de pessoa relacionada ao caso de Indice de HIV" creator="1" date_created="2020-08-31" retired="false"  uuid="5288a442-febd-45f6-aee0-c5dd5c06758d"/> 
-    <_encounter_type encounter_type_id="60" name="Tratamento Profilático da Tuberculose (TPT)" description="Tratamento Profilático da Tuberculose (TPT)" creator="1" date_created="2020-09-09" retired="false"  uuid="24bd60e2-a1c9-4159-a24f-12af15b77510"/>    
+    <_encounter_type encounter_type_id="60" name="Tratamento Profilático da Tuberculose (TPT)" description="Tratamento Profilático da Tuberculose (TPT)" creator="1" date_created="2020-09-09" retired="false"  uuid="24bd60e2-a1c9-4159-a24f-12af15b77510"/> 
+    <_encounter_type encounter_type_id="61" name="LIVRO DE REGISTO DIARIO DE CHAMADAS E VISITAS" description="Livro de Registo diario de chamadas" creator="1" date_created="2020-12-18" retired="false"  uuid="51a9154f-91cc-4e40-853f-62a3b0cd1ad8"/>    
 
 </dataset>
