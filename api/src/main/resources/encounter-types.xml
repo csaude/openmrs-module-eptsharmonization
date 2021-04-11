@@ -49,5 +49,6 @@
     <_encounter_type encounter_type_id="59" name="Actualização Demográfico do Convivente Caso Indice" description="Actualização de Demográficos de pessoa relacionada ao caso de Indice de HIV" creator="1" date_created="2020-08-31" retired="false"  uuid="5288a442-febd-45f6-aee0-c5dd5c06758d"/> 
     <_encounter_type encounter_type_id="60" name="Tratamento Profilático da Tuberculose (TPT)" description="Tratamento Profilático da Tuberculose (TPT)" creator="1" date_created="2020-09-09" retired="false"  uuid="24bd60e2-a1c9-4159-a24f-12af15b77510"/> 
     <_encounter_type encounter_type_id="61" name="LIVRO DE REGISTO DIARIO DE CHAMADAS E VISITAS" description="Livro de Registo diario de chamadas" creator="1" date_created="2020-12-18" retired="false"  uuid="51a9154f-91cc-4e40-853f-62a3b0cd1ad8"/>    
-
+    <_encounter_type encounter_type_id="80" name="PREP: PROFLAXIA PRE-EXPOSICAO - INCIAL" description="REGISTO PREP: PROFLAXIA PRÉ-EXPOSIÇÃO" creator="1" date_created="2021-02-19" retired="false"  uuid="e75b2aa5-8b79-456d-9e65-39e72c03d5e2"/>    
+    <_encounter_type encounter_type_id="81" name="PREP: PROFLAXIA PRE-EXPOSICAO - SEGUIMENTO" description="REGISTO PREP: PROFLAXIA PRÉ-EXPOSIÇÃO" creator="1" date_created="2021-02-19" retired="false"  uuid="0bfe5d98-c7f1-49a6-a42f-91289712a900"/>    
 </dataset>

@@ -18,4 +18,5 @@
     <_visit_type visit_type_id="16" name="CHAMADA TELEFONICA" description="Para registo de chamadas telefonicas aos pacientes" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="7fefe3bb-de47-41e1-8993-c9bfcdaf3f37"/>
     <_visit_type visit_type_id="17" name="MASTER CARD" description="Tipo de visita referente as fichas master card" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="16e8e70e-71a9-4ba7-9138-dfaae88a6969"/>
     <_visit_type visit_type_id="18" name="LIVRO DE REGISTO DIARIO DE CHAMADAS E VISITAS DOMICILIARES" description="LIVRO DE REGISTO DIARIO DE CHAMADAS E VISITAS DOMICILIARES" creator="1" date_created="2020-05-26 17:30:00.0" retired="false" uuid="faafdb96-d8da-4ef3-97a6-eeace295c0ad"/>
+	<_visit_type visit_type_id="40" name="VISITA DE SEGUIMENTO PREP" description="VISITA DE SEGUIMENTO PREP" creator="1" date_created="2021-02-19 17:30:00.0" retired="false" uuid="c1babd68-226c-4f44-b1b4-8034a59822d8"/>
 </dataset>
