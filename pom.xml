@@ -32,6 +32,7 @@
 	<properties>
 		<openmrsPlatformVersion>1.11.5</openmrsPlatformVersion>
 		<poiVersion>3.16-beta2</poiVersion>
+		<tests.skip>true</tests.skip>
 	</properties>
 
 	<dependencyManagement>
@@ -142,6 +143,7 @@
 					<configuration>
 						<autoVersionSubmodules>true</autoVersionSubmodules>
 						<tagNameFormat>@{project.version}</tagNameFormat>
+						<skipTests>${tests.skip}</skipTests>
 					</configuration>
 				</plugin>
 			</plugins>
