@@ -457,12 +457,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
     query.setString("uuid", mdsForm.getUuid());
     query.executeUpdate();
 
-    final Criteria searchCriteria =
-        this.sessionFactory.getCurrentSession().createCriteria(Form.class, "form");
-    searchCriteria.add(Restrictions.eq("formId", mdsForm.getFormId()));
-    this.sessionFactory.getCurrentSession().flush();
-
-    return (Form) searchCriteria.uniqueResult();
+    return fetchForm(mdsForm);
   }
 
   @Override
@@ -596,10 +591,7 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
         .executeUpdate();
     this.sessionFactory.getCurrentSession().flush();
 
-    final Criteria searchCriteria =
-        this.sessionFactory.getCurrentSession().createCriteria(Form.class, "form");
-    searchCriteria.add(Restrictions.eq("formId", nextAvailableFormId));
-    return (Form) searchCriteria.uniqueResult();
+    return fetchForm(new Form(nextAvailableFormId));
   }
 
   @Override
@@ -804,6 +796,25 @@ public class HibernateHarmonizationFormServiceDAO implements HarmonizationFormSe
                     "select _form.encounter_type from _form where _form.form_id = %s",
                     form.getFormId()));
     return (Integer) query.uniqueResult();
+  }
+
+  private Form fetchForm(Form form) throws DAOException {
+    Form returnForm = this.formDAO.getForm(form.getFormId());
+    EncounterType encounterType = findEncounterTypeByForm(returnForm);
+    returnForm.setEncounterType(encounterType);
+    return returnForm;
+  }
+
+  private EncounterType findEncounterTypeByForm(Form form) throws DAOException {
+    final Query query =
+        this.sessionFactory
+            .getCurrentSession()
+            .createSQLQuery(
+                String.format(
+                    "select et.* from encounter_type et where et.encounter_type_id  = (select form.encounter_type from form where form.form_id = %s)",
+                    form.getFormId()))
+            .addEntity(EncounterType.class);
+    return (EncounterType) query.uniqueResult();
   }
 
   private Integer findRelatedEncounterTypeFromTableForm(Form form) throws DAOException {
